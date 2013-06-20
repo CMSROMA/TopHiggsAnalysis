@@ -22,4 +22,4 @@ make all
 
 ./TopHiggsApp inputFile [outputFile] [1=MC,0=data] [dataset] 
 
-(i.e. ./TopHiggsApp thfiles.txt output-th 1 )
+(i.e. ./TopHiggsApp onefile.txt output-th 1 )
