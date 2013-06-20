@@ -1,0 +1,11 @@
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_10_1_NhR.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_11_1_TDb.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_1_1_s4X.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_2_1_uTK.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_3_1_uJv.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_4_1_uPH.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_5_1_i33.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_6_1_mOY.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_7_1_btS.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_8_1_FlP.root
+root://eoscms//eos/cms/store/cmst3/user/crovelli/CMST3/tH/tH125q_blvu_Yt1_H126toWW/default_MC_9_1_J9R.root
