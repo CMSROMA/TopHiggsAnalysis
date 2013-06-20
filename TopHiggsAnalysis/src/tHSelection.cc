@@ -27,8 +27,8 @@ tHSelection::tHSelection(TTree *tree)
   std::string higgsConfigDir;
   std::string higgsConfigDirMass;
   std::ifstream setfile("config/higgs/higgsMass.txt");
-  higgsConfigDir="config/higgs/";
-  higgsConfigDirMass="config/higgs/th125/";
+  higgsConfigDir="config/";
+  higgsConfigDirMass="config/th125/";
   std::cout << "Reading configuration for Higgs mass = 125 GeV/c^2" << std::endl;
   
   // Selection efficiencies
