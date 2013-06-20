@@ -1,0 +1,25 @@
+** Instructions to run the code and check it **
+
+More info at Twiki:
+
+https://twiki.cern.ch/twiki/bin/view/CMS/THRome
+
+Under your CMSSW_5_X_Y/src make:
+
+cvs co -d HiggsAnalysisTools UserCode/emanuele/HiggsAnalysisTools
+
+cvs co -d EgammaAnalysisTools UserCode/emanuele/EgammaAnalysisTools
+
+cvs co -d CommonTools UserCode/emanuele/CommonTools
+
+cvs co -d TopHiggsAnalysis UserCode/jorda/TopHiggsAnalysis
+
+cd TopHiggsAnalysis
+
+cvs co -d data UserCode/emanuele/HiggsAnalysisTools/data
+
+make all
+
+./TopHiggsApp inputFile [outputFile] [1=MC,0=data] [dataset] 
+
+(i.e. ./TopHiggsApp thfiles.txt output-th 1 )
