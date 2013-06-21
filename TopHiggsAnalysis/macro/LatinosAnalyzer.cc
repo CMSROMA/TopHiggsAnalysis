@@ -19,21 +19,20 @@ int main(int argc, char* argv[]) {
 
   char fileName[500];
   if ( argc < 6 ) {
-    std::cout << "Format should be: LatinosAnalyzer filename.root weight1fb sampleid channel release" << std::endl;
+    std::cout << "Format should be: LatinosAnalyzer filename.root weight1fb sampleid channel" << std::endl;
     return 1;
   }
   strcpy(fileName,argv[1]);
   float weight;
   weight = atof(argv[2]);
-  int sampleid, channel, release;
+  int sampleid, channel;
   sampleid=atoi(argv[3]);
   channel=atoi(argv[4]);
-  release=atoi(argv[5]);
 
   std::cout << "Processing sample " << fileName << ": weight for 1/fb = " << weight
-            << "\tsample ID = " << sampleid << "\tchannel = " << channel << "\trelease = " << release << std::endl;
+            << "\tsample ID = " << sampleid << "\tchannel = " << channel << std::endl;
 
-  addWeightsToTreetH weighter(fileName,weight,sampleid,channel,release);
+  addWeightsToTreetH weighter(fileName,weight,sampleid,channel);
   weighter.addWeights();
 
   return 0;

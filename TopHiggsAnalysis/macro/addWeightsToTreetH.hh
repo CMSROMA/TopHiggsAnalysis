@@ -10,7 +10,7 @@ class addWeightsToTreetH {
 public:
 
   //! constructor
-  addWeightsToTreetH(const char* filename, float baseW, int processId, int finalstate, int release);
+  addWeightsToTreetH(const char* filename, float baseW, int processId, int finalstate);
   //! destructor
   virtual ~addWeightsToTreetH() {}
   //! the main method
@@ -24,7 +24,7 @@ private:
 
   std::string filename_;
   float baseW_;
-  int processId_, finalstate_, release_;
+  int processId_, finalstate_;
 
 };
 #endif // ADDWEIGHTSTOTREETH_H

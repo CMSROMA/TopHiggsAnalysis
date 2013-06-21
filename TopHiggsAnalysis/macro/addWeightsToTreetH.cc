@@ -15,12 +15,11 @@
 using namespace std;
 using namespace reweight;
 
-addWeightsToTreetH::addWeightsToTreetH(const char* filename, float baseW, int processId, int finalstate, int release) {
+addWeightsToTreetH::addWeightsToTreetH(const char* filename, float baseW, int processId, int finalstate) {
   filename_ = std::string(filename);
   baseW_ = baseW;
   processId_ = processId;
   finalstate_ = finalstate;
-  release_ = release;
 }
 
 void addWeightsToTreetH::addWeights() {
@@ -30,8 +29,7 @@ void addWeightsToTreetH::addWeights() {
   Float_t lumiB = 2.5;
 
   cout << "Adding weight branch to file " << filename_ << " with weight " << baseW_ << endl;
-  if (release_==0) cout << "Offline efficiency computed using 52X samples" << endl;
-  if (release_==1) cout << "Offline efficiency computed using 42X samples" << endl;
+  cout << "Offline efficiency computed using 52X samples" << endl;
 
   TFile *fileOrig = 0;
   TTree *treeOrig = 0;
