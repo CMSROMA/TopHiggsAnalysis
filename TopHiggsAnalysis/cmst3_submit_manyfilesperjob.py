@@ -9,7 +9,7 @@ import commands
 ### usage  cmst3_submit_manyfilesperjob.py process dataset njobs applicationName queue prefix isMC
 #######################################
 if len(sys.argv) != 8:
-    print "usage cmst3_submit_manyfilesperjob.py process dataset nfileperjob applicationName queue prefix isMC"
+    print "usage cmst3_submit_manyfilesperjob.py process datasetname nfileperjob applicationName queue prefix isMC"
     sys.exit(1)
 process = sys.argv[1]
 dataset = sys.argv[2]
@@ -21,9 +21,9 @@ prefix = sys.argv[6]
 isMC = int(sys.argv[7])
 
 if isMC != 0:
-    inputlist = "tH125q_blvu_Yt1_H126toWW.list"
+    inputlist = "cmst3_53X/"+process+"/"+dataset+".list"
 else:
-    inputlist = "tH125q_blvu_Yt1_H126toWW.list"
+    inputlist = "cmst3_53X/"+process+"/"+dataset+".list"
 
 # to write on the cmst3 cluster disks
 ################################################
@@ -78,7 +78,7 @@ while (len(inputfiles) > 0):
     outputfile.write('cp -r '+pwd+"/"+'/elebdtweights $WORKDIR\n')
 
     outputfile.write('export SCRAM_ARCH=slc5_amd64_gcc462\n')
-    outputfile.write('cd /afs/cern.ch/work/j/jorda/CMSSW_5_3_6/src/\n')
+    outputfile.write('cd /afs/cern.ch/work/j/jorda/prueba3/CMSSW_5_3_6/src/TopHiggsAnalysis\n')
 
     outputfile.write('eval `scramv1 runtime -sh`\n')
     outputfile.write('cd $WORKDIR\n')
@@ -86,7 +86,6 @@ while (len(inputfiles) > 0):
 
     outputfile.write('ls *.root | grep -v Z_calibFall08 | xargs -i scp -o BatchMode=yes -o StrictHostKeyChecking=no {} pccmsrm24:'+diskoutputmain+'/{}\n') 
     outputfile.close
-    #os.system("mkdir -p "+prefix+"/"+process+"/"+output+"/log/"+output+"_"+str(ijob)+".log")
     os.system("echo bsub -q "+queue+" -o "+prefix+"/"+process+"/"+output+"/log/"+output+"_"+str(ijob)+".log source "+pwd+"/"+outputname)
     os.system("bsub -q "+queue+" -o "+prefix+"/"+process+"/"+output+"/log/"+output+"_"+str(ijob)+".log source "+pwd+"/"+outputname+" -copyInput="+process+"_"+str(ijob))
     ijob = ijob+1
