@@ -1,0 +1,5 @@
+root -b -l 
+.L TopHiggsEventCounter8TeV.cc+
+countEvents();
+.q
+
