@@ -18,7 +18,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
 
   char fileName[500];
-  if ( argc < 6 ) {
+  if ( argc < 5 ) {
     std::cout << "Format should be: LatinosAnalyzer filename.root weight1fb sampleid channel" << std::endl;
     return 1;
   }
