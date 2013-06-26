@@ -23,7 +23,7 @@ minPtLeptonSameFlav     0               10000
 mll2                    12              40
 jetConeWidth		0.0		0.3
 etaJetAcc		-4.7		4.7
-etJetAcc                30              10000
+etJetAcc                25              10000
 nSoftMuons              0               1
 nExtraLeptons           0               1
 deltaPhi		0		115
