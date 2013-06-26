@@ -72,17 +72,13 @@ void RedTopHiggsTree::addMLVars() {
   myTree->Branch("numbtagCSVMcbIDcentraljets", &myNumbtagCSVMcbIDcentraljets, "numbtagCSVMcbIDcentraljets/I");
   myTree->Branch("numbtagCSVTcbIDcentraljets", &myNumbtagCSVTcbIDcentraljets, "numbtagCSVTcbIDcentraljets/I");
 
-  myTree->Branch("numbtagCSVLcbIDforwardjets", &myNumbtagCSVLcbIDforwardjets, "numbtagCSVLcbIDforwardjets/I");
-  myTree->Branch("numbtagCSVMcbIDforwardjets", &myNumbtagCSVMcbIDforwardjets, "numbtagCSVMcbIDforwardjets/I");
-  myTree->Branch("numbtagCSVTcbIDforwardjets", &myNumbtagCSVTcbIDforwardjets, "numbtagCSVTcbIDforwardjets/I");
+  myTree->Branch("numbcbIDforwardjets"       , &myNumcbIDforwardjets        , "numcbIDforwardjets/I");
 
   myTree->Branch("numbtagCSVLmvaIDcentraljets", &myNumbtagCSVLmvaIDcentraljets, "numbtagCSVLmvaIDcentraljets/I");
   myTree->Branch("numbtagCSVMmvaIDcentraljets", &myNumbtagCSVMmvaIDcentraljets, "numbtagCSVMmvaIDcentraljets/I");
   myTree->Branch("numbtagCSVTmvaIDcentraljets", &myNumbtagCSVTmvaIDcentraljets, "numbtagCSVTmvaIDcentraljets/I");
 
-  myTree->Branch("numbtagCSVLmvaIDforwardjets", &myNumbtagCSVLmvaIDforwardjets, "numbtagCSVLmvaIDforwardjets/I");
-  myTree->Branch("numbtagCSVMmvaIDforwardjets", &myNumbtagCSVMmvaIDforwardjets, "numbtagCSVMmvaIDforwardjets/I");
-  myTree->Branch("numbtagCSVTmvaIDforwardjets", &myNumbtagCSVTmvaIDforwardjets, "numbtagCSVTmvaIDforwardjets/I");
+  myTree->Branch("nummvaIDforwardjets"        , &myNummvaIDforwardjets        , "nummvaIDforwardjets/I");
   
 }
 
@@ -396,17 +392,13 @@ void RedTopHiggsTree::fillMLVars(int   njets,
 				 int   numbtagCSVMcbIDcentraljets,
 				 int   numbtagCSVTcbIDcentraljets,
 
-				 int   numbtagCSVLcbIDforwardjets,
-				 int   numbtagCSVMcbIDforwardjets,
-				 int   numbtagCSVTcbIDforwardjets,
+				 int   numcbIDforwardjets,
 
 				 int   numbtagCSVLmvaIDcentraljets,
 				 int   numbtagCSVMmvaIDcentraljets,
 				 int   numbtagCSVTmvaIDcentraljets,
 
-				 int   numbtagCSVLmvaIDforwardjets,
-				 int   numbtagCSVMmvaIDforwardjets,
-				 int   numbtagCSVTmvaIDforwardjets
+				 int   nummvaIDforwardjets
 ) {
  
   myNjets   = njets;
@@ -433,17 +425,13 @@ void RedTopHiggsTree::fillMLVars(int   njets,
   myNumbtagCSVMcbIDcentraljets = numbtagCSVMcbIDcentraljets;
   myNumbtagCSVTcbIDcentraljets = numbtagCSVTcbIDcentraljets;
 
-  myNumbtagCSVLcbIDforwardjets = numbtagCSVLcbIDforwardjets;
-  myNumbtagCSVMcbIDforwardjets = numbtagCSVMcbIDforwardjets;
-  myNumbtagCSVTcbIDforwardjets = numbtagCSVTcbIDforwardjets;
+  myNumcbIDforwardjets = numcbIDforwardjets;
 
   myNumbtagCSVLmvaIDcentraljets = numbtagCSVLmvaIDcentraljets;
   myNumbtagCSVMmvaIDcentraljets = numbtagCSVMmvaIDcentraljets;
   myNumbtagCSVTmvaIDcentraljets = numbtagCSVTmvaIDcentraljets;
 
-  myNumbtagCSVLmvaIDforwardjets = numbtagCSVLmvaIDforwardjets;
-  myNumbtagCSVMmvaIDforwardjets = numbtagCSVMmvaIDforwardjets;
-  myNumbtagCSVTmvaIDforwardjets = numbtagCSVTmvaIDforwardjets;
+  myNummvaIDforwardjets = nummvaIDforwardjets;
 
  }
 

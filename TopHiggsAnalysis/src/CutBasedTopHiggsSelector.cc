@@ -70,7 +70,14 @@ void CutBasedTopHiggsSelector::Configure(const char *fileCuts, const char* fileS
   _selection->addSwitch("trigger");
 
   // Lepton selection switches
-  _selection->addCut("electronIP"); 
+  /*
+  _selection->addSwitch("leptonId");
+  _selection->addSwitch("leptonIso");
+  _selection->addSwitch("leptonD0"); 
+  _selection->addSwitch("convRej");
+  */
+
+  _selection->addCut("electronIP");
   _selection->addCut("electronDz");
   _selection->addCut("muonIPhighPT");
   _selection->addCut("muonIPlowPT");

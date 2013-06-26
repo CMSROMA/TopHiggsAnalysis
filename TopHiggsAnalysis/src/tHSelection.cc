@@ -79,6 +79,33 @@ tHSelection::tHSelection(TTree *tree)
                    "elebdtweights/Subdet2HighPt_WithIPInfo_BDTG.weights.xml" ,                
                    ElectronIDMVA::kWithIPInfo);
 
+  // configurating the new lepton BDT
+  // Electrons
+  // ver src/TopHiggs.hh
+  /*
+  fMVAElectron = new IDForBsMVA();
+  fMVAElectron->Initialize("BDTG method",
+			   "",
+			   "",
+			   "",
+			   "",  
+			   "",
+			   "",
+			   True);
+  */
+  // Electrons
+  // ver src/TopHiggs.hh
+  /*
+  fMVAMuon = new IDForBsMVA();
+  fMVAMuon->Initialize("BDTG method",
+		       "",
+		       "",
+		       "",
+		       "",  
+		       "",
+		       "",
+		       False);
+  */
   // Reading GoodRUN LS
   std::cout << "[GoodRunLS]::goodRunLS is " << _selectionEEE->getSwitch("goodRunLS") << " isData is " 
 	    <<  _selectionEEE->getSwitch("isData") << std::endl;
@@ -670,8 +697,8 @@ void tHSelection::Loop() {
   //PUWeight* fPUWeight = new PUWeight();
 
   Long64_t nbytes = 0, nb = 0;
-  Long64_t nentries = fChain->GetEntries();
-  //Long64_t nentries = 10;
+  //Long64_t nentries = fChain->GetEntries();
+  Long64_t nentries = 50000;
   std::cout << "Number of entries = " << nentries << std::endl;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
@@ -738,21 +765,25 @@ void tHSelection::Loop() {
     }
     
     // IMPORTANT: FOR DATA RELOAD THE TRIGGER MASK PER FILE WHICH IS SUPPOSED TO CONTAIN UNIFORM CONDITIONS X FILE
-    // reloadTriggerMask(runNumber);
-    // bool passedHLT = (_selectionEE->getSwitch("isData")) ? hasPassedHLT() : true;
+    reloadTriggerMask(runNumber);
+    //bool passedHLT = (_selectionEEE->getSwitch("isData")) ? hasPassedHLT() : true;
     bool passedHLT[4];
 
-    passedHLT[eee] = true; 
-    passedHLT[mmm] = true; 
-    passedHLT[eem] = true;  
-    passedHLT[mme] = true; 
+    if (_selectionEEE->getSwitch("isData")){
 
-    /*
-    passedHLT[eee] = hasPassedHLT(eee);  
-    passedHLT[mmm] = hasPassedHLT(mmm); 
-    passedHLT[eem] = hasPassedHLT(eem);  
-    passedHLT[mme] = hasPassedHLT(mme); 
-    */
+      passedHLT[eee] = hasPassedHLT(eee);  
+      passedHLT[mmm] = hasPassedHLT(mmm); 
+      passedHLT[eem] = hasPassedHLT(eem);  
+      passedHLT[mme] = hasPassedHLT(mme); 
+    
+    }else{
+
+      passedHLT[eee] = true; 
+      passedHLT[mmm] = true; 
+      passedHLT[eem] = true;  
+      passedHLT[mme] = true; 
+      
+    }
 
     // -------------------------------------------------------------
     // Vertex selection - we only consider the first vertex of the list ( = highest sumPT^2 )
@@ -926,18 +957,13 @@ void tHSelection::Loop() {
       m_numbtagCSVMmvaIDcentraljets[ichan] = 0; // medium
       m_numbtagCSVTmvaIDcentraljets[ichan] = 0; // tight
 
-      m_numbtagCSVLmvaIDforwardjets[ichan] = 0; // loose
-      m_numbtagCSVMmvaIDforwardjets[ichan] = 0; // medium
-      m_numbtagCSVTmvaIDforwardjets[ichan] = 0; // tight
-
       // Initialize the number of b-tagged of Cut Based Id jets
       m_numbtagCSVLcbIDcentraljets[ichan] = 0; // loose
       m_numbtagCSVMcbIDcentraljets[ichan] = 0; // medium
       m_numbtagCSVTcbIDcentraljets[ichan] = 0; // tight
 
-      m_numbtagCSVLcbIDforwardjets[ichan] = 0; // loose
-      m_numbtagCSVMcbIDforwardjets[ichan] = 0; // medium
-      m_numbtagCSVTcbIDforwardjets[ichan] = 0; // tight
+      m_nummvaIDforwardjets[ichan] = 0;
+      m_numcbIDforwardjets [ichan] = 0; // loose
 
       // Initialize variables for jetId studies
       if (wantJetIdStuff) {
@@ -1155,17 +1181,13 @@ void tHSelection::Loop() {
 					  m_numbtagCSVMcbIDcentraljets [theChannel],
 					  m_numbtagCSVTcbIDcentraljets [theChannel],
 
-					  m_numbtagCSVLcbIDforwardjets [theChannel],
-					  m_numbtagCSVMcbIDforwardjets [theChannel],
-					  m_numbtagCSVTcbIDforwardjets [theChannel],
+					  m_numcbIDforwardjets [theChannel],
 
 					  m_numbtagCSVLmvaIDcentraljets [theChannel],
 					  m_numbtagCSVMmvaIDcentraljets [theChannel],
 					  m_numbtagCSVTmvaIDcentraljets [theChannel],
 
-					  m_numbtagCSVLmvaIDforwardjets [theChannel],
-					  m_numbtagCSVMmvaIDforwardjets [theChannel],
-					  m_numbtagCSVTmvaIDforwardjets [theChannel]);
+					  m_nummvaIDforwardjets [theChannel]);
       
       if (wantJetIdStuff)     
 	myOutTree[theChannel] -> fillJetsVars(leadJetPt          [theChannel],
@@ -1935,6 +1957,7 @@ std::vector<int> tHSelection::getBestMME(){
     bool tightElectronSelection = true;
 
     if (tightElectronSelection){
+
       if(_selectionEEE->getSwitch("etaElectronAcc") && !_selectionEEE->passCut("etaElectronAcc",etaEle[i]) ) continue;
       
       if(_selectionEEE->getSwitch("ptElectronAcc")  && !_selectionEEE->passCut("ptElectronAcc",ElectronPt) ) continue;
@@ -3105,13 +3128,11 @@ int tHSelection::numJets( std::vector<int> eleToRemove, std::vector<int> muonToR
   float ETMax  = 0.;
   float ETMax2 = 0.;
 
-  nsoftjets             [theChannel] = 0;
-  m_numbtagCSVMmvaIDcentraljets[theChannel] = 0;//MVA ID for jets
+  nsoftjets                    [theChannel] = 0;
+  m_numbtagCSVMmvaIDcentraljets[theChannel] = 0;//MVA ID -- btag for central jets
   m_numbtagCSVLmvaIDcentraljets[theChannel] = 0;
   m_numbtagCSVTmvaIDcentraljets[theChannel] = 0;
-  m_numbtagCSVMmvaIDforwardjets[theChannel] = 0;//MVA ID for jets
-  m_numbtagCSVLmvaIDforwardjets[theChannel] = 0;
-  m_numbtagCSVTmvaIDforwardjets[theChannel] = 0;
+  m_nummvaIDforwardjets        [theChannel] = 0;//MVA ID for forward jets
   
   // Initialize jet index
   theLeadingJet[theChannel] = -1; // Jet with highest pT
@@ -3147,8 +3168,8 @@ int tHSelection::numJets( std::vector<int> eleToRemove, std::vector<int> muonToR
       + electronMultiplicityAK5PFPUcorrJet[j] + muonMultiplicityAK5PFPUcorrJet[j];
     float chargedEmFraction  = chargedEmEnergyAK5PFPUcorrJet[j]/uncorrenergyAK5PFPUcorrJet[j];
     
-    // if(!isPFJetID(fabs(etaAK5PFPUcorrJet[j]),neutralHadFrac,neutralEmFraction,nConstituents,
-    //               chargedHadFraction,chargedMultiplicity,chargedEmFraction, Higgs::loose)) continue;
+    //if(!isPFJetID(fabs(etaAK5PFPUcorrJet[j]),neutralHadFrac,neutralEmFraction,nConstituents,
+    //chargedHadFraction,chargedMultiplicity,chargedEmFraction, Higgs::loose)) continue;
 
     // Loose MvaId
     // if (!isLooseJetMva(pt,etaAK5PFPUcorrJet[j],jetIdMvaPhilV1AK5PFPUcorrJet[j])) continue;
@@ -3232,19 +3253,17 @@ int tHSelection::numJets( std::vector<int> eleToRemove, std::vector<int> muonToR
     // CVS Working points, as in BTV Twiki
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagPerformanceOP    
 
-    if      ( fabs(etaAK5PFPUcorrJet[j]==5) <= 1.0 ){ // Central Jets
+    if      ( fabs(etaAK5PFPUcorrJet[j]) < 2.4 ){ // Central Jets
 
       if     (CVS > 0.898) m_numbtagCSVTmvaIDcentraljets[theChannel]++;
       else if(CVS > 0.679) m_numbtagCSVMmvaIDcentraljets[theChannel]++;
       else if(CVS > 0.244) m_numbtagCSVLmvaIDcentraljets[theChannel]++;
 
-    }else if( fabs(etaAK5PFPUcorrJet[j]==5) <= 1.0 ){ // Forward Jets
-
-      if     (CVS > 0.898) m_numbtagCSVTmvaIDforwardjets[theChannel]++;
-      else if(CVS > 0.679) m_numbtagCSVMmvaIDforwardjets[theChannel]++;
-      else if(CVS > 0.244) m_numbtagCSVLmvaIDforwardjets[theChannel]++;
-
+    } else {
+      m_nummvaIDforwardjets[theChannel]++;
     }
+
+    if ( fabs(etaAK5PFPUcorrJet[j]) >= 2.4 ) continue; // for the numJets, only central
 
     m_goodJets.push_back(j);
     num++;
@@ -3414,14 +3433,12 @@ int tHSelection::numcbIDJets( std::vector<int> eleToRemove, std::vector<int> muo
 
   int num=0;
   m_goodcbIDJets.clear();
-  nsoftjetscbID[theChannel]=0;
 
+  nsoftjetscbID               [theChannel]=0;
   m_numbtagCSVMcbIDcentraljets[theChannel] = 0;//MVA ID for jets
   m_numbtagCSVLcbIDcentraljets[theChannel] = 0;
   m_numbtagCSVTcbIDcentraljets[theChannel] = 0;
-  m_numbtagCSVMcbIDforwardjets[theChannel] = 0;//MVA ID for jets
-  m_numbtagCSVLcbIDforwardjets[theChannel] = 0;
-  m_numbtagCSVTcbIDforwardjets[theChannel] = 0;
+  m_numcbIDforwardjets        [theChannel] = 0;//MVA ID for jets
 
   m_jetscbIDSum[theChannel]->SetXYZT(0.,0.,0.,0);
 
@@ -3438,14 +3455,14 @@ int tHSelection::numcbIDJets( std::vector<int> eleToRemove, std::vector<int> muo
     if(JESUncertainty == TString("Up") || JESUncertainty == TString("Down")) 
       pt = ( GetJESCorrected(p4Jet,JESUncertainty.Data()) ).Pt();
 
-    float beta   = 0.0;  // To be changed
+    float beta   = betastarclassicIdMvaAK5PFPUcorrJet[j];  // To be changed
     float betaTh = 0.64; // To be changed
-    float rms    = 0.0;  // To be changed
+    float rms    = dR2MeanIdMvaAK5PFPUcorrJet[j];  // To be changed
     float eta    = etaAK5PFPUcorrJet[j];
 
     bool passID = true;
     if( abs(eta) < 2.5 ){
-      if ( beta < 0 ) passID = false;
+      //if ( beta < 0 ) passID = false;
       if ( beta > 0.2*TMath::Log( m_goodvertices - betaTh ) ) passID = false;
       if ( rms > 0.06 ) passID = false;
     } else if ( abs(eta) < 3.0 ){
@@ -3506,19 +3523,17 @@ int tHSelection::numcbIDJets( std::vector<int> eleToRemove, std::vector<int> muo
 
     // CHANGE CUTS for b-tag CVS
     
-    if      ( fabs(etaAK5PFPUcorrJet[j]==5) <= 1.0 ){ // Central Jets
+    if      ( fabs(etaAK5PFPUcorrJet[j]) < 2.4 ){ // Central Jets
 
       if     (CVS > 0.898) m_numbtagCSVTcbIDcentraljets[theChannel]++;
       else if(CVS > 0.679) m_numbtagCSVMcbIDcentraljets[theChannel]++;
       else if(CVS > 0.244) m_numbtagCSVLcbIDcentraljets[theChannel]++;
 
-    }else if( fabs(etaAK5PFPUcorrJet[j]==5) <= 1.0 ){ // Forward Jets
-
-      if     (CVS > 0.898) m_numbtagCSVTcbIDforwardjets[theChannel]++;
-      else if(CVS > 0.679) m_numbtagCSVMcbIDforwardjets[theChannel]++;
-      else if(CVS > 0.244) m_numbtagCSVLcbIDforwardjets[theChannel]++;
-
+    }else{
+      m_numcbIDforwardjets[theChannel]++;
     }
+
+    if (fabs(etaAK5PFPUcorrJet[j]) >= 2.4 ) continue; // for the numJets, only central
 
     m_goodcbIDJets.push_back(j);
     num++;
@@ -3562,8 +3577,8 @@ int tHSelection::numUncorrJets( std::vector<int> eleToRemove, std::vector<int> m
       + muonMultiplicityAK5PFPUcorrJet[j];
     float chargedEmFraction = chargedEmEnergyAK5PFPUcorrJet[j]/uncorrenergyAK5PFPUcorrJet[j];
     
-    // if(!isPFJetID(fabs(etaAK5PFPUcorrJet[j]),neutralHadFrac,neutralEmFraction,nConstituents,
-    //               chargedHadFraction,chargedMultiplicity,chargedEmFraction, Higgs::loose)) continue;
+    //if(!isPFJetID(fabs(etaAK5PFPUcorrJet[j]),neutralHadFrac,neutralEmFraction,nConstituents,
+    //chargedHadFraction,chargedMultiplicity,chargedEmFraction, Higgs::loose)) continue;
 
     bool foundMatch=false;
     // check if the electrons falls into the jet
@@ -3656,8 +3671,8 @@ float tHSelection::bVetoJets( std::vector<int> eleToRemove, std::vector<int> muo
       + muonMultiplicityAK5PFPUcorrJet[j];
     float chargedEmFraction = chargedEmEnergyAK5PFPUcorrJet[j]/uncorrenergyAK5PFPUcorrJet[j];
     
-    // if(!isPFJetID(fabs(etaAK5PFPUcorrJet[j]),neutralHadFrac,neutralEmFraction,nConstituents,
-    //               chargedHadFraction,chargedMultiplicity,chargedEmFraction, Higgs::loose)) continue;
+    //if(!isPFJetID(fabs(etaAK5PFPUcorrJet[j]),neutralHadFrac,neutralEmFraction,nConstituents,
+    //chargedHadFraction,chargedMultiplicity,chargedEmFraction, Higgs::loose)) continue;
 
     // Loose MvaId 
     //if (!isLooseJetMva(pt,etaAK5PFPUcorrJet[j],jetIdMvaPhilV1AK5PFPUcorrJet[j])) continue;

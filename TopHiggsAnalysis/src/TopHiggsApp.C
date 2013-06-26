@@ -682,7 +682,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  /*  
+  /*
   tH.setRequiredTriggers(maskEEE,0);
   tH.setRequiredTriggers(maskMMM,1);
   tH.setRequiredTriggers(maskEEM,2);
