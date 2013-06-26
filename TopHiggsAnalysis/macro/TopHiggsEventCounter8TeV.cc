@@ -29,49 +29,49 @@ void countEvents() {
   }
 
   // nominal sample first, then the systematics ones
-  chains[0]->Add("../results/MC/tH125q_blvu_Yt1_H126toWW-Counters.root");
-  chains[1]->Add("../results/MC/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-Counters.root");
-  chains[2]->Add("../results/MC/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-Counters.root");
-  chains[3]->Add("../results/MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-Counters.root");
-  chains[4]->Add("../results/MC/TTWJets-Counters.root");
-  chains[5]->Add("../results/MC/TTZJets-Counters.root");
-  chains[6]->Add("../results/MC/WWWJets_8TeV-madgraph-Counters.root");
-  chains[7]->Add("../results/MC/WWZNoGstarJets_8TeV-madgraph-Counters.root");
-  chains[8]->Add("../results/MC/WZZNoGstarJets_8TeV-madgraph-Counters.root");
-  chains[9]->Add("../results/MC/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola-Counters.root");
-  chains[10]->Add("../results/MC/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-Counters.root");
-  chains[11]->Add("../results/MC/T_t-channel_TuneZ2star_8TeV-powheg-tauola-Counters.root");
-  chains[12]->Add("../results/MC/T_s-channel_TuneZ2star_8TeV-powheg-tauola-Counters.root");
-  chains[13]->Add("../results/MC/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-Counters.root");
-  chains[14]->Add("../results/MC/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola-Counters.root");
-  chains[15]->Add("../results/MC/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola-Counters.root");
-  chains[16]->Add("../results/MC/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball-Counters.root");
-  chains[17]->Add("../results/MC/DYJetsToLL_M-10To50filter_8TeV-madgraph-Counters.root");
-  chains[18]->Add("../results/MC/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-Counters.root");
+  chains[0]->Add("../results2/MC/tH125q_blvu_Yt1_H126toWW-Counters.root");
+  chains[1]->Add("../results2/MC/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-Counters.root");
+  chains[2]->Add("../results2/MC/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-Counters.root");
+  chains[3]->Add("../results2/MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-Counters.root");
+  chains[4]->Add("../results2/MC/TTWJets-Counters.root");
+  chains[5]->Add("../results2/MC/TTZJets-Counters.root");
+  chains[6]->Add("../results2/MC/WWWJets_8TeV-madgraph-Counters.root");
+  chains[7]->Add("../results2/MC/WWZNoGstarJets_8TeV-madgraph-Counters.root");
+  chains[8]->Add("../results2/MC/WZZNoGstarJets_8TeV-madgraph-Counters.root");
+  chains[9]->Add("../results2/MC/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola-Counters.root");
+  chains[10]->Add("../results2/MC/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-Counters.root");
+  chains[11]->Add("../results2/MC/T_t-channel_TuneZ2star_8TeV-powheg-tauola-Counters.root");
+  chains[12]->Add("../results2/MC/T_s-channel_TuneZ2star_8TeV-powheg-tauola-Counters.root");
+  chains[13]->Add("../results2/MC/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-Counters.root");
+  chains[14]->Add("../results2/MC/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola-Counters.root");
+  chains[15]->Add("../results2/MC/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola-Counters.root");
+  chains[16]->Add("../results2/MC/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball-Counters.root");
+  chains[17]->Add("../results2/MC/DYJetsToLL_M-10To50filter_8TeV-madgraph-Counters.root");
+  chains[18]->Add("../results2/MC/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-Counters.root");
 
 
   cout << "chains added. " << endl;
 
   std::vector<TString> sampleName;
-  sampleName.push_back("../results/MC/tH125q_blvu_Yt1_H126toWW-datasetEEE.root"); // 0
-  sampleName.push_back("../results/MC/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-datasetEEE.root"); // 1
-  sampleName.push_back("../results/MC/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-datasetEEE.root"); // 2
-  sampleName.push_back("../results/MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-datasetEEE.root"); // 3
-  sampleName.push_back("../results/MC/TTWJets-datasetEEE.root"); // 4
-  sampleName.push_back("../results/MC/TTZJets-datasetEEE.root"); // 5
-  sampleName.push_back("../results/MC/WWWJets_8TeV-madgraph-datasetEEE.root"); // 6
-  sampleName.push_back("../results/MC/WWZNoGstarJets_8TeV-madgraph-datasetEEE.root"); // 7
-  sampleName.push_back("../results/MC/WZZNoGstarJets_8TeV-madgraph-datasetEEE.root"); // 8
-  sampleName.push_back("../results/MC/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola-datasetEEE.root"); // 9
-  sampleName.push_back("../results/MC/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 10 
-  sampleName.push_back("../results/MC/T_t-channel_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 11
-  sampleName.push_back("../results/MC/T_s-channel_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 12
-  sampleName.push_back("../results/MC/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 13
-  sampleName.push_back("../results/MC/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 14
-  sampleName.push_back("../results/MC/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 15
-  sampleName.push_back("../results/MC/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball-datasetEEE.root"); // 16
-  sampleName.push_back("../results/MC/DYJetsToLL_M-10To50filter_8TeV-madgraph-datasetEEE.root"); // 17
-  sampleName.push_back("../results/MC/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-datasetEEE.root"); // 18
+  sampleName.push_back("../results2/MC/tH125q_blvu_Yt1_H126toWW-datasetEEE.root"); // 0
+  sampleName.push_back("../results2/MC/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-datasetEEE.root"); // 1
+  sampleName.push_back("../results2/MC/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-datasetEEE.root"); // 2
+  sampleName.push_back("../results2/MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-datasetEEE.root"); // 3
+  sampleName.push_back("../results2/MC/TTWJets-datasetEEE.root"); // 4
+  sampleName.push_back("../results2/MC/TTZJets-datasetEEE.root"); // 5
+  sampleName.push_back("../results2/MC/WWWJets_8TeV-madgraph-datasetEEE.root"); // 6
+  sampleName.push_back("../results2/MC/WWZNoGstarJets_8TeV-madgraph-datasetEEE.root"); // 7
+  sampleName.push_back("../results2/MC/WZZNoGstarJets_8TeV-madgraph-datasetEEE.root"); // 8
+  sampleName.push_back("../results2/MC/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola-datasetEEE.root"); // 9
+  sampleName.push_back("../results2/MC/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 10 
+  sampleName.push_back("../results2/MC/T_t-channel_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 11
+  sampleName.push_back("../results2/MC/T_s-channel_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 12
+  sampleName.push_back("../results2/MC/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 13
+  sampleName.push_back("../results2/MC/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 14
+  sampleName.push_back("../results2/MC/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola-datasetEEE.root"); // 15
+  sampleName.push_back("../results2/MC/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball-datasetEEE.root"); // 16
+  sampleName.push_back("../results2/MC/DYJetsToLL_M-10To50filter_8TeV-madgraph-datasetEEE.root"); // 17
+  sampleName.push_back("../results2/MC/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-datasetEEE.root"); // 18
 
   // xs from: https://docs.google.com/spreadsheet/ccc?key=0Aq5OAopf_dtsdDJqREJReGQyY21wbERldVFSZVJHbFE&hl=en#gid=56
   std::vector<float> sampleXsec;
@@ -151,7 +151,7 @@ void countEvents() {
   if (sampleXsec.size() != sampleName.size() ) cout << "nasty error! check sizes..." << endl;
 
   std::ofstream weightsFile;
-  weightsFile.open("kk_weightTrees.sh");
+  weightsFile.open("weightTreestHresults2.sh");
   weightsFile << "#! /bin/sh\n\n" << std::endl;
   weightsFile << "mkdir -p ../results/MC" << std::endl;
   weightsFile << "lumiEEE=$1" << std::endl;

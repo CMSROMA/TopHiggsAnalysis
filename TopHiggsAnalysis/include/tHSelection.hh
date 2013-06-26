@@ -256,17 +256,12 @@ private:
   int m_numbtagCSVLmvaIDcentraljets[4];
   int m_numbtagCSVTmvaIDcentraljets[4];
 
-  int m_numbtagCSVMmvaIDforwardjets[4];//MVA ID for jets
-  int m_numbtagCSVLmvaIDforwardjets[4];
-  int m_numbtagCSVTmvaIDforwardjets[4];
-
   int m_numbtagCSVMcbIDcentraljets[4];//Cut Based ID for jets
   int m_numbtagCSVLcbIDcentraljets[4];
   int m_numbtagCSVTcbIDcentraljets[4];
 
-  int m_numbtagCSVMcbIDforwardjets[4];//Cut Based ID for jets
-  int m_numbtagCSVLcbIDforwardjets[4];
-  int m_numbtagCSVTcbIDforwardjets[4];
+  int m_nummvaIDforwardjets[4];//MVA ID for jets
+  int m_numcbIDforwardjets [4];//Cut Based ID for jets
   
   int _theGenEle, _theGenPos;
   int _theGenMuMinus, _theGenMuPlus;

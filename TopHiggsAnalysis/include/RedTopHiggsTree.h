@@ -88,9 +88,9 @@ public:
                   float leadJetBTagBProb, float subleadJetBTagBProb, float subleadJetsMaxBTagBProb, 
                   int numExtraLep, int nSoftMuNoJets, int nSoftBJets, int nSoftJets,
 		  int numbtagCSVLcbIDcentraljets,  int numbtagCSVMcbIDcentraljets,  int numbtagCSVTcbIDcentraljets,
-		  int numbtagCSVLcbIDforwardjets,  int numbtagCSVMcbIDforwardjets,  int numbtagCSVTcbIDforwardjets,
+		  int numcbIDforwardjets,  
 		  int numbtagCSVLmvaIDcentraljets, int numbtagCSVMmvaIDcentraljets, int numbtagCSVTmvaIDcentraljets,
-		  int numbtagCSVLmvaIDforwardjets, int numbtagCSVMmvaIDforwardjets, int numbtagCSVTmvaIDforwardjets);
+		  int nummvaIDforwardjets);
 
   //! fill infos for jetId studies
   void fillJetsVars(float ljpt, float ljeta, int ljpfid, int ljmatch, float ljmva, int ljl, float sljpt, float sljeta, int sljpfid, int sljmatch, float sljmva, int sljl);
@@ -196,9 +196,9 @@ private:
   int  myNumExtraLep, myNumSoftBJets, myNumSoftJets;
 
   int myNumbtagCSVLcbIDcentraljets , myNumbtagCSVMcbIDcentraljets , myNumbtagCSVTcbIDcentraljets;
-  int myNumbtagCSVLcbIDforwardjets , myNumbtagCSVMcbIDforwardjets , myNumbtagCSVTcbIDforwardjets;
+  int myNumcbIDforwardjets;
   int myNumbtagCSVLmvaIDcentraljets, myNumbtagCSVMmvaIDcentraljets, myNumbtagCSVTmvaIDcentraljets;
-  int myNumbtagCSVLmvaIDforwardjets, myNumbtagCSVMmvaIDforwardjets, myNumbtagCSVTmvaIDforwardjets;
+  int myNummvaIDforwardjets;
 
   bool myFinalLeptons;
   bool myJetVeto;

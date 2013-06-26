@@ -43,9 +43,13 @@ void addWeightsToTreetH::addWeights() {
     return;
   }
 
-  LumiReWeighting LumiWeights( "/afs/cern.ch/user/e/emanuele/workspace/public/pileup/s7pileup200.root",
-                               "/afs/cern.ch/user/e/emanuele/workspace/public/pileup/puRun2012_5100ipb_71.root",
-                               "hNPU","pileup");
+  //LumiReWeighting LumiWeights( "/afs/cern.ch/user/e/emanuele/workspace/public/pileup/s7pileup200.root",
+  //                             "/afs/cern.ch/user/e/emanuele/workspace/public/pileup/puRun2012_5100ipb_71.root",
+  //                             "hNPU","pileup");
+
+  LumiReWeighting LumiWeights( "/afs/cern.ch/user/e/emanuele/workspace/public/pileup/s10MCPileUp.root",
+                               "/afs/cern.ch/user/e/emanuele/workspace/public/pileup/PUdata2012Final.root",
+                               "pileup","pileup");
     
   // reading root files with electrons and muons efficiencies
 
@@ -105,17 +109,13 @@ void addWeightsToTreetH::addWeights() {
     Int_t numbtagCSVLmvaIDcentraljets;
     Int_t numbtagCSVTmvaIDcentraljets;
 
-    Int_t numbtagCSVMmvaIDforwardjets;//MVA ID for jets
-    Int_t numbtagCSVLmvaIDforwardjets;
-    Int_t numbtagCSVTmvaIDforwardjets;
+    Int_t nummvaIDforwardjets;//MVA ID for jets
 
     Int_t numbtagCSVMcbIDcentraljets;//Cut Based ID for jets
     Int_t numbtagCSVLcbIDcentraljets;
     Int_t numbtagCSVTcbIDcentraljets;
     
-    Int_t numbtagCSVMcbIDforwardjets;//Cut Based ID for jets
-    Int_t numbtagCSVLcbIDforwardjets;
-    Int_t numbtagCSVTcbIDforwardjets;
+    Int_t numcbIDforwardjets;//Cut Based ID for jets
 
     Int_t           nVtx;
     Float_t         dxyEVT;
@@ -259,17 +259,13 @@ void addWeightsToTreetH::addWeights() {
     treeOrig->SetBranchAddress("numbtagCSVLmvaIDcentraljets", &numbtagCSVLmvaIDcentraljets);
     treeOrig->SetBranchAddress("numbtagCSVTmvaIDcentraljets", &numbtagCSVTmvaIDcentraljets);
 
-    treeOrig->SetBranchAddress("numbtagCSVMmvaIDforwardjets", &numbtagCSVMmvaIDforwardjets);
-    treeOrig->SetBranchAddress("numbtagCSVLmvaIDforwardjets", &numbtagCSVLmvaIDforwardjets);
-    treeOrig->SetBranchAddress("numbtagCSVTmvaIDforwardjets", &numbtagCSVTmvaIDforwardjets);
+    treeOrig->SetBranchAddress("nummvaIDforwardjets", &nummvaIDforwardjets);
 
     treeOrig->SetBranchAddress("numbtagCSVMcbIDcentraljets", &numbtagCSVMcbIDcentraljets);
     treeOrig->SetBranchAddress("numbtagCSVLcbIDcentraljets", &numbtagCSVLcbIDcentraljets);
     treeOrig->SetBranchAddress("numbtagCSVTcbIDcentraljets", &numbtagCSVTcbIDcentraljets);
 
-    treeOrig->SetBranchAddress("numbtagCSVMcbIDforwardjets", &numbtagCSVMcbIDforwardjets);
-    treeOrig->SetBranchAddress("numbtagCSVLcbIDforwardjets", &numbtagCSVLcbIDforwardjets);
-    treeOrig->SetBranchAddress("numbtagCSVTcbIDforwardjets", &numbtagCSVTcbIDforwardjets);
+    treeOrig->SetBranchAddress("numcbIDforwardjets", &numcbIDforwardjets);
 
     treeOrig->SetBranchAddress("dxyEVT", &dxyEVT);
     treeOrig->SetBranchAddress("dszEVT", &dszEVT);
@@ -378,9 +374,9 @@ void addWeightsToTreetH::addWeights() {
     float f_hlt, f_nVtx, f_njets, f_ncbIDjets, f_nuncorrjets;
 
     float f_numbtagCSVMmvaIDcentraljets, f_numbtagCSVLmvaIDcentraljets, f_numbtagCSVTmvaIDcentraljets;
-    float f_numbtagCSVMmvaIDforwardjets, f_numbtagCSVLmvaIDforwardjets, f_numbtagCSVTmvaIDforwardjets;  
+    float f_nummvaIDforwardjets;
     float f_numbtagCSVMcbIDcentraljets, f_numbtagCSVLcbIDcentraljets, f_numbtagCSVTcbIDcentraljets;
-    float f_numbtagCSVMcbIDforwardjets, f_numbtagCSVLcbIDforwardjets, f_numbtagCSVTcbIDforwardjets;
+    float f_numcbIDforwardjets;
  
     float f_zveto, f_bveto_ip, f_bveto_mu, f_bveto_munj, f_bveto, f_dphiveto, f_typeL1, f_typeL2, f_typeL3,
       f_nSoftMu, f_nSoftMuNoJets, f_numExtraLep, f_finalstate, f_processId, sameflav, f_nsoftbjet, f_nsoftjet;
@@ -460,17 +456,13 @@ void addWeightsToTreetH::addWeights() {
       theTreeNew->Branch("numbtagCSVLmvaIDcentraljets", &f_numbtagCSVLmvaIDcentraljets, "numbtagCSVLmvaIDcentraljets/F");
       theTreeNew->Branch("numbtagCSVTmvaIDcentraljets", &f_numbtagCSVTmvaIDcentraljets, "numbtagCSVTmvaIDcentraljets/F");
 
-      theTreeNew->Branch("numbtagCSVMmvaIDforwardjets", &f_numbtagCSVMmvaIDforwardjets, "numbtagCSVMmvaIDforwardjets/F");
-      theTreeNew->Branch("numbtagCSVLmvaIDforwardjets", &f_numbtagCSVLmvaIDforwardjets, "numbtagCSVLmvaIDforwardjets/F");
-      theTreeNew->Branch("numbtagCSVTmvaIDforwardjets", &f_numbtagCSVTmvaIDforwardjets, "numbtagCSVTmvaIDforwardjets/F");
+      theTreeNew->Branch("nummvaIDforwardjets", &f_nummvaIDforwardjets, "nummvaIDforwardjets/F");
 
       theTreeNew->Branch("numbtagCSVMcbIDcentraljets", &f_numbtagCSVMcbIDcentraljets, "numbtagCSVMcbIDcentraljets/F");
       theTreeNew->Branch("numbtagCSVLcbIDcentraljets", &f_numbtagCSVLcbIDcentraljets, "numbtagCSVLcbIDcentraljets/F");
       theTreeNew->Branch("numbtagCSVTcbIDcentraljets", &f_numbtagCSVTcbIDcentraljets, "numbtagCSVTcbIDcentraljets/F");
 
-      theTreeNew->Branch("numbtagCSVMcbIDforwardjets", &f_numbtagCSVMcbIDforwardjets, "numbtagCSVMcbIDforwardjets/F");
-      theTreeNew->Branch("numbtagCSVLcbIDforwardjets", &f_numbtagCSVLcbIDforwardjets, "numbtagCSVLcbIDforwardjets/F");
-      theTreeNew->Branch("numbtagCSVTcbIDforwardjets", &f_numbtagCSVTcbIDforwardjets, "numbtagCSVTcbIDforwardjets/F");
+      theTreeNew->Branch("numcbIDforwardjets", &f_numcbIDforwardjets, "numcbIDforwardjets/F");
 
       theTreeNew->Branch("nuncorrjets", &f_nuncorrjets, "nuncorrjets/F");
       theTreeNew->Branch("dxyEVT", &dxyEVT, "dxyEVT/F");
@@ -784,17 +776,13 @@ void addWeightsToTreetH::addWeights() {
       f_numbtagCSVLmvaIDcentraljets = (float)numbtagCSVLmvaIDcentraljets;
       f_numbtagCSVTmvaIDcentraljets = (float)numbtagCSVTmvaIDcentraljets;
 
-      f_numbtagCSVMmvaIDforwardjets = (float)numbtagCSVMmvaIDforwardjets;
-      f_numbtagCSVLmvaIDforwardjets = (float)numbtagCSVLmvaIDforwardjets;
-      f_numbtagCSVTmvaIDforwardjets = (float)numbtagCSVTmvaIDforwardjets;
+      f_nummvaIDforwardjets = (float)nummvaIDforwardjets;
 
       f_numbtagCSVMcbIDcentraljets = (float)numbtagCSVMcbIDcentraljets;
       f_numbtagCSVLcbIDcentraljets = (float)numbtagCSVLcbIDcentraljets;
       f_numbtagCSVTcbIDcentraljets = (float)numbtagCSVTcbIDcentraljets;
 
-      f_numbtagCSVMcbIDforwardjets = (float)numbtagCSVMcbIDforwardjets;
-      f_numbtagCSVLcbIDforwardjets = (float)numbtagCSVLcbIDforwardjets;
-      f_numbtagCSVTcbIDforwardjets = (float)numbtagCSVTcbIDforwardjets;
+      f_numcbIDforwardjets = (float)numcbIDforwardjets;
 
       f_nuncorrjets = (float)nuncorrjets;
       f_zveto = (float)zveto;
