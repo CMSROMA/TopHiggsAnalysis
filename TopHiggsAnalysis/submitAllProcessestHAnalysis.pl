@@ -51,7 +51,7 @@ system("python cmst3_submit_manyfilesperjob.py MC WJetsToLNu_TuneZ2Star_8TeV-mad
 
 print  "submitting dy+jets ...\n";
 system("python cmst3_submit_manyfilesperjob.py MC DYJetsToLL_M-10To50filter_8TeV-madgraph 5 TopHiggsApp 8nh tH 1");
-system("python cmst3_submit_manyfilesperjob.py MC DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball 5 TopHiggsApp 8nh tH 1");
+system("python cmst3_submit_manyfilesperjob.py MC DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball 10 TopHiggsApp 8nh tH 1");
 
 print "\nDONE \n";
 

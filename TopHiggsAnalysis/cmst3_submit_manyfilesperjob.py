@@ -32,7 +32,7 @@ else:
 # to write on local disks
 ################################################
 
-diskoutputdir = "/cmsrm/pc24_2/jorda/data/TopHiggs5.3.X/"
+diskoutputdir = "/cmsrm/pc24_2/jorda/data/TopHiggs5.3.X_prueba2/"
 diskoutputmain = diskoutputdir+"/"+prefix+"/"+process+"/"+output
 
 # prepare job to write on the cmst3 cluster disks
@@ -86,7 +86,6 @@ while (len(inputfiles) > 0):
 
     outputfile.write('ls *.root | grep -v Z_calibFall08 | xargs -i scp -o BatchMode=yes -o StrictHostKeyChecking=no {} pccmsrm24:'+diskoutputmain+'/{}\n') 
     outputfile.close
-    os.system("mkdir -p "+prefix+"/"+process+"/"+output+"/log/"+output+"_"+str(ijob)+".log")
     os.system("echo bsub -q "+queue+" -o "+prefix+"/"+process+"/"+output+"/log/"+output+"_"+str(ijob)+".log source "+pwd+"/"+outputname)
     os.system("bsub -q "+queue+" -o "+prefix+"/"+process+"/"+output+"/log/"+output+"_"+str(ijob)+".log source "+pwd+"/"+outputname+" -copyInput="+process+"_"+str(ijob))
     ijob = ijob+1
