@@ -76,36 +76,38 @@ tHSelection::tHSelection(TTree *tree)
                    "elebdtweights/Subdet2LowPt_WithIPInfo_BDTG.weights.xml",
                    "elebdtweights/Subdet0HighPt_WithIPInfo_BDTG.weights.xml",
                    "elebdtweights/Subdet1HighPt_WithIPInfo_BDTG.weights.xml",
-                   "elebdtweights/Subdet2HighPt_WithIPInfo_BDTG.weights.xml" ,                
+                   "elebdtweights/Subdet2HighPt_WithIPInfo_BDTG.weights.xml",                
                    ElectronIDMVA::kWithIPInfo);
+
+  std::cout << "estoy aqui" << std::endl;
 
   // configurating the new lepton BDT
   // Electrons
-  // ver src/TopHiggs.hh
-  /*
-  fMVAElectron = new IDForBsMVA();
-  fMVAElectron->Initialize("BDTG method",
-			   "",
-			   "",
-			   "",
-			   "",  
-			   "",
-			   "",
-			   True);
-  */
-  // Electrons
-  // ver src/TopHiggs.hh
-  /*
-  fMVAMuon = new IDForBsMVA();
-  fMVAMuon->Initialize("BDTG method",
-		       "",
-		       "",
-		       "",
-		       "",  
-		       "",
-		       "",
-		       False);
-  */
+  // see src/TopHiggs.hh
+
+  fMVAElectron = new IDForBsMVA(true);
+  fMVAElectron->Initialize("leptonMVA/el_pteta_low_cb_BDTG.weights.xml",
+			   "leptonMVA/el_pteta_low_fb_BDTG.weights.xml",
+			   "leptonMVA/el_pteta_low_ec_BDTG.weights.xml",
+			   "leptonMVA/el_pteta_high_cb_BDTG.weights.xml",  
+			   "leptonMVA/el_pteta_high_fb_BDTG.weights.xml",
+			   "leptonMVA/el_pteta_high_ec_BDTG.weights.xml",
+			   true);
+
+  // Muons
+  // see src/TopHiggs.hh
+
+  fMVAMuon = new IDForBsMVA(false);
+  fMVAMuon->Initialize("leptonMVA/mu_pteta_low_b_BDTG.weights.xml",
+		       "leptonMVA/mu_pteta_low_e_BDTG.weights.xml",
+		       "leptonMVA/mu_pteta_high_b_BDTG.weights.xml",
+		       "leptonMVA/mu_pteta_high_e_BDTG.weights.xml",  
+		       // not used
+		       "leptonMVA/mu_pteta_high_e_BDTG.weights.xml",
+		       "leptonMVA/mu_pteta_high_e_BDTG.weights.xml",
+
+		       false);
+
   // Reading GoodRUN LS
   std::cout << "[GoodRunLS]::goodRunLS is " << _selectionEEE->getSwitch("goodRunLS") << " isData is " 
 	    <<  _selectionEEE->getSwitch("isData") << std::endl;
@@ -246,8 +248,8 @@ bool tHSelection::findMcTree(const char* processType) {
     int index_nplusfromWfromH  = 999; // neutrino(+) coming from W(+) from H
     int index_nfromWfromT      = 999; // neutrino(+) coming from W from T
 
-    //std::cout << " imc | st | id | mother id | motherid (motherid) " << std::endl;
-    //std::cout << "-------------------------------------------------" << std::endl;
+    std::cout << " imc | st | id | mother id | motherid (motherid) " << std::endl;
+    std::cout << "-------------------------------------------------" << std::endl;
 
     int nLeptonsfromWfromH = 0;
     int nLeptonsfromWfromT = 0;
@@ -261,10 +263,17 @@ bool tHSelection::findMcTree(const char* processType) {
 
       if ( !(statusMc[imc] == 3) ) continue; // I am only interested in hard-scattering products
       
-      //std::cout << " " << imc << " | " << statusMc[imc] << " | " << idMc[imc] << " | " << idMc[mothMc[imc]] 
-      //		<< " | " << idMc[mothMc[mothMc[imc]]]   << std::endl;
+      std::cout << " " << imc << " | " << statusMc[imc] << " | " << idMc[imc] << " | " << idMc[mothMc[imc]] 
+      		<< " | " << idMc[mothMc[mothMc[imc]]]   << std::endl;
 
       float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
+
+      if (imc == 7) std::cout<<" eta light quark == " << etaMc[imc] << std::endl;
+
+      if (imc == 7){
+	_genForwardQuark_Pt  = pMc[imc]*fabs(sin(thetaMc[imc]));
+	_genForwardQuark_Eta = etaMc[imc];
+      }
       
       if( fabs(idMc[imc]) == 6  ) index_Top   = imc;
       if( fabs(idMc[imc]) == 25 ) index_Higgs = imc;
@@ -391,7 +400,6 @@ bool tHSelection::findMcTree(const char* processType) {
     
     _genNeutrinofromWfromT_Pt  = pMc[index_nfromWfromT]*fabs(sin(thetaMc[index_nfromWfromT]));
     _genNeutrinofromWfromT_Eta = etaMc[index_nfromWfromT]; 
-
 
     if (index_Top < 30 && index_Higgs < 30 ) tHevent = true;
 
@@ -697,8 +705,8 @@ void tHSelection::Loop() {
   //PUWeight* fPUWeight = new PUWeight();
 
   Long64_t nbytes = 0, nb = 0;
-  //Long64_t nentries = fChain->GetEntries();
-  Long64_t nentries = 50000;
+  Long64_t nentries = fChain->GetEntries();
+  //Long64_t nentries = 1000;
   std::cout << "Number of entries = " << nentries << std::endl;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
@@ -741,7 +749,7 @@ void tHSelection::Loop() {
       //promptMM    = findMcTree("HtoWWto2m2nu_prompt");
       //promptEM    = findMcTree("HtoWWtoem2nu_prompt");  
       //promptME    = findMcTree("HtoWWtome2nu_prompt");
-      tHgenerated = findMcTree("tH");  
+      //tHgenerated = findMcTree("tH");  
       //WZgenerated = findMcTree("WZ");  
       if(TString(_datasetName.c_str()).Contains("DYToEE")) getDYGeneratorKinematics(11);
       if(TString(_datasetName.c_str()).Contains("DYToMuMu")) getDYGeneratorKinematics(13);
@@ -1235,7 +1243,10 @@ void tHSelection::Loop() {
 						    _genNeutrinoMinusfromWfromH_Eta,
 						    
 						    _genNeutrinofromWfromT_Pt,
-						    _genNeutrinofromWfromT_Eta );
+						    _genNeutrinofromWfromT_Eta,
+
+						    _genForwardQuark_Pt,
+						    _genForwardQuark_Eta );
       
       myOutTree[theChannel] -> fillLatinos ( outputStep0, 
 					     outputStep1 ); 
@@ -1282,6 +1293,7 @@ void tHSelection::Loop() {
 					       m_p4Lepton3[theChannel]->Py(), 
 					       m_p4Lepton3[theChannel]->Pz(),
 					       m_ch             [theChannel],
+					       m_bdt            [theChannel],
 					       m_jetsSum        [theChannel], 
 					       m_uncorrJetsSum  [theChannel], 
 					       m_p3PFMET); 
@@ -1359,9 +1371,232 @@ void tHSelection::counterEndJob(){
 
 }
 
+bool tHSelection::isSelectedMuon2012(int i){
+
+  // HWW Selection : only not standalone MUON  
+  Utils anaUtils;
+  bool thisMuFlag1 = anaUtils.muonIdVal(muonIdMuon[i],AllGlobalMuons);
+  bool thisMuFlag2 = anaUtils.muonIdVal(muonIdMuon[i],AllTrackerMuons);
+  if (!thisMuFlag1 && !thisMuFlag2) return false;
+  if (typeMuon[i]==8)               return false;  // to be used when new trees are available
+  // Only not standalone muons latinos
+  
+  TLorentzVector Muon;
+  Muon.SetPxPyPzE(double(pxMuon[i]), double(pyMuon[i]), double(pzMuon[i]), double(energyMuon[i]));
+
+  RochCor2012 *tmprmcor;  
+  tmprmcor = new RochCor2012();
+  tmprmcor->momcor_mc(Muon, chargeMuon[i], 0, 1.0);
+  
+  //std::cout << " ** [GetBestMMM Function] :: Rochester Correction ** " << std::endl;
+  //std::cout << " [Before] with TLorentz pT[muon] = [" << Muon.Pt() << "]" << std::endl;
+  
+  double MuonPt = double(GetPt(pxMuon[i],pyMuon[i]));
+  //float MuonPt = Muon.Pt();
+  /*
+    std::cout << " Muon.Pt()  = " << Muon.Pt() << std::endl;
+    std::cout << " GetPt(...) = " << MuonPt    << std::endl;
+  */
+  
+  //std::cout << " [After] pT[muon] = [" << float(Muon.Pt()) << "]" << std::endl;
+  
+  //std::cout<< " muon [pT][eta] = ["<< MuonPt << "][" << etaMuon[i] << "]"<<std::endl;  
+  
+  if(_selectionEEE->getSwitch("etaMuonAcc") && !_selectionEEE->passCut("etaMuonAcc", etaMuon[i]) ) return false;
+  if(_selectionEEE->getSwitch("ptMuonAcc")  && !_selectionEEE->passCut("ptMuonAcc" , MuonPt)     ) return false;
+  
+  bool theMuonID = true;
+  isMuonID2012(i, &theMuonID);
+  if (!theMuonID) return false;
+
+  bool theMuonIso = true;
+  isPFIsolatedMuon2012(i);
+  if (!theMuonIso) return false;
+
+  int ctfMuon   = trackIndexMuon[i]; 
+  float dxyMuon = transvImpactParTrack[ctfMuon];
+  float dzMuon  = muonDzPV(i,0);
+  
+  // Identification and Isolation MUON Selection
+  if ( !theMuonID || !isPFIsolatedMuon2012(i) ) return false;      
+  
+  // Impact parameters MUON Selection
+  if (MuonPt>20) {          // hardcoded
+    if (_selectionEEE->getSwitch("muonIPhighPT") && (!_selectionEEE->passCut("muonIPhighPT",dxyMuon)) ) return false;   
+  } else if (MuonPt<=20) {  // hardcoded
+    if (_selectionEEE->getSwitch("muonIPlowPT")  && (!_selectionEEE->passCut("muonIPlowPT",dxyMuon)) ) return false;   
+  }
+  
+  if (_selectionEEE->getSwitch("muonDz") && (!_selectionEEE->passCut("muonDz",dzMuon)) ) return false;         
+  
+  return true;
+
+}
+
+bool tHSelection::isSelectedMuon2013(int i){
+
+  bool print = false;
+
+  double MuonPt = double(GetPt(pxMuon[i],pyMuon[i]));
+
+  // Kinematics
+  if ( MuonPt < 5 || etaMuon[i] > 2.4 ) return false;
+
+  if (print) std::cout<< " [Accep.]  = 1" << std::endl;
+
+  if ( !pfmuonIdMuon[i] ) return false;
+
+  int track      = trackIndexMuon[i];
+  float theIp    = impactPar3DTrack[track];
+  float theIpErr = impactPar3DErrorTrack[track];
+  float sip3d    = theIp/theIpErr;
+  if ( sip3d > 10 ) return false;
+
+  int ctfMuon   = trackIndexMuon[i]; 
+  float dxyMuon = transvImpactParTrack[ctfMuon];
+  float dzMuon  = muonDzPV(i,0);
+  if ( dxyMuon > 0.5 || dzMuon > 1.0 ) return false;
+
+  // Isolation
+  float relIso = (1.0/MuonPt)*(pfCandChargedIso04Muon[i] + TMath::Max(0.0,(pfCandNeutralIso04Muon[i]+pfCandPhotonIso04Muon[i]-0.5*pfCandChargedPUIso04Muon[i])));
+  if ( relIso > 0.4 ) return false;
+
+  // Lepton MVA ID
+  float bdtValue = leptBDTForBs(fMVAMuon, i, false);
+  if ( bdtValue < 0.7 ) return false;
+  if (print) std::cout<< " [FinalBDT]= 1" << std::endl;  
+
+  return true;
+
+}
+
+bool tHSelection::isSelectedElectron2012(int i){
+
+  // HWW Selection
+
+  bool print = false;
+  
+  float ElectronPt = GetPt(pxEle[i],pyEle[i]);
+  
+  if (print) std::cout<< " ELECTRON INFORMATION " << std::endl;
+  if (print) std::cout<< " [pT][eta] = ["<< ElectronPt << "][" << etaEle[i] << "]"<<std::endl;  
+  
+  bool acceptanceEta = false;
+  bool acceptancePt  = false;
+
+  if(_selectionEEE->getSwitch("etaElectronAcc") && !_selectionEEE->passCut("etaElectronAcc",etaEle[i]) ) 
+    return false;
+  
+  if(_selectionEEE->getSwitch("ptElectronAcc")  && !_selectionEEE->passCut("ptElectronAcc",ElectronPt) ) 
+    return false;
+  
+  if (print) std::cout<< " [Accep.]  = 1" << std::endl;
+  
+  bool theElectronID, theElectronIsol, theElectronConvRej;
+  theElectronID = theElectronIsol = theElectronConvRej = true;
+  
+  isEleID2012AndDenom(i,&theElectronID,&theElectronIsol,&theElectronConvRej);
+  
+  if (!theElectronID) return false;
+  if (print) std::cout<< " [ID]      = " << theElectronID << std::endl;
+
+  if (!theElectronIsol) return false;
+  if (print) std::cout<< " [Iso]     = " << theElectronIsol << std::endl;
+
+  if (!theElectronConvRej) return false;
+  if (print) std::cout<< " [Con.Rej] = " << theElectronConvRej << std::endl;
+  
+  int   gsfTrack = gsfTrackIndexEle[i]; 
+  float dxyEle = transvImpactParGsfTrack[gsfTrack];
+  float dzEle  = eleDzPV(i,0);
+
+  if (_selectionEEE->getSwitch("electronIP") && (!_selectionEEE->passCut("electronIP",dxyEle)) ) return false;
+  if (_selectionEEE->getSwitch("electronDz") && (!_selectionEEE->passCut("electronDz",dzEle))  ) return false;
+  
+  return true;
+  
+}
+
+bool tHSelection::isSelectedElectron2013(int i){
+
+  // ttH Selection
+
+  bool print = false;
+
+  // Preselection requirements from AN-13-159
+
+  float ElectronPt = GetPt(pxEle[i],pyEle[i]);
+  
+  if (print) std::cout<< " ELECTRON INFORMATION " << std::endl;
+  if (print) std::cout<< " [pT][eta] = ["<< ElectronPt << "][" << etaEle[i] << "]"<<std::endl;    
+  
+  // Kinematics
+  if ( ElectronPt < 7 || etaEle[i] > 2.5 ) return false;
+
+  if (print) std::cout<< " [Accep.]  = 1" << std::endl;
+
+  // BDT selection
+  bool passBDT = false;
+  if ( ElectronPt > 5 && ElectronPt < 10 ) {
+    if       ( abs(etaEle[i])<0.8 ){
+      if (eleBDT(fMVA,i) > 0.47) passBDT = true; 
+    }else if ( abs(etaEle[i])>0.8 && abs(etaEle[i]) < 1.479 ) {
+      if (eleBDT(fMVA,i) > 0.004) passBDT = true; 
+    }else if ( abs(etaEle[i]) > 1.479 ) {
+      if (eleBDT(fMVA,i) > 0.295) passBDT = true; 
+    }
+  }else if ( ElectronPt > 10 ){
+    if       ( abs(etaEle[i])<0.8 ){
+      if (eleBDT(fMVA,i) > 0.5) passBDT = true; 
+    }else if ( abs(etaEle[i])>0.8 && abs(etaEle[i]) < 1.479 ) {
+      if (eleBDT(fMVA,i) > 0.12) passBDT = true; 
+    }else if ( abs(etaEle[i]) > 1.479 ) {
+      if (eleBDT(fMVA,i) > 0.6) passBDT = true; 
+    }
+  }
+
+  if (!passBDT) return false;
+  if (print) std::cout<< " [BDTpre] = 1" << std::endl;  
+
+  // Impact parameter cuts
+  int gsftrack   = gsfTrackIndexEle[i];
+  float theIp    = impactPar3DGsfTrack[gsftrack];
+  float theIpErr = impactPar3DErrorGsfTrack[gsftrack]; 
+  float sip3d    = theIp/theIpErr;
+  if ( sip3d > 10 ) return false;
+  
+  float dxyEle = transvImpactParGsfTrack[gsftrack];
+  float dzEle  = eleDzPV(i,0);      
+  if ( dxyEle > 0.5 || dzEle > 1.0 ) return false;
+  
+  if (print) std::cout<< " [Imp.Pa.] = 1" << std::endl;  
+
+  // Conversion rejection
+  int missHits = expInnerLayersGsfTrack[gsftrack];
+  if ( missHits > 1 ) return true;
+  
+  if (print) std::cout<< " [Conv.Re] = 1" << std::endl;  
+
+  // Isolation
+  float relIso = (1.0/ElectronPt)*(pfCandChargedIso04Ele[i] + TMath::Max(0.0,(pfCandNeutralIso04Ele[i]+pfCandPhotonIso04Ele[i]-0.5*pfCandChargedPUIso04Ele[i])));
+  if ( relIso > 0.4 ) return false;
+
+  if (print) std::cout<< " [Iso]     = 1" << std::endl;  
+
+  // Lepton MVA ID
+  float bdtValue = leptBDTForBs(fMVAElectron, i, true);
+  if ( bdtValue < 0.7 ) return false;
+  if (print) std::cout<< " [FinalBDT]= 1" << std::endl;  
+  
+  return true;
+
+}
+
 std::vector<int> tHSelection::getBestEEE(){
 
   selectedElectrons.clear();
+
+  std::cout<< " *************** calling eee" << std::endl;
 
   // index for the three selected electrons
   int index1 = -1;
@@ -1383,54 +1618,24 @@ std::vector<int> tHSelection::getBestEEE(){
 
   for(int i=0;i<nEle;i++) {
     
-    //std::cout<< " ----------------------------" <<std::endl;
-    //std::cout<< " electron [index] = [" << i << "]" <<std::endl;  
-
-    // HWW Selection
-
-    float ElectronPt = GetPt(pxEle[i],pyEle[i]);
-
-    //std::cout<< " electron [pT][eta] = ["<< ElectronPt << "][" << etaEle[i] << "]"<<std::endl;  
+    float ElectronPt     = GetPt(pxEle[i],pyEle[i]);
+    float ElectronCharge = chargeEle[i];
 
     // Switch on/off the tight selection (for debugging)
-    bool tightElectronSelection = true;
+    bool tightElectronSelection     = false;
+    bool LeptonMVAElectronSelection = true;
 
     if (tightElectronSelection){
 
-      if(_selectionEEE->getSwitch("etaElectronAcc") && !_selectionEEE->passCut("etaElectronAcc",etaEle[i]) ) continue;
-      
-      if(_selectionEEE->getSwitch("ptElectronAcc")  && !_selectionEEE->passCut("ptElectronAcc",ElectronPt) ) continue;
-      
-      //std::cout<< " the electron PASSED the [acceptance] selection " << std::endl;
-      
-      bool theElectronID, theElectronIsol, theElectronConvRej;
-      theElectronID = theElectronIsol = theElectronConvRej = true;
-      
-      isEleID2012AndDenom(i,&theElectronID,&theElectronIsol,&theElectronConvRej);
-      
-      if (!theElectronID) continue;
-      
-      //std::cout<< " electron [ID] = [" << theElectronID << "]" << std::endl;
-      
-      if (!theElectronIsol) continue;
-      
-      //std::cout<< " electron [Iso] = [" << theElectronIsol << "]" << std::endl;
-      
-      if ( !theElectronConvRej ) continue;      
-      
-      //std::cout<< " electron [Con.Rej] = [" << theElectronConvRej << "]" << std::endl;
-      
-      int   gsfTrack = gsfTrackIndexEle[i]; 
-      float dxyEle = transvImpactParGsfTrack[gsfTrack];
-      float dzEle  = eleDzPV(i,0);
-      if (_selectionEEE->getSwitch("electronIP") && (!_selectionEEE->passCut("electronIP",dxyEle)) ) continue;
-      if (_selectionEEE->getSwitch("electronDz") && (!_selectionEEE->passCut("electronDz",dzEle))  ) continue;
-      
-      //std::cout<< " the electron PASSED the [IP -  1] selection " << std::endl;
-      
+      if (! isSelectedElectron2012(i))continue;
+
+    }else if(LeptonMVAElectronSelection){
+
+      if (! isSelectedElectron2013(i)) continue;
+
+    }else{
+      std::cout << "WARNING: No ID Selected!!" << std::endl;
     }
-    
-    float ElectronCharge = chargeEle[i];
     
     // Store this muon in the AllElecIndexMap
     AllElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i);
@@ -1592,9 +1797,9 @@ std::vector<int> tHSelection::getBestMMM(){
   int NumberNegativeMuons = 0;
   int NumberAllMuons      = 0;
 
-  RochCor2012 *tmprmcor;
-
   //std::cout<< " ... looping over the most general muon collection:" << std::endl;
+
+  RochCor2012 *tmprmcor;  
 
   for(int i=0;i<nMuon;i++) {
     
@@ -2653,9 +2858,15 @@ void tHSelection::setKinematicsEEE(int myEle1, int myEle2, int myEle3){
     m_lh[eee][0] = eleIdLikelihoodEle[myEle1];
     m_lh[eee][1] = eleIdLikelihoodEle[myEle2];    
     m_lh[eee][2] = eleIdLikelihoodEle[myEle3];    
+    /*
     m_bdt[eee][0] = eleBDT(fMVA,myEle1);
     m_bdt[eee][1] = eleBDT(fMVA,myEle2);
     m_bdt[eee][2] = eleBDT(fMVA,myEle3);
+    */
+    m_bdt[eee][0] = leptBDTForBs(fMVAElectron,myEle1,true);
+    m_bdt[eee][1] = leptBDTForBs(fMVAElectron,myEle2,true);
+    m_bdt[eee][2] = leptBDTForBs(fMVAElectron,myEle3,true);
+
     m_chmaj[eee][0] = eleChargeMajority(myEle1);
     m_chmaj[eee][1] = eleChargeMajority(myEle2);    
     m_chmaj[eee][2] = eleChargeMajority(myEle3);

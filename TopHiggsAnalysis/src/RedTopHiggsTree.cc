@@ -210,7 +210,8 @@ void RedTopHiggsTree::addKinematics() {
   myTree->Branch("pxL3", &myPxL3, "pxL3/F");
   myTree->Branch("pyL3", &myPyL3, "pyL3/F");
   myTree->Branch("pzL3", &myPzL3, "pzL3/F");
-  myTree->Branch("ch", myLepCharge, "ch[3]/I");
+  myTree->Branch("ch"  , myLepCharge, "ch[3]/I");
+  myTree->Branch("bdt" , myLepBDT   , "bdt[3]/F");
 
   myJetsSum = 0;
   myUncorrJetsSum = 0;
@@ -301,6 +302,9 @@ void RedTopHiggsTree::addtHMcTruthInfos(){
 
   myTree->Branch("genNeutrinofromWfromT_Pt" , &myGenNeutrinofromWfromT_Pt , "genNeutrinofromWfromT_Pt/F");
   myTree->Branch("genNeutrinofromWfromT_Eta", &myGenNeutrinofromWfromT_Eta, "genNeutrinofromWfromT_Eta/F");
+
+  myTree->Branch("genForwardQuark_Pt" , &myGenForwardQuark_Pt , "genForwardQuark_Pt/F");
+  myTree->Branch("genForwardQuark_Eta", &myGenForwardQuark_Eta, "genForwardQuark_Eta/F");
   
 }
 
@@ -518,6 +522,7 @@ void RedTopHiggsTree::fillKinematics(float pxTkMet, float pyTkMet, float pzTkMet
                                   float pxL2, float pyL2, float pzL2,
                                   float pxL3, float pyL3, float pzL3,
                                   int ch[3], 
+                                  float bdt[3], 
                                   TLorentzVector *jetSum, TLorentzVector *uncorrJetSum, TVector3 *pfmet) {
 
   myPxTkMet = pxTkMet;
@@ -548,6 +553,7 @@ void RedTopHiggsTree::fillKinematics(float pxTkMet, float pyTkMet, float pzTkMet
   myPfMet = pfmet;
   for(int i=0; i<3; i++) {
     myLepCharge[i] = ch[i];
+    myLepBDT   [i] = bdt[i];
   }
 }
 
@@ -676,7 +682,10 @@ void RedTopHiggsTree::filltHMcTruthInfos(float genHiggsPt,
 					 float genNeutrinoMinusfromWfromH_Eta,
 					 
 					 float genNeutrinofromWfromT_Pt,
-					 float genNeutrinofromWfromT_Eta){
+					 float genNeutrinofromWfromT_Eta,
+
+					 float genForwardQuark_Pt,
+					 float genForwardQuark_Eta){
   
   myGenHiggsPt = genHiggsPt;
   myGenHiggsEta = genHiggsEta;
@@ -710,5 +719,8 @@ void RedTopHiggsTree::filltHMcTruthInfos(float genHiggsPt,
   
   myGenNeutrinofromWfromT_Pt = genNeutrinofromWfromT_Pt;  
   myGenNeutrinofromWfromT_Eta = genNeutrinofromWfromT_Eta;
+
+  myGenForwardQuark_Pt = genForwardQuark_Pt;  
+  myGenForwardQuark_Eta = genForwardQuark_Eta;
 
 }

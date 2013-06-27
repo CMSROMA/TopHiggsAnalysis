@@ -1121,9 +1121,12 @@ float TopHiggs::leptBDTForBs(IDForBsMVA *mva, int leptIndex, bool isEle) {
   float minDr    = 999.;
   int closestGen = -999;
   if (applyMcCorr) {   
-    for (int imc; imc<nMc; imc++) {
+    for (int imc=2; imc<nMc; imc++) { // Avoid the colliding particles in first appearance
+      if (thetaMc[imc] == 0 || etaMc[imc] == 0) continue; // avoid strange particles
       TVector3 trueP;
-      trueP.SetPtThetaPhi(pMc[imc]*fabs(sin(thetaMc[imc])),thetaMc[imc],phiMc[imc]);
+      std::cout<<"theta/eta = " << thetaMc[imc] << "/" << etaMc[imc] << std::endl;
+      //trueP.SetPtThetaPhi(pMc[imc]*fabs(sin(thetaMc[imc])),thetaMc[imc],phiMc[imc]);
+      trueP.SetPtEtaPhi(pMc[imc]*fabs(sin(thetaMc[imc])),etaMc[imc],phiMc[imc]);
       float dR = trueP.DeltaR(pLept);
       if(dR<minDr && dR<0.3) {
 	minDr = dR;
@@ -1185,7 +1188,7 @@ float TopHiggs::leptBDTForBs(IDForBsMVA *mva, int leptIndex, bool isEle) {
 	closestJet = ii;
       }
     }      
-    
+
     if (closestJet<0) {
       cout << "problem with leptonID!! Jet not found" << endl;
       return -9999;

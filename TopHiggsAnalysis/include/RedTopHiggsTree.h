@@ -69,6 +69,7 @@ public:
                       float pxL2, float pyL2, float pzL2,
                       float pxL3, float pyL3, float pzL3,
                       int ch[3],
+		      float bdt[3],
                       TLorentzVector *jetSum, TLorentzVector *uncorrJetSum, TVector3 *pfmet);
   
   void fillSystematics(float scE[3], float r9[3], float ene1, float ene2, float ene3, int ty1, int ty2, int ty3,
@@ -148,7 +149,10 @@ public:
 			  float genNeutrinoMinusfromWfromH_Eta,
 			  
 			  float genNeutrinofromWfromT_Pt,
-			  float genNeutrinofromWfromT_Eta);
+			  float genNeutrinofromWfromT_Eta,
+
+			  float genForwardQuark_Pt,
+			  float genForwardQuark_Eta);
   
 
   //! effectively store the events in the tree
@@ -282,6 +286,9 @@ private:
   float myGenNeutrinofromWfromT_Pt;
   float myGenNeutrinofromWfromT_Eta;
 
+  float myGenForwardQuark_Pt;
+  float myGenForwardQuark_Eta;
+
   // latinos
   bool mySteps[2];
 
@@ -289,6 +296,7 @@ private:
   int   myLepFlav[3];
   float myPt[3], myEta[3], myPhi[3];
   float myLepId[3], myLepIso[3], myLepConv[3];
+  float myLepBDT[3];
   TVector3 *myMetFromJets, *myPfMetUp, *myPfMetDown;
   float myMtUp, myMtDown;
 

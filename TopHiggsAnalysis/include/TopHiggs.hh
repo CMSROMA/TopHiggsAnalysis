@@ -149,8 +149,8 @@ protected:
   ElectronIDMVA *fMVA;
 
   // MVA for lepton ID. From G.Petrucciani and C.Botta
-  //IDForBsMVA *fMVAElectron;
-  //IDForBsMVA *fMVAMuon;
+  IDForBsMVA *fMVAElectron;
+  IDForBsMVA *fMVAMuon;
 
   // class to apply corrections to the LeptonID MVA for Bs
   tH_leptonMcCorrections *tHMcCorr;
