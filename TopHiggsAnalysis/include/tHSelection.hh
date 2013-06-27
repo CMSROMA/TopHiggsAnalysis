@@ -53,6 +53,13 @@ private:
 
   bool findMcTree(const char* processType);
 
+  //! ID for leptons
+  bool isSelectedMuon2012(int muonIndex);
+  bool isSelectedMuon2013(int muonIndex);
+
+  bool isSelectedElectron2012(int electronIndex);
+  bool isSelectedElectron2013(int electronIndex);
+
   //! get the best MMM
   std::vector<int> getBestMMM(); // MMM channel
 
@@ -323,6 +330,9 @@ private:
 
   float _genNeutrinofromWfromT_Pt;
   float _genNeutrinofromWfromT_Eta; 
+
+  float _genForwardQuark_Pt;
+  float _genForwardQuark_Eta;
 
   float _highestPtGen[1], _lowestPtGen[1];
   float _nGenJet[1];
