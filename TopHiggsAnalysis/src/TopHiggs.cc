@@ -1124,7 +1124,6 @@ float TopHiggs::leptBDTForBs(IDForBsMVA *mva, int leptIndex, bool isEle) {
     for (int imc=2; imc<nMc; imc++) { // Avoid the colliding particles in first appearance
       if (thetaMc[imc] == 0 || etaMc[imc] == 0) continue; // avoid strange particles
       TVector3 trueP;
-      std::cout<<"theta/eta = " << thetaMc[imc] << "/" << etaMc[imc] << std::endl;
       //trueP.SetPtThetaPhi(pMc[imc]*fabs(sin(thetaMc[imc])),thetaMc[imc],phiMc[imc]);
       trueP.SetPtEtaPhi(pMc[imc]*fabs(sin(thetaMc[imc])),etaMc[imc],phiMc[imc]);
       float dR = trueP.DeltaR(pLept);
