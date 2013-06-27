@@ -48,6 +48,12 @@ tHSelection::tHSelection(TTree *tree)
   CutBasedHiggsSelection[mme].Configure(fileCuts.c_str(),fileSwitches.c_str(),"FULL SELECTION EVENT COUNTER MME"); 
   _selectionMME = CutBasedHiggsSelection[mme].GetSelection();
 
+  // Z-peak cross-check
+  CutBasedHiggsSelection[ee].Configure(fileCuts.c_str(),fileSwitches.c_str(),"FULL SELECTION EVENT COUNTER EE"); 
+  _selectionEE = CutBasedHiggsSelection[ee].GetSelection();
+
+  CutBasedHiggsSelection[mm].Configure(fileCuts.c_str(),fileSwitches.c_str(),"FULL SELECTION EVENT COUNTER MM"); 
+  _selectionMM = CutBasedHiggsSelection[mm].GetSelection();
 
   // Extra selection efficiencies - to be put here not to pass the full list of leptons to the preselection class
   _selectionEEE->addCut("etaElectronAcc");    
@@ -128,7 +134,7 @@ tHSelection::tHSelection(TTree *tree)
   // Rochester correction for muons
   rmcor = new RochCor2012();
 
-  for(int theChannel=0; theChannel<4; theChannel++) {
+  for(int theChannel=0; theChannel<6; theChannel++) {
     m_p4Lepton1[theChannel] = new TLorentzVector(0.,0.,0.,0.);
     m_p4Lepton2[theChannel] = new TLorentzVector(0.,0.,0.,0.);
     m_p4Lepton3[theChannel] = new TLorentzVector(0.,0.,0.,0.);
@@ -161,7 +167,7 @@ tHSelection::tHSelection(TTree *tree)
 
 tHSelection::~tHSelection(){
 
-  for(int theChannel=0; theChannel<4; theChannel++) {  
+  for(int theChannel=0; theChannel<6; theChannel++) {  
 
     delete m_p4Lepton1[theChannel];
     delete m_p4Lepton2[theChannel];
@@ -183,10 +189,18 @@ tHSelection::~tHSelection(){
   delete _selectionEEM;
   delete _selectionMME;
 
+  delete _selectionEE;
+  delete _selectionMM;
+
   myOutTree[eee]->save();
   myOutTree[mmm]->save();
   myOutTree[mme]->save();
   myOutTree[eem]->save();
+
+  myOutTree[ee]->save();
+  myOutTree[mm]->save();
+
+  myGenLevelTree->save();
   
 }
 
@@ -248,8 +262,8 @@ bool tHSelection::findMcTree(const char* processType) {
     int index_nplusfromWfromH  = 999; // neutrino(+) coming from W(+) from H
     int index_nfromWfromT      = 999; // neutrino(+) coming from W from T
 
-    std::cout << " imc | st | id | mother id | motherid (motherid) " << std::endl;
-    std::cout << "-------------------------------------------------" << std::endl;
+    //std::cout << " imc | st | id | mother id | motherid (motherid) " << std::endl;
+    //std::cout << "-------------------------------------------------" << std::endl;
 
     int nLeptonsfromWfromH = 0;
     int nLeptonsfromWfromT = 0;
@@ -263,12 +277,10 @@ bool tHSelection::findMcTree(const char* processType) {
 
       if ( !(statusMc[imc] == 3) ) continue; // I am only interested in hard-scattering products
       
-      std::cout << " " << imc << " | " << statusMc[imc] << " | " << idMc[imc] << " | " << idMc[mothMc[imc]] 
-      		<< " | " << idMc[mothMc[mothMc[imc]]]   << std::endl;
+      //std::cout << " " << imc << " | " << statusMc[imc] << " | " << idMc[imc] << " | " << idMc[mothMc[imc]] 
+      //	<< " | " << idMc[mothMc[mothMc[imc]]]   << std::endl;
 
       float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-
-      if (imc == 7) std::cout<<" eta light quark == " << etaMc[imc] << std::endl;
 
       if (imc == 7){
 	_genForwardQuark_Pt  = pMc[imc]*fabs(sin(thetaMc[imc]));
@@ -353,19 +365,13 @@ bool tHSelection::findMcTree(const char* processType) {
 
     if ( nLeptonsfromWfromH == 4){
       nWWtoLLdecays++;
-      //std::cout<<" H-->WW-->2l2n decay!"<<std::endl;
     }
     if ( nLeptonsfromWfromT == 2){ // (lepton + neutrino)
       nWfromTtoLdecay++;
-      //std::cout<<" t-->Wb-->lnb decay!"<<std::endl;
     }
-    //if ( (nLeptonsfromWfromH + nLeptonsfromWfromT) == 3 ){
-    //  nWfromTtoLdecay++;
-      //std::cout<<" H-->WW-->2l2n and t-->Wb-->lnb decays"<<std::endl;
-    //}
+
     if ( (nPlusLepton == 2 && nMinusLepton == 0) || ( nMinusLepton == 2 && nPlusLepton == 0 ) ){
       nSSevent++;
-      //std::cout<<"SS event at gen level"<<std::endl;
     }
 
     _genHiggsPt  = pMc[index_Higgs]*fabs(sin(thetaMc[index_Higgs]));
@@ -382,25 +388,33 @@ bool tHSelection::findMcTree(const char* processType) {
     
     _genWfromT_Pt  = pMc[index_WfromTop]*fabs(sin(thetaMc[index_WfromTop]));
     _genWfromT_Eta = etaMc[index_WfromTop];
-    
-    _genLeptonPlusfromWfromH_Pt  = pMc[index_lplusfromWfromH]*fabs(sin(thetaMc[index_lplusfromWfromH]));
-    _genLeptonPlusfromWfromH_Eta = etaMc[index_lplusfromWfromH];
-    
-    _genLeptonMinusfromWfromH_Pt  = pMc[index_lminusfromWfromH]*fabs(sin(thetaMc[index_lminusfromWfromH]));
-    _genLeptonMinusfromWfromH_Eta = etaMc[index_lminusfromWfromH];
-    
-    _genLeptonfromWfromT_Pt  = pMc[index_lfromWfromT]*fabs(sin(thetaMc[index_lfromWfromT]));
-    _genLeptonfromWfromT_Eta = etaMc[index_lfromWfromT];
-    
-    _genNeutrinoPlusfromWfromH_Pt  = pMc[index_nplusfromWfromH]*fabs(sin(thetaMc[index_nplusfromWfromH]));
-    _genNeutrinoPlusfromWfromH_Eta = etaMc[index_nplusfromWfromH];
-    
-    _genNeutrinoMinusfromWfromH_Pt  = pMc[index_nminusfromWfromH]*fabs(sin(thetaMc[index_nminusfromWfromH]));
-    _genNeutrinoMinusfromWfromH_Eta = etaMc[index_nminusfromWfromH];
-    
-    _genNeutrinofromWfromT_Pt  = pMc[index_nfromWfromT]*fabs(sin(thetaMc[index_nfromWfromT]));
-    _genNeutrinofromWfromT_Eta = etaMc[index_nfromWfromT]; 
 
+    if ( nLeptonsfromWfromH > 1 ){
+
+      _genNeutrinoPlusfromWfromH_Pt  = pMc[index_nplusfromWfromH]*fabs(sin(thetaMc[index_nplusfromWfromH]));
+      _genNeutrinoPlusfromWfromH_Eta = etaMc[index_nplusfromWfromH];
+      
+      _genNeutrinoMinusfromWfromH_Pt  = pMc[index_nminusfromWfromH]*fabs(sin(thetaMc[index_nminusfromWfromH]));
+      _genNeutrinoMinusfromWfromH_Eta = etaMc[index_nminusfromWfromH];
+      
+      _genLeptonPlusfromWfromH_Pt  = pMc[index_lplusfromWfromH]*fabs(sin(thetaMc[index_lplusfromWfromH]));
+      _genLeptonPlusfromWfromH_Eta = etaMc[index_lplusfromWfromH];
+      
+      _genLeptonMinusfromWfromH_Pt  = pMc[index_lminusfromWfromH]*fabs(sin(thetaMc[index_lminusfromWfromH]));
+      _genLeptonMinusfromWfromH_Eta = etaMc[index_lminusfromWfromH];
+
+    } 
+     
+    if(nLeptonsfromWfromT > 0){
+
+      _genLeptonfromWfromT_Pt  = pMc[index_lfromWfromT]*fabs(sin(thetaMc[index_lfromWfromT]));
+      _genLeptonfromWfromT_Eta = etaMc[index_lfromWfromT];
+
+      _genNeutrinofromWfromT_Pt  = pMc[index_nfromWfromT]*fabs(sin(thetaMc[index_nfromWfromT]));
+      _genNeutrinofromWfromT_Eta = etaMc[index_nfromWfromT]; 
+
+    }
+    
     if (index_Top < 30 && index_Higgs < 30 ) tHevent = true;
 
     return ( tHevent );
@@ -665,13 +679,24 @@ void tHSelection::Loop() {
   std::string reducedTreeNameMMM = _datasetName+"-datasetMMM.root";
   std::string reducedTreeNameEEM = _datasetName+"-datasetEEM.root";
   std::string reducedTreeNameMME = _datasetName+"-datasetMME.root";
+
+  std::string reducedTreeNameEE = _datasetName+"-datasetEE.root";
+  std::string reducedTreeNameMM = _datasetName+"-datasetMM.root";
  
   myOutTree[eee] = new RedTopHiggsTree(reducedTreeNameEEE.c_str());
   myOutTree[mmm] = new RedTopHiggsTree(reducedTreeNameMMM.c_str());
   myOutTree[eem] = new RedTopHiggsTree(reducedTreeNameEEM.c_str());
   myOutTree[mme] = new RedTopHiggsTree(reducedTreeNameMME.c_str());
 
-  for(int theChannel=0; theChannel<4; theChannel++) {
+  myOutTree [ee] = new RedTopHiggsTree(reducedTreeNameEE.c_str());
+  myOutTree [mm] = new RedTopHiggsTree(reducedTreeNameMM.c_str());
+
+  myGenLevelTree = new RedTopHiggsTree("genLevelInfo.root");
+
+  if(!_selectionEEE->getSwitch("isData")) 
+    myGenLevelTree->addtHMcTruthInfos();
+  
+  for(int theChannel=0; theChannel<6; theChannel++) {
 
     if(!_selectionEEE->getSwitch("isData")) {
 
@@ -705,8 +730,8 @@ void tHSelection::Loop() {
   //PUWeight* fPUWeight = new PUWeight();
 
   Long64_t nbytes = 0, nb = 0;
-  Long64_t nentries = fChain->GetEntries();
-  //Long64_t nentries = 1000;
+  //Long64_t nentries = fChain->GetEntries();
+  Long64_t nentries = 20000;
   std::cout << "Number of entries = " << nentries << std::endl;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
@@ -745,16 +770,51 @@ void tHSelection::Loop() {
     bool tHgenerated = false;
 
     if( !_selectionEEE->getSwitch("isData") ) {
-      //promptEE    = findMcTree("HtoWWto2e2nu_prompt");
-      //promptMM    = findMcTree("HtoWWto2m2nu_prompt");
-      //promptEM    = findMcTree("HtoWWtoem2nu_prompt");  
-      //promptME    = findMcTree("HtoWWtome2nu_prompt");
-      //tHgenerated = findMcTree("tH");  
+      tHgenerated = findMcTree("tH");  
       //WZgenerated = findMcTree("WZ");  
-      if(TString(_datasetName.c_str()).Contains("DYToEE")) getDYGeneratorKinematics(11);
-      if(TString(_datasetName.c_str()).Contains("DYToMuMu")) getDYGeneratorKinematics(13);
     }
+
+    if (tHgenerated){
+      myGenLevelTree -> filltHMcTruthInfos(_genHiggsPt,
+					   _genHiggsEta,
+					   
+					   _genTopPt,
+					   _genTopEta,
+					   
+					   _genWpfromH_Pt,
+					   _genWpfromH_Eta,
+					   
+					   _genWmfromH_Pt,
+					   _genWmfromH_Eta,
+					   
+					   _genWfromT_Pt,
+					   _genWfromT_Eta,
+					   
+					   _genLeptonPlusfromWfromH_Pt,
+					   _genLeptonPlusfromWfromH_Eta,
+					   
+					   _genLeptonMinusfromWfromH_Pt,
+					   _genLeptonMinusfromWfromH_Eta,
+					   
+					   _genLeptonfromWfromT_Pt,
+					   _genLeptonfromWfromT_Eta,
+					   
+					   _genNeutrinoPlusfromWfromH_Pt,
+					   _genNeutrinoPlusfromWfromH_Eta,
+					   
+					   _genNeutrinoMinusfromWfromH_Pt,
+					   _genNeutrinoMinusfromWfromH_Eta,
+					   
+					   _genNeutrinofromWfromT_Pt,
+					   _genNeutrinofromWfromT_Eta,
+					   
+					   _genForwardQuark_Pt,
+					   _genForwardQuark_Eta );
+      myGenLevelTree->store();
+
+    }    
     
+
     // Good Run selection
     if ( _selectionEEE->getSwitch("isData") && _selectionEEE->getSwitch("goodRunLS") && !isGoodRunLS() ) {
       if ( lastRun!= runNumber || lastLumi != lumiBlock) {
@@ -783,6 +843,9 @@ void tHSelection::Loop() {
       passedHLT[mmm] = hasPassedHLT(mmm); 
       passedHLT[eem] = hasPassedHLT(eem);  
       passedHLT[mme] = hasPassedHLT(mme); 
+
+      passedHLT[ee] = hasPassedHLT(ee);  
+      passedHLT[mm] = hasPassedHLT(mm); 
     
     }else{
 
@@ -790,6 +853,9 @@ void tHSelection::Loop() {
       passedHLT[mmm] = true; 
       passedHLT[eem] = true;  
       passedHLT[mme] = true; 
+
+      passedHLT[ee] = true;  
+      passedHLT[mm] = true; 
       
     }
 
@@ -814,37 +880,39 @@ void tHSelection::Loop() {
     std::cout<< " ************* " <<std::endl;
     */
 
+
     // EEE Channel
     std::vector<int> theBestEEE = getBestEEE();
-    //std::cout<< " Checking EEE " << std::endl;
-    //std::cout<< " (EEE) Leptons index [0][1][2] = [" 
-    //	     << theBestEEE.at(0) << "][" << theBestEEE.at(1) << "][" << theBestEEE.at(2) << "]" << std::endl;
 
     // MMM Channel
     std::vector<int> theBestMMM = getBestMMM();
-    //std::cout<< " Checking MMM " << std::endl;
-    //std::cout<< " (MMM) Leptons index [0][1][2] = [" 
-    //	     << theBestMMM.at(0) << "][" << theBestMMM.at(1) << "][" << theBestMMM.at(2) << "]" << std::endl;
 
     // EEM Channel
     std::vector<int> theBestEEM = getBestEEM();
-    //std::cout<< " Checking EEM " << std::endl;
-    //std::cout<< " (EEM) Leptons index [0][1][2] = [" 
-    //     << theBestEEM.at(0) << "][" << theBestEEM.at(1) << "][" << theBestEEM.at(2) << "]" << std::endl;
 
     // MME Channel
     std::vector<int> theBestMME = getBestMME();
-    //std::cout<< " Checking MME " << std::endl;
-    //std::cout<< " (MME) Leptons index [0][1][2] = [" 
-    //	     << theBestMME.at(0) << "][" << theBestMME.at(1) << "][" << theBestMME.at(2) << "]" << std::endl;
 
-    //std::cout<< "" <<std::endl;
+    // EE Channel
+    std::vector<int> theBestEE = getBestEE();
+    std::cout<< " [Z-peak]: Checking EE " << std::endl;
+    std::cout<< " (EE) Leptons index [0][1] = [" 
+    	     << theBestEE.at(0) << "][" << theBestEE.at(1) << "]" << std::endl;
+
+    // MM Channel
+    std::vector<int> theBestMM = getBestMM();
+    std::cout<< " [Z-peak]: Checking MM " << std::endl;
+    std::cout<< " (MM) Leptons index [0][1] = [" 
+    	     << theBestMM.at(0) << "][" << theBestMM.at(1) << "]" << std::endl;
 
     // Reconstructed channel
     m_channel[eee] = false;     
     m_channel[mmm] = false;
     m_channel[eem] = false;
     m_channel[mme] = false;
+
+    m_channel[ee] = false;
+    m_channel[mm] = false;
 
     if(isGoodVertex){
       
@@ -900,6 +968,13 @@ void tHSelection::Loop() {
 	m_channel[eee] = true;
       }
 
+      // For Z-peak cross-check, select first MM
+      if      ( theBestMM.at(0)> -1 && theBestMM.at(1) > -1 ) {
+	m_channel[mm] = true;
+      }else if( theBestEE.at(0)> -1 && theBestEE.at(1) > -1 ) {
+	m_channel[ee] = true;
+      }
+
       
     }
 
@@ -934,18 +1009,21 @@ void tHSelection::Loop() {
     setKinematicsEEM(theBestEEM.at(0), theBestEEM.at(1), theBestEEM.at(2));
     setKinematicsMME(theBestMME.at(0), theBestMME.at(1), theBestMME.at(2));
 
-    float dphiLLJ[4];
-    float    btag[4];
+    setKinematicsEE(theBestEE.at(0), theBestEE.at(1));
+    setKinematicsMM(theBestMM.at(0), theBestMM.at(1));
 
-    int       nsoftmu[4];
-    int nsoftmunojets[4];
-    int nextraleptons[4];
+    float dphiLLJ[6];
+    float    btag[6];
 
-    float jesMtUp  [4];
-    float jesMtDown[4];
+    int       nsoftmu[6];
+    int nsoftmunojets[6];
+    int nextraleptons[6];
+
+    float jesMtUp  [6];
+    float jesMtDown[6];
     
 
-    for(int ichan=0; ichan<4; ichan++) {
+    for(int ichan=0; ichan<6; ichan++) {
 
       // Initialize the btags for the leading and subleading jets to unphysical value
       leadJetBtag       [ichan] = -2000.;
@@ -1032,7 +1110,7 @@ void tHSelection::Loop() {
     // ---------------------------------------
     // filling counters for the different final states
 
-    for(int theChannel=0; theChannel<4; theChannel++) {
+    for(int theChannel=0; theChannel<6; theChannel++) {
 
       //std::cout<<"estoy en el channel theChannel == "<<theChannel<<std::endl;
       
@@ -1157,6 +1235,28 @@ void tHSelection::Loop() {
 	}
 
       }
+
+
+      // mm channel, Z-peak
+      if (theChannel == mm){
+	if(muCands[mm].size()==2){
+	  setLepIdVariables( (muCands[mm])[0] , (muCands[mm])[1] , -1 , 13, 13, 13 );
+	}else{
+	  setLepIdVariables(-1,-1,-1,13,13,13);
+	}
+      }
+
+      // ee channel, Z-peak
+      if (theChannel == ee){
+	
+	if(eleCands[ee].size()==2){
+	  setLepIdVariables( (eleCands[ee])[0] , (eleCands[ee])[1] , -1 , 11, 11, 11);
+	}else{
+	  setLepIdVariables(-1,-1,-1,11,11,11);
+	}
+	
+      } 
+
 
       myOutTree[theChannel] -> fillLeptons(myPt     , 
 					   myEta    , 
@@ -1363,7 +1463,6 @@ void tHSelection::counterEndJob(){
   std::cout << nTotal << std::endl;
   std::cout << " Total events with H-->WW--> llnn:" << std::endl;
   std::cout << nWWtoLLdecays << std::endl;
-  //std::cout << " Total events with H-->WW--> llnn && t-->Wb--> lnb:" << std::endl;
   std::cout << " Total events with t-->Wb--> lnb:" << std::endl;
   std::cout << nWfromTtoLdecay << std::endl;
   std::cout << " Total events with SS leptons, coming from W from H and/or T:" << std::endl;
@@ -1596,7 +1695,8 @@ std::vector<int> tHSelection::getBestEEE(){
 
   selectedElectrons.clear();
 
-  std::cout<< " *************** calling eee" << std::endl;
+  // Verbose
+  bool check = false;
 
   // index for the three selected electrons
   int index1 = -1;
@@ -1614,16 +1714,19 @@ std::vector<int> tHSelection::getBestEEE(){
   int NumberNegativeElec = 0;
   int NumberAllElec      = 0;
 
-  //std::cout<< " ... looping over the most general electron collection:" << std::endl;
+  if (check){
+    std::cout<<""<<std::endl;
+    std::cout<< " ... looping over the most general electron collection:" << std::endl;
+  }
 
   for(int i=0;i<nEle;i++) {
     
     float ElectronPt     = GetPt(pxEle[i],pyEle[i]);
     float ElectronCharge = chargeEle[i];
 
-    // Switch on/off the tight selection (for debugging)
-    bool tightElectronSelection     = false;
-    bool LeptonMVAElectronSelection = true;
+    // Select the lepton ID
+    bool tightElectronSelection     = true;
+    bool LeptonMVAElectronSelection = false;
 
     if (tightElectronSelection){
 
@@ -1634,67 +1737,50 @@ std::vector<int> tHSelection::getBestEEE(){
       if (! isSelectedElectron2013(i)) continue;
 
     }else{
-      std::cout << "WARNING: No ID Selected!!" << std::endl;
+      std::cout << "ERROR: No ID Selected!!" << std::endl;
+      break;
     }
     
     // Store this muon in the AllElecIndexMap
     AllElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i);
     NumberAllElec++;
 
-    //std::cout<< " electron [charge] = [" <<ElectronCharge << "]" <<std::endl;
-
     if (ElectronCharge < 0 ){ 
-      //Store this electron in the NegativeElecMap
       NegativeElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i); 
       NumberNegativeElec++; 
-
-      //std::cout<< " electron classified as NEGATIVE " << std::endl;
-
     }else{ 
-      //Store this electron in the PositiveElecMap
       PositiveElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i); 
       NumberPositiveElec++;
-
-      //std::cout<< " electron classified as POSITIVE " << std::endl;
-
     }
     
   }
   
-  //std::cout<< " number of [total] equal? [positive] + [negative] = [" << NumberAllElec << "][" 
-  //<< NumberPositiveElec << "][" << NumberNegativeElec << "]" << std::endl;
-
   // CHECK THE MAPS
-  /*
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterAllElec;
-  for(_iterAllElec = AllElecIndexMap.rbegin(); _iterAllElec != AllElecIndexMap.rend(); ++_iterAllElec) {
+  if(check){
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterAllElec;
+    for(_iterAllElec = AllElecIndexMap.rbegin(); _iterAllElec != AllElecIndexMap.rend(); ++_iterAllElec) {
+      std::cout << "AllElecIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterAllElec).first << " ][" 
+		<< ((*_iterAllElec).second).first  << "," 
+		<< ((*_iterAllElec).second).second << "]" << std::endl;
+    }
     
-    std::cout << "AllElecIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterAllElec).first << " ][" 
-	      << ((*_iterAllElec).second).first  << "," 
-	      << ((*_iterAllElec).second).second << "]" << std::endl;
-
-  }
-
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterPosElec;
-  for(_iterPosElec = PositiveElecIndexMap.rbegin(); _iterPosElec != PositiveElecIndexMap.rend(); ++_iterPosElec) {
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterPosElec;
+    for(_iterPosElec = PositiveElecIndexMap.rbegin(); _iterPosElec != PositiveElecIndexMap.rend(); ++_iterPosElec) {
+      std::cout << "PositiveElecIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterPosElec).first << " ][" 
+		<< ((*_iterPosElec).second).first  << "," 
+		<< ((*_iterPosElec).second).second << "]" << std::endl;
+    }
     
-    std::cout << "PositiveElecIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterPosElec).first << " ][" 
-	      << ((*_iterPosElec).second).first  << "," 
-	      << ((*_iterPosElec).second).second << "]" << std::endl;
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterNegElec;
+    for(_iterNegElec = NegativeElecIndexMap.rbegin(); _iterNegElec != NegativeElecIndexMap.rend(); ++_iterNegElec) {
+      std::cout << "NegativeElecIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterNegElec).first << " ][" 
+		<< ((*_iterNegElec).second).first  << "," 
+		<< ((*_iterNegElec).second).second << "]" << std::endl;
+    }
   }
-
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterNegElec;
-  for(_iterNegElec = NegativeElecIndexMap.rbegin(); _iterNegElec != NegativeElecIndexMap.rend(); ++_iterNegElec) {
-    
-    std::cout << "NegativeElecIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterNegElec).first << " ][" 
-	      << ((*_iterNegElec).second).first  << "," 
-	      << ((*_iterNegElec).second).second << "]" << std::endl;
-
-  }
-  */
 
   double Pt1 = -999;
   double Pt2 = -999;
@@ -1713,8 +1799,6 @@ std::vector<int> tHSelection::getBestEEE(){
     std::map<float,std::pair<int,int> >::reverse_iterator it;
     for(it=AllElecIndexMap.rbegin();it!=AllElecIndexMap.rend();++it){
 
-      //std::cout << " selectedElectrons = " << selectedElectrons << std::endl;
-      
       if (selectedElectrons ==0){
 
 	// The first electron we select is the one with highest pT
@@ -1754,14 +1838,16 @@ std::vector<int> tHSelection::getBestEEE(){
       
     }
     
-    /*
-    std::cout << "the electron with 1st highest pT is electron[pT][ch,index] = ["
-	      <<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl; 
-    std::cout << "the electron with 2nd highest pT is electron[pT][ch,index] = ["
-	      <<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl;     
-    std::cout << "the electron with 3rd highest pT is electron[pT][ch,index] = ["
-	      <<Pt3<<"]["<<charge3<<","<<index3<<"]"<< std::endl; 
-    */
+    if (check){
+    std::cout << "***********************" << std::endl;
+    std::cout << "eee CHANNEL" << std::endl;
+      std::cout << "the electron with 1st highest pT is electron[pT][ch,index] = ["
+		<<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl; 
+      std::cout << "the electron with 2nd highest pT is electron[pT][ch,index] = ["
+		<<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl;     
+      std::cout << "the electron with 3rd highest pT is electron[pT][ch,index] = ["
+		<<Pt3<<"]["<<charge3<<","<<index3<<"]"<< std::endl; 
+    }
 
   }
 
@@ -1781,6 +1867,9 @@ std::vector<int> tHSelection::getBestMMM(){
 
   selectedMuons.clear();
 
+  // Verbose
+  bool check = false;
+  
   // index for the three selected muons
   int index1 = -1;
   int index2 = -1;
@@ -1797,148 +1886,76 @@ std::vector<int> tHSelection::getBestMMM(){
   int NumberNegativeMuons = 0;
   int NumberAllMuons      = 0;
 
-  //std::cout<< " ... looping over the most general muon collection:" << std::endl;
+  if(check){
+    std::cout<<""<<std::endl;
+    std::cout<< " ... Looping over the most general muon collection:" << std::endl;
+  }
 
   RochCor2012 *tmprmcor;  
 
   for(int i=0;i<nMuon;i++) {
     
-    /*
-    std::cout<< " ----------------------------" <<std::endl;
-    std::cout<< " muon [index] = [" << i << "]" <<std::endl;  
-    */
-
-    // HWW Selection : only not standalone MUON  
-    Utils anaUtils;
-    bool thisMuFlag1 = anaUtils.muonIdVal(muonIdMuon[i],AllGlobalMuons);
-    bool thisMuFlag2 = anaUtils.muonIdVal(muonIdMuon[i],AllTrackerMuons);
-    if (!thisMuFlag1 && !thisMuFlag2) continue;
-    if(typeMuon[i]==8) continue;  // to be used when new trees are available
-    // Only not standalone muons latinos
-    
-    TLorentzVector Muon;
-    Muon.SetPxPyPzE(double(pxMuon[i]), double(pyMuon[i]), double(pzMuon[i]), double(energyMuon[i]));
-
-    tmprmcor = new RochCor2012();
-    tmprmcor->momcor_mc(Muon, chargeMuon[i], 0, 1.0);
-
-    //std::cout << " ** [GetBestMMM Function] :: Rochester Correction ** " << std::endl;
-    //std::cout << " [Before] with TLorentz pT[muon] = [" << Muon.Pt() << "]" << std::endl;
-
-    double MuonPt = double(GetPt(pxMuon[i],pyMuon[i]));
-    //float MuonPt = Muon.Pt();
-    /*
-    std::cout << " Muon.Pt()  = " << Muon.Pt() << std::endl;
-    std::cout << " GetPt(...) = " << MuonPt    << std::endl;
-    */
-
-    //std::cout << " [After] pT[muon] = [" << float(Muon.Pt()) << "]" << std::endl;
-
-    //std::cout<< " muon [pT][eta] = ["<< MuonPt << "][" << etaMuon[i] << "]"<<std::endl;  
-
-    bool tightMuonSelection = true;
-
-    if (tightMuonSelection){
-
-      if(_selectionEEE->getSwitch("etaMuonAcc") && !_selectionEEE->passCut("etaMuonAcc", etaMuon[i]) ) continue;
-      if(_selectionEEE->getSwitch("ptMuonAcc")  && !_selectionEEE->passCut("ptMuonAcc" , MuonPt)     ) continue;
-      
-      //std::cout<< " the muon PASSED the [acceptance] selection " << std::endl;
-      
-      bool theMuonID = true;
-      isMuonID2012(i, &theMuonID);
-      
-      //std::cout<< " muon [ID] = [" << theMuonID << "]" << std::endl;
-      
-      bool theMuonIso = true;
-      isPFIsolatedMuon2012(i);
-      
-      //std::cout<< " muon [Iso] = [" << isPFIsolatedMuon2012(i) << "]" << std::endl;
-      
-      int ctfMuon   = trackIndexMuon[i]; 
-      float dxyMuon = transvImpactParTrack[ctfMuon];
-      float dzMuon  = muonDzPV(i,0);
-      
-      // Identification and Isolation MUON Selection
-      if ( !theMuonID || !isPFIsolatedMuon2012(i) ) continue;      
-      
-      // Impact parameters MUON Selection
-      if (MuonPt>20) {          // hardcoded
-	if (_selectionEEE->getSwitch("muonIPhighPT") && (!_selectionEEE->passCut("muonIPhighPT",dxyMuon)) ) continue;   
-      } else if (MuonPt<=20) {  // hardcoded
-	if (_selectionEEE->getSwitch("muonIPlowPT")  && (!_selectionEEE->passCut("muonIPlowPT",dxyMuon)) ) continue;   
-      }
-      
-      //std::cout<< " the muon PASSED the [IP -  1] selection " << std::endl;
-      
-      if (_selectionEEE->getSwitch("muonDz") && (!_selectionEEE->passCut("muonDz",dzMuon)) )  continue;         
-      
-      //std::cout<< " the muon PASSED the [IP -  2] selection " << std::endl;
-
-    }
-
+    float MuonPt     = GetPt(pxMuon[i],pyMuon[i]);
     float MuonCharge = chargeMuon[i];
+    
+    // Select the lepton ID
+    bool tightMuonSelection     = true;
+    bool LeptonMVAMuonSelection = false;
+    
+    if (tightMuonSelection){
       
+      if (! isSelectedMuon2012(i))continue;
+      
+    }else if(LeptonMVAMuonSelection){
+      
+      if (! isSelectedMuon2013(i)) continue;
+      
+    }else{
+      std::cout << "ERROR: No ID Selected!!" << std::endl;
+      break;
+    }
+   
     // Store this muon in the AllMuonsIndexMap
     AllMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i);
     NumberAllMuons++;
 
-    //std::cout<< " muon [charge] = [" <<MuonCharge << "]" <<std::endl;
-
     if ( MuonCharge < 0 ){ 
-      //Store this muon in the NegativeMuonsMap
       NegativeMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i); 
       NumberNegativeMuons++; 
-
-      //std::cout<< " muon classified as NEGATIVE " << std::endl;
-
     }else{ 
-      //Store this muon in the PositiveMuonsMap
       PositiveMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i); 
       NumberPositiveMuons++;
-
-      //std::cout<< " muon classified as POSITIVE " << std::endl;
-
     }
     
   }
-  
-  //std::cout<< " number of [total] equal? [positive] + [negative] = [" << NumberAllMuons << "][" 
-  //   << NumberPositiveMuons << "][" << NumberNegativeMuons << "]" << std::endl;
 
   // CHECK THE MAPS
-  /*
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterAllMuons;
-  for(_iterAllMuons = AllMuonsIndexMap.rbegin(); _iterAllMuons != AllMuonsIndexMap.rend(); ++_iterAllMuons) {
+  if (check){
+
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterAllMuons;
+    for(_iterAllMuons = AllMuonsIndexMap.rbegin(); _iterAllMuons != AllMuonsIndexMap.rend(); ++_iterAllMuons) {
+      std::cout << "AllMuonsIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterAllMuons).first << " ][" 
+		<< ((*_iterAllMuons).second).first  << "," 
+		<< ((*_iterAllMuons).second).second << "]" << std::endl;
+    }
+  
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterPosMuons;
+    for(_iterPosMuons = PositiveMuonsIndexMap.rbegin(); _iterPosMuons != PositiveMuonsIndexMap.rend(); ++_iterPosMuons) {
+      std::cout << "PositiveMuonsIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterPosMuons).first << " ][" 
+		<< ((*_iterPosMuons).second).first  << "," 
+		<< ((*_iterPosMuons).second).second << "]" << std::endl;
+    }
     
-
-    std::cout << "AllMuonsIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterAllMuons).first << " ][" 
-	      << ((*_iterAllMuons).second).first  << "," 
-	      << ((*_iterAllMuons).second).second << "]" << std::endl;
-
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterNegMuons;
+    for(_iterNegMuons = NegativeMuonsIndexMap.rbegin(); _iterNegMuons != NegativeMuonsIndexMap.rend(); ++_iterNegMuons) {
+      std::cout << "NegativeMuonsIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterNegMuons).first << " ][" 
+		<< ((*_iterNegMuons).second).first  << "," 
+		<< ((*_iterNegMuons).second).second << "]" << std::endl;
+    }
   }
-  */
-  /*
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterPosMuons;
-  for(_iterPosMuons = PositiveMuonsIndexMap.rbegin(); _iterPosMuons != PositiveMuonsIndexMap.rend(); ++_iterPosMuons) {
-    
-    std::cout << "PositiveMuonsIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterPosMuons).first << " ][" 
-	      << ((*_iterPosMuons).second).first  << "," 
-	      << ((*_iterPosMuons).second).second << "]" << std::endl;
-  }
-
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterNegMuons;
-  for(_iterNegMuons = NegativeMuonsIndexMap.rbegin(); _iterNegMuons != NegativeMuonsIndexMap.rend(); ++_iterNegMuons) {
-    
-    std::cout << "NegativeMuonsIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterNegMuons).first << " ][" 
-	      << ((*_iterNegMuons).second).first  << "," 
-	      << ((*_iterNegMuons).second).second << "]" << std::endl;
-
-  }
-  */
 
   float Pt1 = -999;
   float Pt2 = -999;
@@ -1957,8 +1974,6 @@ std::vector<int> tHSelection::getBestMMM(){
     std::map<float,std::pair<int,int> >::reverse_iterator it;
     for(it=AllMuonsIndexMap.rbegin();it!=AllMuonsIndexMap.rend();++it){
 
-      //std::cout << " selectedMuons = " << selectedMuons << std::endl;
-      
       if (selectedMuons ==0){
 
 	// The first muon we select is the one with highest pT
@@ -2002,14 +2017,16 @@ std::vector<int> tHSelection::getBestMMM(){
       
     }
 
-    /*
-    std::cout << "the muon with 1st highest pT is muon[pT][ch,index] = ["
-	      <<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl; 
-    std::cout << "the muon with 2nd highest pT is muon[pT][ch,index] = ["
-	      <<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl;     
-    std::cout << "the muon with 3rd highest pT is muon[pT][ch,index] = ["
-	      <<Pt3<<"]["<<charge3<<","<<index3<<"]"<< std::endl; 
-    */
+    if (check){
+    std::cout << "***********************" << std::endl;
+    std::cout << "mmm CHANNEL" << std::endl;
+      std::cout << "the muon with 1st highest pT is muon[pT][ch,index] = ["
+		<<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl; 
+      std::cout << "the muon with 2nd highest pT is muon[pT][ch,index] = ["
+		<<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl;     
+      std::cout << "the muon with 3rd highest pT is muon[pT][ch,index] = ["
+		<<Pt3<<"]["<<charge3<<","<<index3<<"]"<< std::endl; 
+    }
 
   }
 
@@ -2029,6 +2046,9 @@ std::vector<int> tHSelection::getBestMME(){
 
   selectedLeptons.clear();
 
+  // Verbose
+  bool check = false;
+
   // index for the three selected leptons
   int index1 = -1; // Muon
   int index2 = -1; // Muon
@@ -2043,70 +2063,32 @@ std::vector<int> tHSelection::getBestMME(){
   int NumberPositiveMuons = 0;
   int NumberNegativeMuons = 0;
 
-  //std::cout<< " ... looping over the most general muon collection:" << std::endl;
-  
+  if(check){
+    std::cout<<""<<std::endl;
+    std::cout<< " ... Looping over the most general muon collection:" << std::endl;
+  }
+
   for(int i=0;i<nMuon;i++) {
     
-    //std::cout<< " ----------------------------" <<std::endl;
-    //std::cout<< " muon [index] = [" << i << "]" <<std::endl;  
-
-    // HWW Selection : only not standalone MUON  
-    Utils anaUtils;
-    bool thisMuFlag1 = anaUtils.muonIdVal(muonIdMuon[i],AllGlobalMuons);
-    bool thisMuFlag2 = anaUtils.muonIdVal(muonIdMuon[i],AllTrackerMuons);
-    if (!thisMuFlag1 && !thisMuFlag2) continue;
-    if(typeMuon[i]==8) continue;  // to be used when new trees are available
-    // Only not standalone muons latinos
+    float MuonPt     = GetPt(pxMuon[i],pyMuon[i]);
+    float MuonCharge = chargeMuon[i];
     
-    float MuonPt = GetPt(pxMuon[i],pyMuon[i]);
-
-    //std::cout<< " muon [pT][eta] = ["<< MuonPt << "][" << etaMuon[i] << "]"<<std::endl;  
-
-    // Switch on/off the tight selection (for debugging)
-    bool tightMuonSelection = true;
-
+    // Select the lepton ID
+    bool tightMuonSelection     = true;
+    bool LeptonMVAMuonSelection = false;
+    
     if (tightMuonSelection){
-
-      if(_selectionEEE->getSwitch("etaMuonAcc") && !_selectionEEE->passCut("etaMuonAcc", etaMuon[i]) ) continue;
-      if(_selectionEEE->getSwitch("ptMuonAcc")  && !_selectionEEE->passCut("ptMuonAcc" , MuonPt)     ) continue;
       
-      //std::cout<< " the muon PASSED the [acceptance] selection " << std::endl;
+      if (! isSelectedMuon2012(i))continue;
       
-      bool theMuonID = true;
-      isMuonID2012(i, &theMuonID);
+    }else if(LeptonMVAMuonSelection){
       
-      //std::cout<< " muon [ID] = [" << theMuonID << "]" << std::endl;
-      
-      bool theMuonIso = true;
-      isPFIsolatedMuon2012(i);
-      
-      //std::cout<< " muon [Iso] = [" << isPFIsolatedMuon2012(i) << "]" << std::endl;
-      
-      int ctfMuon   = trackIndexMuon[i]; 
-      float dxyMuon = transvImpactParTrack[ctfMuon];
-      float dzMuon  = muonDzPV(i,0);
-      
-      // Identification and Isolation MUON Selection
-      if ( !theMuonID || !isPFIsolatedMuon2012(i) ) continue;      
-      
-      // Impact parameters MUON Selection
-      if (MuonPt>20) {          // hardcoded
-	if (_selectionEEE->getSwitch("muonIPhighPT") && (!_selectionEEE->passCut("muonIPhighPT",dxyMuon)) ) continue;   
-      } else if (MuonPt<=20) {  // hardcoded
-	if (_selectionEEE->getSwitch("muonIPlowPT")  && (!_selectionEEE->passCut("muonIPlowPT",dxyMuon)) ) continue;   
-      }
-      
-      //std::cout<< " the muon PASSED the [IP -  1] selection " << std::endl;
-      
-      if (_selectionEEE->getSwitch("muonDz") && (!_selectionEEE->passCut("muonDz",dzMuon)) )  continue;         
-      
-      //std::cout<< " the muon PASSED the [IP -  2] selection " << std::endl;
+      if (! isSelectedMuon2013(i)) continue;
       
     }else{
-      std::cout<< "WARNING! Loose selection applied for muons!! "<<std::endl;
+      std::cout << "ERROR: No ID Selected!!" << std::endl;
+      break;
     }
-
-    float MuonCharge = chargeMuon[i];
 
     // Store this muon in the AllMuonsIndexMap
     AllMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i);
@@ -2116,27 +2098,20 @@ std::vector<int> tHSelection::getBestMME(){
     if     (MuonCharge < 0 ) NumberNegativeMuons++; 
     else if(MuonCharge > 0 ) NumberPositiveMuons++;
     
-
-    //std::cout<< " muon [charge] = [" <<MuonCharge << "]" <<std::endl;
-    
   }
   
-  //std::cout<< " [MUONS] number of [total] = [positive] + [negative] = [" << NumberAllMuons << "][" 
-  //<< NumberPositiveMuons << "][" << NumberNegativeMuons << "]" << std::endl;
-
   // CHECK THE MAPS
-  /*
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterAllMuons;
-  for(_iterAllMuons = AllMuonsIndexMap.rbegin(); _iterAllMuons != AllMuonsIndexMap.rend(); ++_iterAllMuons) {
-    
-    std::cout << "AllMuonsIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterAllMuons).first << " ][" 
-	      << ((*_iterAllMuons).second).first  << "," 
-	      << ((*_iterAllMuons).second).second << "]" << std::endl;
-
+  if (check){
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterAllMuons;
+    for(_iterAllMuons = AllMuonsIndexMap.rbegin(); _iterAllMuons != AllMuonsIndexMap.rend(); ++_iterAllMuons) {
+      std::cout << "AllMuonsIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterAllMuons).first << " ][" 
+		<< ((*_iterAllMuons).second).first  << "," 
+		<< ((*_iterAllMuons).second).second << "]" << std::endl;
+      
+    }
   }
-  */
-
+  
   // Map for all electrons
   // -First - element of the map: pT of the lepton
   // -Second- element of the map: a pair containing the charge and the index in the collection
@@ -2146,64 +2121,33 @@ std::vector<int> tHSelection::getBestMME(){
   int NumberPositiveElec = 0;
   int NumberNegativeElec = 0;
 
-  //std::cout<< ""<<std::endl;
-  //std::cout<< " ... looping over the most general electron collection:" << std::endl;
+  if(check){
+    std::cout<<""<<std::endl;
+    std::cout<< " ... Looping over the most general electron collection:" << std::endl;
+  }
 
   for(int i=0;i<nEle;i++) {
-    
-    //std::cout<< " ----------------------------" <<std::endl;
-    //std::cout<< " electron [index] = [" << i << "]" <<std::endl;  
 
-    // HWW Selection
-
-    float ElectronPt = GetPt(pxEle[i],pyEle[i]);
-
-    // Switch on/off the tight selection (for debugging)
-    bool tightElectronSelection = true;
-
-    if (tightElectronSelection){
-
-      if(_selectionEEE->getSwitch("etaElectronAcc") && !_selectionEEE->passCut("etaElectronAcc",etaEle[i]) ) continue;
-      
-      if(_selectionEEE->getSwitch("ptElectronAcc")  && !_selectionEEE->passCut("ptElectronAcc",ElectronPt) ) continue;
-      
-      //std::cout<< " electron [pT][eta] = ["<< ElectronPt << "][" << etaEle[i] << "]"<<std::endl;  
-      //std::cout<< " the electron PASSED the [acceptance] selection " << std::endl;
-      
-      bool theElectronID, theElectronIsol, theElectronConvRej;
-      theElectronID = theElectronIsol = theElectronConvRej = true;
-      
-      isEleID2012AndDenom(i,&theElectronID,&theElectronIsol,&theElectronConvRej);
-      
-      if (!theElectronID) continue;
-      
-      //std::cout<< " electron [ID] = [" << theElectronID << "]" << std::endl;
-      
-      if (!theElectronIsol) continue;
-      
-      //std::cout<< " electron [Iso] = [" << theElectronIsol << "]" << std::endl;
-      
-      if ( !theElectronConvRej ) continue;      
-      
-      //std::cout<< " electron [Con.Rej] = [" << theElectronConvRej << "]" << std::endl;
-      
-      int gsfTrack = gsfTrackIndexEle[i]; 
-      float dxyEle = transvImpactParGsfTrack[gsfTrack];
-      float dzEle  = eleDzPV(i,0);
-      if (_selectionEEE->getSwitch("electronIP") && (!_selectionEEE->passCut("electronIP",dxyEle)) ) continue;
-      if (_selectionEEE->getSwitch("electronDz") && (!_selectionEEE->passCut("electronDz",dzEle))  ) continue;
-      
-      //std::cout<< " the electron PASSED the [IP -  1] selection " << std::endl;
-      
-    }else{
-      std::cout<< "WARNING! Loose selection applied for electrons!! "<<std::endl;
-    }
-
+    float ElectronPt     = GetPt(pxEle[i],pyEle[i]);
     float ElectronCharge = chargeEle[i];
+    
+    // Select the lepton ID
+    bool tightElectronSelection     = true;
+    bool LeptonMVAElectronSelection = false;
+    
+    if (tightElectronSelection){
+      
+      if (! isSelectedElectron2012(i))continue;
 
-    //std::cout<< " electron [pT][eta] = ["<< ElectronPt << "][" << etaEle[i] << "]"<<std::endl;  
-    //std::cout<< " electron [charge]  = [" <<ElectronCharge << "]" <<std::endl;
+    }else if(LeptonMVAElectronSelection){
 
+      if (! isSelectedElectron2013(i)) continue;
+
+    }else{
+      std::cout << "ERROR: No ID Selected!!" << std::endl;
+      break;
+    }
+    
     AllElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i);
     NumberAllElec++;
 
@@ -2213,20 +2157,17 @@ std::vector<int> tHSelection::getBestMME(){
 
   }
   
-  //std::cout<< " [ELECTRONS] number of [total] = [" << NumberAllElec << "]" << std::endl;
-
   // CHECK THE MAP
-  /*
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterAllElec;
-  for(_iterAllElec = AllElecIndexMap.rbegin(); _iterAllElec != AllElecIndexMap.rend(); ++_iterAllElec) {
-    
-    std::cout << "AllElecIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterAllElec).first << " ][" 
-	      << ((*_iterAllElec).second).first  << "," 
-	      << ((*_iterAllElec).second).second << "]" << std::endl;
-
+  if (check){
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterAllElec;
+    for(_iterAllElec = AllElecIndexMap.rbegin(); _iterAllElec != AllElecIndexMap.rend(); ++_iterAllElec) {
+      std::cout << "AllElecIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterAllElec).first << " ][" 
+		<< ((*_iterAllElec).second).first  << "," 
+		<< ((*_iterAllElec).second).second << "]" << std::endl;
+      
+    }
   }
-  */
 
   double Pt1 = -999;
   double Pt2 = -999;
@@ -2251,8 +2192,8 @@ std::vector<int> tHSelection::getBestMME(){
     // (m+ m- e+) OR (m+ m- e-)  
     if( NumberNegativeMuons > 0 && NumberPositiveMuons > 0 && (NumberNegativeElec > 0 || NumberPositiveElec > 0) ){
 
-      //std::cout << " --> We are in the case (m+ m- e+) OR (m+ m- e-)" << std::endl;
-
+      if(check) std::cout << " --> We are in the case (m+ m- e+) OR (m+ m- e-)" << std::endl;
+      
       // Select the muons (with opposite charges)
       
       // Loop over the muon collection for the first muon 
@@ -2306,7 +2247,7 @@ std::vector<int> tHSelection::getBestMME(){
 	      ||
 	      (NumberPositiveMuons == 0 && NumberNegativeMuons  > 1 && NumberPositiveElec > 0) ){
       
-      //std::cout << " --> We are in the case (m+ m+ e-) OR (m- m- e+) " << std::endl;
+      if(check) std::cout << " --> We are in the case (m+ m+ e-) OR (m- m- e+) " << std::endl;
       
       int nselectedmuons = 0;
       
@@ -2343,8 +2284,6 @@ std::vector<int> tHSelection::getBestMME(){
 	}
 	
       }
-      
-      
       // Select the electron
       std::map<float,std::pair<int,int> >::reverse_iterator itEle;
       for(itEle=AllElecIndexMap.rbegin();itEle!=AllElecIndexMap.rend();++itEle){
@@ -2368,16 +2307,16 @@ std::vector<int> tHSelection::getBestMME(){
     
   }
 
-  /*
-  std::cout << "***********************" << std::endl;
-  std::cout << "mme CHANNEL" << std::endl;
-  std::cout << "the muon with highest pT is muon[pT][ch,index] = ["
-	    <<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl;     
-  std::cout << "the muon with second highest pT is muon[pT][ch,index] = ["
-	    <<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl; 
-  std::cout << "the selected electron is electron[pT][ch,index] = ["
-	    <<Pt3<<"]["<<charge3<<","<<index3<<"]"<< std::endl; 
-  */
+  if(check){
+    std::cout << "***********************" << std::endl;
+    std::cout << "mme CHANNEL" << std::endl;
+    std::cout << "the muon with highest pT is muon[pT][ch,index] = ["
+	      <<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl;     
+    std::cout << "the muon with second highest pT is muon[pT][ch,index] = ["
+	      <<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl; 
+    std::cout << "the selected electron is electron[pT][ch,index] = ["
+	      <<Pt3<<"]["<<charge3<<","<<index3<<"]"<< std::endl; 
+  }
 
   AllMuonsIndexMap.clear();
   AllElecIndexMap.clear();
@@ -2393,6 +2332,9 @@ std::vector<int> tHSelection::getBestMME(){
 std::vector<int> tHSelection::getBestEEM(){
 
   selectedLeptons.clear();
+  
+  // Verbose
+  bool check = false;
 
   // index for the three selected leptons
   int index1 = -1; // Electron
@@ -2408,70 +2350,32 @@ std::vector<int> tHSelection::getBestEEM(){
   int NumberPositiveMuons = 0;
   int NumberNegativeMuons = 0;
 
-  //std::cout<< " ... looping over the most general muon collection:" << std::endl;
-  
+  if(check){
+    std::cout<<""<<std::endl;
+    std::cout<< " ... Looping over the most general muon collection:" << std::endl;
+  }
+
   for(int i=0;i<nMuon;i++) {
     
-    //std::cout<< " ----------------------------" <<std::endl;
-    //std::cout<< " muon [index] = [" << i << "]" <<std::endl;  
-
-    // HWW Selection : only not standalone MUON  
-    Utils anaUtils;
-    bool thisMuFlag1 = anaUtils.muonIdVal(muonIdMuon[i],AllGlobalMuons);
-    bool thisMuFlag2 = anaUtils.muonIdVal(muonIdMuon[i],AllTrackerMuons);
-    if (!thisMuFlag1 && !thisMuFlag2) continue;
-    if(typeMuon[i]==8) continue;  // to be used when new trees are available
-    // Only not standalone muons latinos
+   float MuonPt     = GetPt(pxMuon[i],pyMuon[i]);
+    float MuonCharge = chargeMuon[i];
     
-    float MuonPt = GetPt(pxMuon[i],pyMuon[i]);
-
-    //std::cout<< " muon [pT][eta] = ["<< MuonPt << "][" << etaMuon[i] << "]"<<std::endl;  
-
-    // Switch on/off the tight selection (for debugging)
-    bool tightMuonSelection = true;
-
+    // Select the lepton ID
+    bool tightMuonSelection     = true;
+    bool LeptonMVAMuonSelection = false;
+    
     if (tightMuonSelection){
-
-      if(_selectionEEE->getSwitch("etaMuonAcc") && !_selectionEEE->passCut("etaMuonAcc", etaMuon[i]) ) continue;
-      if(_selectionEEE->getSwitch("ptMuonAcc")  && !_selectionEEE->passCut("ptMuonAcc" , MuonPt)     ) continue;
       
-      //std::cout<< " the muon PASSED the [acceptance] selection " << std::endl;
+      if (! isSelectedMuon2012(i))continue;
       
-      bool theMuonID = true;
-      isMuonID2012(i, &theMuonID);
+    }else if(LeptonMVAMuonSelection){
       
-      //std::cout<< " muon [ID] = [" << theMuonID << "]" << std::endl;
-      
-      bool theMuonIso = true;
-      isPFIsolatedMuon2012(i);
-      
-      //std::cout<< " muon [Iso] = [" << isPFIsolatedMuon2012(i) << "]" << std::endl;
-      
-      int ctfMuon   = trackIndexMuon[i]; 
-      float dxyMuon = transvImpactParTrack[ctfMuon];
-      float dzMuon  = muonDzPV(i,0);
-      
-      // Identification and Isolation MUON Selection
-      if ( !theMuonID || !isPFIsolatedMuon2012(i) ) continue;      
-      
-      // Impact parameters MUON Selection
-      if (MuonPt>20) {          // hardcoded
-	if (_selectionEEE->getSwitch("muonIPhighPT") && (!_selectionEEE->passCut("muonIPhighPT",dxyMuon)) ) continue;   
-      } else if (MuonPt<=20) {  // hardcoded
-	if (_selectionEEE->getSwitch("muonIPlowPT")  && (!_selectionEEE->passCut("muonIPlowPT",dxyMuon)) ) continue;   
-      }
-      
-      //std::cout<< " the muon PASSED the [IP -  1] selection " << std::endl;
-      
-      if (_selectionEEE->getSwitch("muonDz") && (!_selectionEEE->passCut("muonDz",dzMuon)) )  continue;         
-      
-      //std::cout<< " the muon PASSED the [IP -  2] selection " << std::endl;
+      if (! isSelectedMuon2013(i)) continue;
       
     }else{
-      std::cout<< "WARNING! Loose selection applied for muons!! "<<std::endl;
+      std::cout << "ERROR: No ID Selected!!" << std::endl;
+      break;
     }
-
-    float MuonCharge = chargeMuon[i];
 
     // Store this muon in the AllMuonsIndexMap
     AllMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i);
@@ -2481,26 +2385,20 @@ std::vector<int> tHSelection::getBestEEM(){
     if     (MuonCharge < 0 ) NumberNegativeMuons++; 
     else if(MuonCharge > 0 ) NumberPositiveMuons++;
     
-
-    //std::cout<< " muon [charge] = [" <<MuonCharge << "]" <<std::endl;
-    
   }
   
-  //std::cout<< " [MUONS] number of [total] = [positive] + [negative] = [" << NumberAllMuons << "][" 
-  //	   << NumberPositiveMuons << "][" << NumberNegativeMuons << "]" << std::endl;
-
   // CHECK THE MAPS
-  /*
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterAllMuons;
-  for(_iterAllMuons = AllMuonsIndexMap.rbegin(); _iterAllMuons != AllMuonsIndexMap.rend(); ++_iterAllMuons) {
-    
-    std::cout << "AllMuonsIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterAllMuons).first << " ][" 
-	      << ((*_iterAllMuons).second).first  << "," 
-	      << ((*_iterAllMuons).second).second << "]" << std::endl;
-
+  if(check){
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterAllMuons;
+    for(_iterAllMuons = AllMuonsIndexMap.rbegin(); _iterAllMuons != AllMuonsIndexMap.rend(); ++_iterAllMuons) {
+      
+      std::cout << "AllMuonsIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterAllMuons).first << " ][" 
+		<< ((*_iterAllMuons).second).first  << "," 
+		<< ((*_iterAllMuons).second).second << "]" << std::endl;
+      
+    }
   }
-  */
 
   // Map for all electrons
   // -First - element of the map: pT of the lepton
@@ -2511,63 +2409,33 @@ std::vector<int> tHSelection::getBestEEM(){
   int NumberPositiveElec = 0;
   int NumberNegativeElec = 0;
 
-  //std::cout<< ""<<std::endl;
-  //std::cout<< " ... looping over the most general electron collection:" << std::endl;
+  if(check){
+    std::cout<<""<<std::endl;
+    std::cout<<" ... Looping over the most general electron collection:" << std::endl;
+  }
 
   for(int i=0;i<nEle;i++) {
     
-    //std::cout<< " ----------------------------" <<std::endl;
-    //std::cout<< " electron [index] = [" << i << "]" <<std::endl;  
-
-    // HWW Selection
-
-    float ElectronPt = GetPt(pxEle[i],pyEle[i]);
-
-    // Switch on/off the tight selection (for debugging)
-    bool tightElectronSelection = true;
-
-    if (tightElectronSelection){
-      if(_selectionEEE->getSwitch("etaElectronAcc") && !_selectionEEE->passCut("etaElectronAcc",etaEle[i]) ) continue;
-      
-      if(_selectionEEE->getSwitch("ptElectronAcc")  && !_selectionEEE->passCut("ptElectronAcc",ElectronPt) ) continue;
-      
-      //std::cout<< " electron [pT][eta] = ["<< ElectronPt << "][" << etaEle[i] << "]"<<std::endl;  
-      //std::cout<< " the electron PASSED the [acceptance] selection " << std::endl;
-      
-      bool theElectronID, theElectronIsol, theElectronConvRej;
-      theElectronID = theElectronIsol = theElectronConvRej = true;
-      
-      isEleID2012AndDenom(i,&theElectronID,&theElectronIsol,&theElectronConvRej);
-      
-      if (!theElectronID) continue;
-      
-      //std::cout<< " electron [ID] = [" << theElectronID << "]" << std::endl;
-      
-      if (!theElectronIsol) continue;
-      
-      //std::cout<< " electron [Iso] = [" << theElectronIsol << "]" << std::endl;
-      
-      if ( !theElectronConvRej ) continue;      
-      
-      //std::cout<< " electron [Con.Rej] = [" << theElectronConvRej << "]" << std::endl;
-      
-      int gsfTrack = gsfTrackIndexEle[i]; 
-      float dxyEle = transvImpactParGsfTrack[gsfTrack];
-      float dzEle  = eleDzPV(i,0);
-      if (_selectionEEE->getSwitch("electronIP") && (!_selectionEEE->passCut("electronIP",dxyEle)) ) continue;
-      if (_selectionEEE->getSwitch("electronDz") && (!_selectionEEE->passCut("electronDz",dzEle))  ) continue;
-      
-      //std::cout<< " the electron PASSED the [IP -  1] selection " << std::endl;
-      
-    }else{
-      std::cout<< "WARNING! Loose selection applied for electrons!! "<<std::endl;
-    }
-
+    float ElectronPt     = GetPt(pxEle[i],pyEle[i]);
     float ElectronCharge = chargeEle[i];
+    
+    // Select the lepton ID
+    bool tightElectronSelection     = true;
+    bool LeptonMVAElectronSelection = false;
+    
+    if (tightElectronSelection){
+      
+      if (! isSelectedElectron2012(i))continue;
 
-    //std::cout<< " electron [pT][eta] = ["<< ElectronPt << "][" << etaEle[i] << "]"<<std::endl;  
-    //std::cout<< " electron [charge]  = [" <<ElectronCharge << "]" <<std::endl;
+    }else if(LeptonMVAElectronSelection){
 
+      if (! isSelectedElectron2013(i)) continue;
+
+    }else{
+      std::cout << "ERROR: No ID Selected!!" << std::endl;
+      break;
+    }
+    
     AllElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i);
     NumberAllElec++;
 
@@ -2577,20 +2445,17 @@ std::vector<int> tHSelection::getBestEEM(){
 
   }
   
-  //std::cout<< " [ELECTRONS] number of [total] = [" << NumberAllElec << "]" << std::endl;
-
   // CHECK THE MAP
-  /*
-  std::map<float,std::pair<int,int> >::reverse_iterator _iterAllElec;
-  for(_iterAllElec = AllElecIndexMap.rbegin(); _iterAllElec != AllElecIndexMap.rend(); ++_iterAllElec) {
-    
-    std::cout << "AllElecIndexMap[pT][ch,index] = [";
-    std::cout << (*_iterAllElec).first << " ][" 
-	      << ((*_iterAllElec).second).first  << "," 
-	      << ((*_iterAllElec).second).second << "]" << std::endl;
-
+  if(check){
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterAllElec;
+    for(_iterAllElec = AllElecIndexMap.rbegin(); _iterAllElec != AllElecIndexMap.rend(); ++_iterAllElec) {
+      std::cout << "AllElecIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterAllElec).first << " ][" 
+		<< ((*_iterAllElec).second).first  << "," 
+		<< ((*_iterAllElec).second).second << "]" << std::endl;
+      
+    }
   }
-  */
 
   double Pt1 = -999;
   double Pt2 = -999;
@@ -2615,7 +2480,7 @@ std::vector<int> tHSelection::getBestEEM(){
     // (e+ e- m+) OR (e+ e- m-)  
     if( NumberNegativeElec > 0 && NumberPositiveElec > 0 && (NumberNegativeMuons > 0 || NumberPositiveMuons > 0) ){
 
-      //std::cout << " --> We are in the case (e+ e- m+) OR (e+ e- m-)" << std::endl;
+      if(check) std::cout << " --> We are in the case (e+ e- m+) OR (e+ e- m-)" << std::endl;
       
       // Select the electrons (with opposite charges)
       
@@ -2670,7 +2535,7 @@ std::vector<int> tHSelection::getBestEEM(){
 	      ||
 	      (NumberPositiveElec == 0 && NumberNegativeElec  > 1 && NumberPositiveMuons > 0) ){
       
-      //std::cout << " --> We are in the case (e+ e+ m-) OR (e- e- m+) " << std::endl;
+      if(check) std::cout << " --> We are in the case (e+ e+ m-) OR (e- e- m+) " << std::endl;
       
       int nselectedelectrons = 0;
       
@@ -2732,16 +2597,16 @@ std::vector<int> tHSelection::getBestEEM(){
     
   }
   
-  /*
-  std::cout << "***********************" << std::endl;
-  std::cout << "emm CHANNEL" << std::endl;
-  std::cout << "the electron with highest pT is electron[pT][ch,index] = ["
-	    <<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl;     
-  std::cout << "the electron with second highest pT is electron[pT][ch,index] = ["
-	    <<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl; 
-  std::cout << "the selected muon is muon[pT][ch,index] = ["
-	    <<Pt3<<"]["<<charge3<<","<<index3<<"]"<< std::endl; 
-  */
+  if(check){
+    std::cout << "***********************" << std::endl;
+    std::cout << "emm CHANNEL" << std::endl;
+    std::cout << "the electron with highest pT is electron[pT][ch,index] = ["
+	      <<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl;     
+    std::cout << "the electron with second highest pT is electron[pT][ch,index] = ["
+	      <<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl; 
+    std::cout << "the selected muon is muon[pT][ch,index] = ["
+	      <<Pt3<<"]["<<charge3<<","<<index3<<"]"<< std::endl; 
+  }
 
   AllMuonsIndexMap.clear();
   AllElecIndexMap.clear();
@@ -2753,6 +2618,322 @@ std::vector<int> tHSelection::getBestEEM(){
   return selectedLeptons;
   
 }//getBestEEM
+
+std::vector<int> tHSelection::getBestEE(){
+
+  selectedElectrons.clear();
+
+  // Verbose
+  bool check = true;
+
+  // index for the two selected electrons
+  int index1 = -1;
+  int index2 = -1;
+  
+  // Maps for positive and negative electrons, separately
+  std::map<float,std::pair<int,int> > PositiveElecIndexMap;
+  std::map<float,std::pair<int,int> > NegativeElecIndexMap;
+  
+  // Map for all electrons (do not care about the charge)
+  std::map<float,std::pair<int,int> > AllElecIndexMap;
+
+  int NumberPositiveElec = 0;
+  int NumberNegativeElec = 0;
+  int NumberAllElec      = 0;
+
+  if (check){
+    std::cout<<""<<std::endl;
+    std::cout<< " ... Looping over the most general electron collection:" << std::endl;
+  }
+
+  for(int i=0;i<nEle;i++) {
+    
+    float ElectronPt     = GetPt(pxEle[i],pyEle[i]);
+    float ElectronCharge = chargeEle[i];
+
+    // Select the lepton ID
+    bool tightElectronSelection     = true;
+    bool LeptonMVAElectronSelection = false;
+
+    if (tightElectronSelection){
+
+      if (! isSelectedElectron2012(i))continue;
+
+    }else if(LeptonMVAElectronSelection){
+
+      if (! isSelectedElectron2013(i)) continue;
+
+    }else{
+      std::cout << "ERROR: No ID Selected!!" << std::endl;
+      break;
+    }
+    
+    // Store this muon in the AllElecIndexMap
+    AllElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i);
+    NumberAllElec++;
+
+    if (ElectronCharge < 0 ){ 
+      NegativeElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i); 
+      NumberNegativeElec++; 
+    }else{ 
+      PositiveElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i); 
+      NumberPositiveElec++;
+    }
+    
+  }
+  
+  // CHECK THE MAPS
+  if(check){
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterAllElec;
+    for(_iterAllElec = AllElecIndexMap.rbegin(); _iterAllElec != AllElecIndexMap.rend(); ++_iterAllElec) {
+      std::cout << "AllElecIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterAllElec).first << " ][" 
+		<< ((*_iterAllElec).second).first  << "," 
+		<< ((*_iterAllElec).second).second << "]" << std::endl;
+    }
+    
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterPosElec;
+    for(_iterPosElec = PositiveElecIndexMap.rbegin(); _iterPosElec != PositiveElecIndexMap.rend(); ++_iterPosElec) {
+      std::cout << "PositiveElecIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterPosElec).first << " ][" 
+		<< ((*_iterPosElec).second).first  << "," 
+		<< ((*_iterPosElec).second).second << "]" << std::endl;
+    }
+    
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterNegElec;
+    for(_iterNegElec = NegativeElecIndexMap.rbegin(); _iterNegElec != NegativeElecIndexMap.rend(); ++_iterNegElec) {
+      std::cout << "NegativeElecIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterNegElec).first << " ][" 
+		<< ((*_iterNegElec).second).first  << "," 
+		<< ((*_iterNegElec).second).second << "]" << std::endl;
+    }
+  }
+
+  double Pt1 = -999;
+  double Pt2 = -999;
+
+  double charge1 = 0;
+  double charge2 = 0;
+
+  //SELECT THE HIGHEST PT ELECTRON
+  
+  if( NumberAllElec > 1 && NumberNegativeElec > 0 && NumberPositiveElec > 0 ){  
+
+    int selectedElectrons = 0;
+
+    std::map<float,std::pair<int,int> >::reverse_iterator it;
+    for(it=AllElecIndexMap.rbegin();it!=AllElecIndexMap.rend();++it){
+
+      if (selectedElectrons ==0){
+
+	// The first electron we select is the one with highest pT
+	index1  = ((*it).second).second;
+	charge1 = ((*it).second).first;
+	Pt1     =  (*it).first;
+
+	selectedElectrons++;
+	
+      }else if(selectedElectrons == 1){
+
+	// The second electron we select is the one with second highest pT and opposite sign wrt first electron	
+	int charge = ((*it).second).first;
+	if ( charge1*charge < 0 ){
+
+	  index2  = ((*it).second).second;
+	  charge2 = ((*it).second).first;
+	  Pt2     =  (*it).first;
+	  
+	  selectedElectrons++;
+	  break;
+	}
+	
+      }else{
+	continue;
+      }
+      
+    }
+    
+    if (check){
+    std::cout << "***********************" << std::endl;
+    std::cout << "ee CHANNEL" << std::endl;
+      std::cout << "the electron with 1st highest pT is electron[pT][ch,index] = ["
+		<<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl; 
+      std::cout << "the electron with 2nd highest pT is electron[pT][ch,index] = ["
+		<<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl;     
+    }
+
+  }
+
+  PositiveElecIndexMap.clear();
+  NegativeElecIndexMap.clear();
+  AllElecIndexMap.clear();
+
+  selectedElectrons.push_back(index1);
+  selectedElectrons.push_back(index2);
+
+  return selectedElectrons;
+
+}//getBestEE()
+
+std::vector<int> tHSelection::getBestMM(){
+  
+  selectedMuons.clear();
+
+  // Verbose
+  bool check = true;
+  
+  // index for the two selected muons
+  int index1 = -1;
+  int index2 = -1;
+  
+  // Maps for positive and negative muons, separately
+  std::map<float,std::pair<int,int> > PositiveMuonsIndexMap;
+  std::map<float,std::pair<int,int> > NegativeMuonsIndexMap;
+  
+  // Map for all muons (do not care about the charge)
+  std::map<float,std::pair<int,int> > AllMuonsIndexMap;
+
+  int NumberPositiveMuons = 0;
+  int NumberNegativeMuons = 0;
+  int NumberAllMuons      = 0;
+
+  if(check){
+    std::cout<<""<<std::endl;
+    std::cout<< " ... Looping over the most general muon collection:" << std::endl;
+  }
+
+  RochCor2012 *tmprmcor;  
+
+  for(int i=0;i<nMuon;i++) {
+    
+    float MuonPt     = GetPt(pxMuon[i],pyMuon[i]);
+    float MuonCharge = chargeMuon[i];
+    
+    // Select the lepton ID
+    bool tightMuonSelection     = true;
+    bool LeptonMVAMuonSelection = false;
+    
+    if (tightMuonSelection){
+      
+      if (! isSelectedMuon2012(i))continue;
+      
+    }else if(LeptonMVAMuonSelection){
+      
+      if (! isSelectedMuon2013(i)) continue;
+      
+    }else{
+      std::cout << "ERROR: No ID Selected!!" << std::endl;
+      break;
+    }
+   
+    // Store this muon in the AllMuonsIndexMap
+    AllMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i);
+    NumberAllMuons++;
+
+    if ( MuonCharge < 0 ){ 
+      NegativeMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i); 
+      NumberNegativeMuons++; 
+    }else{ 
+      PositiveMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i); 
+      NumberPositiveMuons++;
+    }
+    
+  }
+
+  // CHECK THE MAPS
+  if (check){
+
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterAllMuons;
+    for(_iterAllMuons = AllMuonsIndexMap.rbegin(); _iterAllMuons != AllMuonsIndexMap.rend(); ++_iterAllMuons) {
+      std::cout << "AllMuonsIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterAllMuons).first << " ][" 
+		<< ((*_iterAllMuons).second).first  << "," 
+		<< ((*_iterAllMuons).second).second << "]" << std::endl;
+    }
+  
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterPosMuons;
+    for(_iterPosMuons = PositiveMuonsIndexMap.rbegin(); _iterPosMuons != PositiveMuonsIndexMap.rend(); ++_iterPosMuons) {
+      std::cout << "PositiveMuonsIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterPosMuons).first << " ][" 
+		<< ((*_iterPosMuons).second).first  << "," 
+		<< ((*_iterPosMuons).second).second << "]" << std::endl;
+    }
+    
+    std::map<float,std::pair<int,int> >::reverse_iterator _iterNegMuons;
+    for(_iterNegMuons = NegativeMuonsIndexMap.rbegin(); _iterNegMuons != NegativeMuonsIndexMap.rend(); ++_iterNegMuons) {
+      std::cout << "NegativeMuonsIndexMap[pT][ch,index] = [";
+      std::cout << (*_iterNegMuons).first << " ][" 
+		<< ((*_iterNegMuons).second).first  << "," 
+		<< ((*_iterNegMuons).second).second << "]" << std::endl;
+    }
+  }
+
+  float Pt1 = -999;
+  float Pt2 = -999;
+
+  double charge1 = 0;
+  double charge2 = 0;
+
+  //SELECT THE HIGHEST PT MUON
+  
+  if( NumberAllMuons > 1 && NumberNegativeMuons > 0 && NumberPositiveMuons > 0 ){  
+
+    int selectedMuons = 0;
+
+    std::map<float,std::pair<int,int> >::reverse_iterator it;
+    for(it=AllMuonsIndexMap.rbegin();it!=AllMuonsIndexMap.rend();++it){
+
+      if (selectedMuons ==0){
+
+	// The first muon we select is the one with highest pT
+	index1  = ((*it).second).second;
+	charge1 = ((*it).second).first;
+	Pt1     =  (*it).first;
+
+	selectedMuons++;
+	
+      }else if(selectedMuons == 1){
+
+	int charge = ((*it).second).first;	
+
+	if ( charge1*charge < 0 ){
+
+	  // The second muon we select is the one with second highest pT and opposite charge wrt first muon
+	  index2  = ((*it).second).second;
+	  charge2 = ((*it).second).first;
+	  Pt2     =  (*it).first;
+	  
+	  selectedMuons++;
+	  break;
+	}
+	
+      }else{
+	continue;
+      }
+      
+    }
+    
+    if (check){
+    std::cout << "***********************" << std::endl;
+    std::cout << "mm CHANNEL" << std::endl;
+      std::cout << "the muon with 1st highest pT is muon[pT][ch,index] = ["
+		<<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl; 
+      std::cout << "the muon with 2nd highest pT is muon[pT][ch,index] = ["
+		<<Pt2<<"]["<<charge2<<","<<index2<<"]"<< std::endl;     
+    }
+
+  }
+
+  PositiveMuonsIndexMap.clear();
+  NegativeMuonsIndexMap.clear();
+  AllMuonsIndexMap.clear();
+
+  selectedMuons.push_back(index1);
+  selectedMuons.push_back(index2);
+
+  return selectedMuons;
+
+}//getBestMM()
 
 void tHSelection::setKinematicsEEE(int myEle1, int myEle2, int myEle3){
 
@@ -2877,7 +3058,7 @@ void tHSelection::setKinematicsEEE(int myEle1, int myEle2, int myEle3){
 
   }
 
-}
+}//setKinematicsEEE()
 
 void tHSelection::setKinematicsMMM(int myMu1, int myMu2, int myMu3){
 
@@ -2989,9 +3170,15 @@ void tHSelection::setKinematicsMMM(int myMu1, int myMu2, int myMu3){
     m_lh[mmm][0] = -999.9;
     m_lh[mmm][1] = -999.9;    
     m_lh[mmm][2] = -999.9;    
+    /*
     m_bdt[mmm][0] = -999.9;
     m_bdt[mmm][1] = -999.9;
     m_bdt[mmm][2] = -999.9;
+    */
+    m_bdt[mmm][0] = leptBDTForBs(fMVAMuon,myMu1,false);
+    m_bdt[mmm][1] = leptBDTForBs(fMVAMuon,myMu2,false);
+    m_bdt[mmm][2] = leptBDTForBs(fMVAMuon,myMu3,false);
+
     m_chmaj[mmm][0] = -999.9;
     m_chmaj[mmm][1] = -999.9;    
     m_chmaj[mmm][2] = -999.9;
@@ -3117,9 +3304,14 @@ void tHSelection::setKinematicsMME(int myMu1 , int myMu2 , int myEle1){
     m_lh[mme][0] = -999.9;
     m_lh[mme][1] = -999.9;    
     m_lh[mme][2] = eleIdLikelihoodEle[myEle1];    
+    /*
     m_bdt[mme][0] = -999.9;
     m_bdt[mme][1] = -999.9;
     m_bdt[mme][2] = eleBDT(fMVA,myEle1);
+    */
+    m_bdt[mme][0] = leptBDTForBs(fMVAMuon,myMu1,false);
+    m_bdt[mme][1] = leptBDTForBs(fMVAMuon,myMu2,false);
+    m_bdt[mme][2] = leptBDTForBs(fMVAElectron,myEle1,true);
     m_chmaj[mme][0] = -999.9;
     m_chmaj[mme][1] = -999.9;    
     m_chmaj[mme][2] = eleChargeMajority(myEle1);
@@ -3245,9 +3437,14 @@ void tHSelection::setKinematicsEEM(int myEle1 , int myEle2 , int myMu1){
     m_lh[eem][0] = eleIdLikelihoodEle[myEle1];
     m_lh[eem][1] = eleIdLikelihoodEle[myEle2];    
     m_lh[eem][2] = -999.9;    
+    /*
     m_bdt[eem][0] = eleBDT(fMVA,myEle1);
     m_bdt[eem][1] = eleBDT(fMVA,myEle2);
     m_bdt[eem][2] = -999.9;
+    */
+    m_bdt[eem][0] = leptBDTForBs(fMVAElectron,myEle1,true);
+    m_bdt[eem][2] = leptBDTForBs(fMVAElectron,myEle2,true);
+    m_bdt[eem][3] = leptBDTForBs(fMVAMuon,myMu1,false);
     m_chmaj[eem][0] = eleChargeMajority(myEle1);
     m_chmaj[eem][1] = eleChargeMajority(myEle2);    
     m_chmaj[eem][2] = -999.9;
@@ -3259,6 +3456,192 @@ void tHSelection::setKinematicsEEM(int myEle1 , int myEle2 , int myMu1){
   }
 
 }
+
+void tHSelection::setKinematicsEE(int myEle1, int myEle2){
+
+  // Check that we have two selected electrons
+  if ( myEle1 > -1 && myEle2 > -1 ) {
+
+    // Definition of the variables to be used in this function
+    float Electron1Charge = chargeEle[myEle1];  
+    float Electron2Charge = chargeEle[myEle2];  
+    
+    float Electron1Pt = GetPt(pxEle[myEle1],pyEle[myEle1]);
+    float Electron2Pt = GetPt(pxEle[myEle2],pyEle[myEle2]);
+    
+    TLorentzVector Electron1, Electron2, Electron3;
+    Electron1.SetPxPyPzE(pxEle[myEle1], pyEle[myEle1], pzEle[myEle1], energyEle[myEle1]);
+    Electron2.SetPxPyPzE(pxEle[myEle2], pyEle[myEle2], pzEle[myEle2], energyEle[myEle2]);
+    
+    // Store the selected electrons in eleCands[]. To be used later
+    eleCands[ee].push_back(myEle1);
+    eleCands[ee].push_back(myEle2);
+    
+    // Look for the pair with closest m_ll to m_Z
+    float mll;
+    mll = (Electron1 + Electron2).M();
+    
+    hardestLeptonPt[ee] = TMath::Max( Electron1Pt,Electron2Pt );
+    slowestLeptonPt[ee] = TMath::Min( Electron1Pt,Electron2Pt );
+    
+    m_p4Lepton1[ee] -> SetXYZT(pxEle[myEle1], pyEle[myEle1], pzEle[myEle1], energyEle[myEle1]);
+    m_p4Lepton2[ee] -> SetXYZT(pxEle[myEle2], pyEle[myEle2], pzEle[myEle2], energyEle[myEle2]);
+    m_p4Lepton3[ee] -> SetXYZT(0.0, 0.0, 0.0, 0.0); // dummy
+    
+    m_p4Lepton1Energy[ee] = energyEle[myEle1];
+    m_p4Lepton2Energy[ee] = energyEle[myEle2];
+    m_p4Lepton3Energy[ee] = -999.9;
+    
+    m_p4Lepton1Type[ee] = 0;
+    m_p4Lepton2Type[ee] = 0;
+    m_p4Lepton3Type[ee] = 0; // don't care
+    
+    m_mll            [ee] = mll;
+    m_deltaPhi       [ee] = -999.9;
+    m_deltaErre      [ee] = -999.9;
+    m_deltaEtaLeptons[ee] = -999.9;
+    
+    m_dilepPt [ee].SetXYZ( m_p4Lepton1[ee]->Vect().X()+m_p4Lepton2[ee]->Vect().X(), 
+			   m_p4Lepton2[ee]->Vect().Y()+m_p4Lepton2[ee]->Vect().Y(), 0.0 );
+
+    m_trilepPt[ee].SetXYZ( 0.0, 0.0, 0.0 );
+
+    // usual definition
+    m_transvMass[ee] = -999.9;
+    // chris' variable
+    m_GammaMR   [ee] = -999.9;
+    
+    m_MR            [ee] = -999.9;
+    m_MTR           [ee] = -999.9;
+    m_metOptll      [ee] = -999.9;
+    m_mT2           [ee] = -999.9;
+    m_p3TKMET       [ee] = -999.9;
+    m_chMet         [ee] = -999.9;
+    m_projectedMet  [ee] = -999.9;
+    m_projectedPFMet[ee] = -999.9;
+    m_projectedTkMet[ee] = -999.9;
+    m_MTRcharged    [ee] = -999.9;
+
+    m_ch[ee][0] = chargeEle[myEle1];
+    m_ch[ee][1] = chargeEle[myEle2];
+    m_ch[ee][2] = -999.9;
+    m_iso[ee][0] = pfCombinedIsoEle[myEle1] / Electron1Pt;
+    m_iso[ee][1] = pfCombinedIsoEle[myEle2] / Electron2Pt;
+    m_iso[ee][2] = -999.9;
+    m_lh[ee][0] = eleIdLikelihoodEle[myEle1];
+    m_lh[ee][1] = eleIdLikelihoodEle[myEle2];    
+    m_lh[ee][2] = -999.9;    
+    /*
+    m_bdt[eee][0] = eleBDT(fMVA,myEle1);
+    m_bdt[eee][1] = eleBDT(fMVA,myEle2);
+    m_bdt[eee][2] = eleBDT(fMVA,myEle3);
+    */
+    m_bdt[ee][0] = leptBDTForBs(fMVAElectron,myEle1,true);
+    m_bdt[ee][1] = leptBDTForBs(fMVAElectron,myEle2,true);
+    m_bdt[ee][2] = -999.9;
+
+    m_chmaj[ee][0] = eleChargeMajority(myEle1);
+    m_chmaj[ee][1] = eleChargeMajority(myEle2);    
+    m_chmaj[ee][2] = -999.9;
+
+    Electron1.Clear();
+    Electron2.Clear();
+
+  }
+
+}//setKinematicsEE()
+
+void tHSelection::setKinematicsMM(int myMu1, int myMu2){
+
+  // Check that we have two selected muons
+  if ( myMu1 > -1 && myMu2 > -1 ) {
+
+    // Definition of the variables to be used in this function
+    float Muon1Charge = chargeMuon[myMu1];  
+    float Muon2Charge = chargeMuon[myMu2];  
+    
+    float Muon1Pt = GetPt(pxMuon[myMu1],pyMuon[myMu1]);
+    float Muon2Pt = GetPt(pxMuon[myMu2],pyMuon[myMu2]);
+    
+    TLorentzVector Muon1, Muon2, Muon3;
+    Muon1.SetPxPyPzE(pxMuon[myMu1], pyMuon[myMu1], pzMuon[myMu1], energyMuon[myMu1]);
+    Muon2.SetPxPyPzE(pxMuon[myMu2], pyMuon[myMu2], pzMuon[myMu2], energyMuon[myMu2]);
+    
+    // Store the selected muons in muCands[]. To be used later
+    muCands[mm].push_back(myMu1);
+    muCands[mm].push_back(myMu2);
+    
+    // Look for the pair with closest m_ll to m_Z
+    float mll = (Muon1 + Muon2).M();
+
+    hardestLeptonPt[mm] = TMath::Max( Muon1Pt,Muon2Pt );
+    slowestLeptonPt[mm] = TMath::Min( Muon1Pt,Muon2Pt );
+    
+    m_p4Lepton1[mm] -> SetXYZT(pxMuon[myMu1], pyMuon[myMu1], pzMuon[myMu1], energyMuon[myMu1]);
+    m_p4Lepton2[mm] -> SetXYZT(pxMuon[myMu2], pyMuon[myMu2], pzMuon[myMu2], energyMuon[myMu2]);
+    m_p4Lepton3[mm] -> SetXYZT(0.0, 0.0, 0.0, 0.0);
+    
+    m_p4Lepton1Energy[mm] = energyMuon[myMu1];
+    m_p4Lepton2Energy[mm] = energyMuon[myMu2];
+    m_p4Lepton3Energy[mm] = -999.9;
+    
+    m_p4Lepton1Type[mm] = 1;
+    m_p4Lepton2Type[mm] = 1;
+    m_p4Lepton3Type[mm] = 1;
+    
+    m_mll            [mm] = mll;
+    m_deltaPhi       [mm] = -999.9;
+    m_deltaErre      [mm] = -999.9;
+    m_deltaEtaLeptons[mm] = -999.9;
+    
+    m_dilepPt [mm].SetXYZ( m_p4Lepton1[mmm]->Vect().X()+m_p4Lepton2[mmm]->Vect().X(), 
+			   m_p4Lepton2[mmm]->Vect().Y()+m_p4Lepton2[mmm]->Vect().Y(), 0.0 );
+    m_trilepPt[mm].SetXYZ( 0.0, 0.0, 0.0 );
+
+    // usual definition
+    m_transvMass[mm] = -999.9;
+    // chris' variable
+    m_GammaMR   [mm] = -999.9;
+    
+    m_MR            [mm] = -999.9;
+    m_MTR           [mm] = -999.9;
+    m_metOptll      [mm] = -999.9;
+    m_mT2           [mm] = -999.9;
+    m_p3TKMET       [mm] = -999.9;
+    m_chMet         [mm] = -999.9;
+    m_projectedMet  [mm] = -999.9;
+    m_projectedPFMet[mm] = -999.9;
+    m_projectedTkMet[mm] = -999.9;
+    m_MTRcharged    [mm] = -999.9;
+
+    m_ch[mm][0] = chargeMuon[myMu1];
+    m_ch[mm][1] = chargeMuon[myMu2];
+    m_ch[mm][2] = -999.9;
+    m_iso[mm][0] = pfCombinedIsoMuon[myMu1] / Muon1Pt;
+    m_iso[mm][1] = pfCombinedIsoMuon[myMu2] / Muon2Pt;
+    m_iso[mm][2] = -999.9;
+    m_lh[mm][0] = -999.9;
+    m_lh[mm][1] = -999.9;    
+    m_lh[mm][2] = -999.9;    
+    /*
+    m_bdt[mm][0] = -999.9;
+    m_bdt[mm][1] = -999.9;
+    m_bdt[mm][2] = -999.9;
+    */
+    m_bdt[mm][0] = leptBDTForBs(fMVAMuon,myMu1,false);
+    m_bdt[mm][1] = leptBDTForBs(fMVAMuon,myMu2,false);
+    m_bdt[mm][2] = -999.9;
+
+    m_chmaj[mm][0] = -999.9;
+    m_chmaj[mm][1] = -999.9;    
+    m_chmaj[mm][2] = -999.9;
+
+    Muon1.Clear();
+    Muon2.Clear();
+
+  }
+
+}// setKinematicsMM()
 
 void tHSelection::resetKinematicsStart() {
 
@@ -3287,7 +3670,43 @@ void tHSelection::resetKinematics() {
   m_goodJets.clear();
   m_goodcbIDJets.clear();
 
-  for(int theChannel=0; theChannel<4; theChannel++) {
+  _genHiggsPt = -999.9;
+  _genHiggsEta = -999.9;
+
+  _genTopPt = -999.9;
+  _genTopEta = -999.9;
+
+  _genWpfromH_Pt = -999.9;
+  _genWpfromH_Eta = -999.9;
+
+  _genWmfromH_Pt = -999.9;
+  _genWmfromH_Eta = -999.9;
+
+  _genWfromT_Pt = -999.9;
+  _genWfromT_Eta = -999.9;
+
+  _genLeptonPlusfromWfromH_Pt = -999.9;
+  _genLeptonPlusfromWfromH_Eta = -999.9;
+
+  _genLeptonMinusfromWfromH_Pt = -999.9;
+  _genLeptonMinusfromWfromH_Eta = -999.9;
+
+  _genLeptonfromWfromT_Pt = -999.9;
+  _genLeptonfromWfromT_Eta = -999.9;
+
+  _genNeutrinoPlusfromWfromH_Pt = -999.9;
+  _genNeutrinoPlusfromWfromH_Eta = -999.9;
+
+  _genNeutrinoMinusfromWfromH_Pt = -999.9;
+  _genNeutrinoMinusfromWfromH_Eta = -999.9;
+  
+  _genNeutrinofromWfromT_Pt = -999.9;
+  _genNeutrinofromWfromT_Eta = -999.9;
+  
+  _genForwardQuark_Pt = -999.9;
+  _genForwardQuark_Eta = -999.9;
+  
+  for(int theChannel=0; theChannel<6; theChannel++) {
 
     eleCands[theChannel].clear();
     muCands[theChannel].clear();

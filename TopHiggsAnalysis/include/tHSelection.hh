@@ -72,11 +72,21 @@ private:
   //! get the best EEM
   std::vector<int> getBestEEM(); // EEM channel
 
+  //! get the best MM -- for Z-peak cross-checks
+  std::vector<int> getBestMM();   
+
+  //! get the best EE -- for Z-peak cross-checks
+  std::vector<int> getBestEE();    
+
   //! set the 4 vectors, invariant mass, etc. after preselections and full selection
   void setKinematicsMMM(int myMu1 , int myMu2 , int myMu3 );
   void setKinematicsEEE(int myEle1, int myEle2, int myEle3);
   void setKinematicsMME(int myMu1 , int myMu2 , int myEle1);
   void setKinematicsEEM(int myEle1, int myEle2, int myMu1 );
+
+  //! set kinematics for Z-peak  cross-check
+  void setKinematicsMM(int myMu1 , int myMu2 );
+  void setKinematicsEE(int myEle1, int myEle2 );
 
   //! reset the kinematic quantities at the beginning of event and after the selection if needed
   void resetKinematicsStart();
@@ -170,9 +180,9 @@ private:
   CommonHiggsPreselector CommonHiggsPreselection;
 
   //! to evaluate full selection efficiency
-  Selection *_selectionEEE, *_selectionMMM, *_selectionMME, *_selectionEEM;
+  Selection *_selectionEEE, *_selectionMMM, *_selectionMME, *_selectionEEM, *_selectionEE, *_selectionMM;
 
-  CutBasedTopHiggsSelector CutBasedHiggsSelection[4];
+  CutBasedTopHiggsSelector CutBasedHiggsSelection[6];
 
   //! be verbose during runtime
   bool _verbose;
@@ -182,11 +192,11 @@ private:
   std::string _process;
 
   //! an integer defining the sub-channel
-  enum { eee = 0, mmm = 1, eem = 2, mme = 3 };
+  enum { eee = 0, mmm = 1, eem = 2, mme = 3, ee = 4, mm = 5 };
 
   //! array containing the possibility of having reconstructed a certain sub-channel
-  bool m_channel[4]; // channels defined above
-  bool isOk[4];
+  bool m_channel[6]; // channels defined above
+  bool isOk[6];
   
   //! trigger masks
   std::vector<int> m_requiredTriggersEEE, m_notRequiredTriggersEEE;
@@ -203,72 +213,72 @@ private:
   int thePreElectron,  thePrePositron, thePreElectronME, thePreElectronEM;
   int thePreMuonMinus, thePreMuonPlus, thePreMuonME, thePreMuonEM;
   
-  // -- note: the index [4] refers to the channel
-  int theLeadingJet[4];
-  int theSecondJet [4];
-  std::vector<int> eleCands[4], muCands[4];
-  TLorentzVector *m_p4Lepton1      [4], *m_p4Lepton2     [4], *m_p4Lepton3     [4];
-  float           m_p4Lepton1Energy[4], m_p4Lepton2Energy[4], m_p4Lepton3Energy[4];
-  int             m_p4Lepton1Type  [4], m_p4Lepton2Type  [4], m_p4Lepton3Type  [4];
+  // -- note: the index [6] refers to the channel
+  int theLeadingJet[6];
+  int theSecondJet [6];
+  std::vector<int> eleCands[6], muCands[6];
+  TLorentzVector *m_p4Lepton1      [6], *m_p4Lepton2     [6], *m_p4Lepton3     [6];
+  float           m_p4Lepton1Energy[6], m_p4Lepton2Energy[6], m_p4Lepton3Energy[6];
+  int             m_p4Lepton1Type  [6], m_p4Lepton2Type  [6], m_p4Lepton3Type  [6];
 
   TVector3 *m_p3PFMET;
   TVector3 *m_metFromJets, *m_pfMetJESUp, *m_pfMetJESDown;
-  TVector3 m_p3TKMET[4];
+  TVector3 m_p3TKMET[6];
   float m_theMET;
-  TLorentzVector *m_jetsSum[4], *m_jetscbIDSum[4], *m_uncorrJetsSum[4];
+  TLorentzVector *m_jetsSum[6], *m_jetscbIDSum[6], *m_uncorrJetsSum[6];
 
-  TVector3 m_dilepPt[4];
-  TVector3 m_trilepPt[4];
-  float m_deltaPhi[4];
-  float m_deltaErre[4];
-  float m_deltaEtaLeptons[4];
-  float m_mll[4];
-  float m_transvMass[4];
-  float m_MTR[4], m_MTRcharged[4], m_MR[4], m_GammaMR[4];
-  float m_mT2[4];
-  float m_projectedMet[4], m_chMet[4];
-  float m_projectedPFMet[4], m_projectedTkMet[4];
-  float m_metOptll[4];
-  float hardestLeptonPt[4], slowestLeptonPt[4];
-  float leadJetBtag[4], subleadJetBtag[4], subLeadJetsMaxBtag[4];
-  float leadJetBtagBProb[4], subleadJetBtagBProb[4], subLeadJetsMaxBtagBProb[4];
-  float m_softbdisc[4], m_hardbdisc[4];
-  int   njets[4], ncbIDjets[4], nuncorrjets[4];
+  TVector3 m_dilepPt[6];
+  TVector3 m_trilepPt[6];
+  float m_deltaPhi[6];
+  float m_deltaErre[6];
+  float m_deltaEtaLeptons[6];
+  float m_mll[6];
+  float m_transvMass[6];
+  float m_MTR[6], m_MTRcharged[6], m_MR[6], m_GammaMR[6];
+  float m_mT2[6];
+  float m_projectedMet[6], m_chMet[6];
+  float m_projectedPFMet[6], m_projectedTkMet[6];
+  float m_metOptll[6];
+  float hardestLeptonPt[6], slowestLeptonPt[6];
+  float leadJetBtag[6], subleadJetBtag[6], subLeadJetsMaxBtag[6];
+  float leadJetBtagBProb[6], subleadJetBtagBProb[6], subLeadJetsMaxBtagBProb[6];
+  float m_softbdisc[6], m_hardbdisc[6];
+  int   njets[6], ncbIDjets[6], nuncorrjets[6];
   int   m_goodvertices;
 
   // for jetId studies
   bool  wantJetIdStuff;
-  float leadJetPt          [4], leadJetEta        [4], leadJetMvaJetId   [4];
-  int   leadJetLoosePFId   [4], leadJetMatchGen   [4], leadJetLooseId    [4];
-  float subleadJetPt       [4], subleadJetEta     [4], subleadJetMvaJetId[4];
-  int   subleadJetLoosePFId[4], subleadJetMatchGen[4], subleadJetLooseId [4];
+  float leadJetPt          [6], leadJetEta        [6], leadJetMvaJetId   [6];
+  int   leadJetLoosePFId   [6], leadJetMatchGen   [6], leadJetLooseId    [6];
+  float subleadJetPt       [6], subleadJetEta     [6], subleadJetMvaJetId[6];
+  int   subleadJetLoosePFId[6], subleadJetMatchGen[6], subleadJetLooseId [6];
 
   // 4 channels, 3 leptons
-  int   m_ch   [4][3];
-  float m_iso  [4][3];
-  float m_lh   [4][3];
-  float m_bdt  [4][3];
-  int   m_chmaj[4][3];
+  int   m_ch   [6][3];
+  float m_iso  [6][3];
+  float m_lh   [6][3];
+  float m_bdt  [6][3];
+  int   m_chmaj[6][3];
 
   //! B-Veto event variables
   float m_maxDxyEvt, m_maxDszEvt;
   float m_maxTrackCountingHighEffBJetTags, m_maxImpactParameterMVABJetTags, m_maxCombinedSecondaryVertexMVABJetTags; 
   int m_closestPV;
-  int nsoftjets[4], nsoftjetscbID[4];
+  int nsoftjets[6], nsoftjetscbID[6];
 
   // jet studies
-  int m_numbtagjets[4];
+  int m_numbtagjets[6];
 
-  int m_numbtagCSVMmvaIDcentraljets[4];//MVA ID for jets
-  int m_numbtagCSVLmvaIDcentraljets[4];
-  int m_numbtagCSVTmvaIDcentraljets[4];
+  int m_numbtagCSVMmvaIDcentraljets[6];//MVA ID for jets
+  int m_numbtagCSVLmvaIDcentraljets[6];
+  int m_numbtagCSVTmvaIDcentraljets[6];
 
-  int m_numbtagCSVMcbIDcentraljets[4];//Cut Based ID for jets
-  int m_numbtagCSVLcbIDcentraljets[4];
-  int m_numbtagCSVTcbIDcentraljets[4];
+  int m_numbtagCSVMcbIDcentraljets[6];//Cut Based ID for jets
+  int m_numbtagCSVLcbIDcentraljets[6];
+  int m_numbtagCSVTcbIDcentraljets[6];
 
-  int m_nummvaIDforwardjets[4];//MVA ID for jets
-  int m_numcbIDforwardjets [4];//Cut Based ID for jets
+  int m_nummvaIDforwardjets[6];//MVA ID for jets
+  int m_numcbIDforwardjets [6];//Cut Based ID for jets
   
   int _theGenEle, _theGenPos;
   int _theGenMuMinus, _theGenMuPlus;
@@ -282,10 +292,13 @@ private:
   std::vector<int> m_goodcbIDJets;// Cut Based ID
 
   //! reduced tree for event selection (on at least 3 leptons events)
-  RedTopHiggsTree *myOutTree[4];
+  RedTopHiggsTree *myOutTree[6];
 
   //! reduced tree for trigger studies (on all events)
   RedTriggerTree *myTriggerTree;
+
+  //! reduced tree for gen level variables
+  RedTopHiggsTree *myGenLevelTree;
 
   //! variables for EleID
   int   myLepFlav[3];
