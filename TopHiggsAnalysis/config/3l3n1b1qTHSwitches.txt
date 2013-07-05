@@ -4,7 +4,7 @@ asymmetricID		1
 applyBDTEleID           1
 MCtruth			0   
 apply_kFactor		0  
-trigger			0    
+trigger			1    
 preselection		1   
 maxPtLepton		1
 minPtLepton		1

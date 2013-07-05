@@ -85,8 +85,6 @@ tHSelection::tHSelection(TTree *tree)
                    "elebdtweights/Subdet2HighPt_WithIPInfo_BDTG.weights.xml",                
                    ElectronIDMVA::kWithIPInfo);
 
-  std::cout << "estoy aqui" << std::endl;
-
   // configurating the new lepton BDT
   // Electrons
   // see src/TopHiggs.hh
@@ -120,7 +118,7 @@ tHSelection::tHSelection(TTree *tree)
 
   // To read good run list!
   if (_selectionEEE->getSwitch("goodRunLS") && _selectionEEE->getSwitch("isData")) {
-    std::string goodRunJsonFile = "config/json/goodCollisions2012.json";
+    std::string goodRunJsonFile = "config/json/certifiedLatinos.53X.Moriond.json";
     setJsonGoodRunList(goodRunJsonFile);
     fillRunLSMap();
   }
@@ -191,6 +189,8 @@ tHSelection::~tHSelection(){
 
   delete _selectionEE;
   delete _selectionMM;
+
+  delete rmcor;
 
   myOutTree[eee]->save();
   myOutTree[mmm]->save();
@@ -735,8 +735,8 @@ void tHSelection::Loop() {
   //PUWeight* fPUWeight = new PUWeight();
 
   Long64_t nbytes = 0, nb = 0;
-  //Long64_t nentries = fChain->GetEntries();
-  Long64_t nentries = 50000;
+  Long64_t nentries = fChain->GetEntries();
+  //Long64_t nentries = 50000;
   std::cout << "Number of entries = " << nentries << std::endl;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
@@ -775,7 +775,7 @@ void tHSelection::Loop() {
     bool tHgenerated = false;
 
     if( !_selectionEEE->getSwitch("isData") ) {
-      tHgenerated = findMcTree("tH");  
+      //tHgenerated = findMcTree("tH");  
       //WZgenerated = findMcTree("WZ");  
     }
 
@@ -842,8 +842,7 @@ void tHSelection::Loop() {
     
     // IMPORTANT: FOR DATA RELOAD THE TRIGGER MASK PER FILE WHICH IS SUPPOSED TO CONTAIN UNIFORM CONDITIONS X FILE
     reloadTriggerMask(runNumber);
-    //bool passedHLT = (_selectionEEE->getSwitch("isData")) ? hasPassedHLT() : true;
-    bool passedHLT[4];
+    bool passedHLT[6];
 
     if (_selectionEEE->getSwitch("isData")){
 
@@ -908,10 +907,10 @@ void tHSelection::Loop() {
     //theBestEE.push_back(-1);
 
     // MM Channel
-    //std::vector<int> theBestMM = getBestMM();
-    std::vector<int> theBestMM;
-    theBestMM.push_back(-1);
-    theBestMM.push_back(-1);
+    std::vector<int> theBestMM = getBestMM();
+    //std::vector<int> theBestMM;
+    //theBestMM.push_back(-1);
+    //theBestMM.push_back(-1);
 
     // Reconstructed channel
     m_channel[eee] = false;     
@@ -979,6 +978,7 @@ void tHSelection::Loop() {
       // For Z-peak cross-check, select first MM
       if      ( theBestMM.at(0)> -1 && theBestMM.at(1) > -1 ) {
 	m_channel[mm] = true;
+
       }else if( theBestEE.at(0)> -1 && theBestEE.at(1) > -1 ) {
 	m_channel[ee] = true;
       }
@@ -1162,8 +1162,6 @@ void tHSelection::Loop() {
       CutBasedHiggsSelection[theChannel].SetPtll         (m_dilepPt[theChannel].Pt());
       CutBasedHiggsSelection[theChannel].SetWWInvMass    (m_transvMass[theChannel]);
       
-      //if (m_channel[theChannel]) std::cout<<"m_chanel[theChannel] == true" <<std::endl;
-      
       bool isSelected = true;
       
       // Call internally to some functions to obtain the bools for the steps
@@ -1172,10 +1170,6 @@ void tHSelection::Loop() {
       // latinos
       bool outputStep0  = CutBasedHiggsSelection[theChannel].outputStep0();
       bool outputStep1  = CutBasedHiggsSelection[theChannel].outputStep1();
-      
-      //if (outputStep0)   std::cout<< " outputStep0   = true"<<std::endl;
-      //if (outputStep1)   std::cout<< " outputStep1   = true"<<std::endl;
-      
       
       // Filling the tree
 
@@ -1464,8 +1458,8 @@ void tHSelection::Loop() {
 					       jesMtDown        [theChannel]);
       
       
-      // dumping final tree, only if there are 3 final leptons
-      if(m_channel[theChannel] && outputStep1) 
+      // dumping final tree, only if it passes the trigger and there are 3 final leptons
+      if(m_channel[theChannel] && outputStep0 && outputStep1) 
 	myOutTree[theChannel] -> store();
 
     }
@@ -1540,9 +1534,7 @@ bool tHSelection::isSelectedMuon2012(int i){
   TLorentzVector Muon;
   Muon.SetPxPyPzE(double(pxMuon[i]), double(pyMuon[i]), double(pzMuon[i]), double(energyMuon[i]));
 
-  RochCor2012 *tmprmcor;  
-  tmprmcor = new RochCor2012();
-  tmprmcor->momcor_mc(Muon, chargeMuon[i], 0, 1.0);
+  rmcor->momcor_mc(Muon, chargeMuon[i], 0, 1.0);
   
   //std::cout << " ** [GetBestMMM Function] :: Rochester Correction ** " << std::endl;
   //std::cout << " [Before] with TLorentz pT[muon] = [" << Muon.Pt() << "]" << std::endl;
@@ -1563,18 +1555,12 @@ bool tHSelection::isSelectedMuon2012(int i){
   
   bool theMuonID = true;
   isMuonID2012(i, &theMuonID);
-  if (!theMuonID) return false;
 
-  bool theMuonIso = true;
-  isPFIsolatedMuon2012(i);
-  if (!theMuonIso) return false;
+  if( !theMuonID || !isPFIsolatedMuon2012(i) ) return false;
 
   int ctfMuon   = trackIndexMuon[i]; 
   float dxyMuon = transvImpactParTrack[ctfMuon];
   float dzMuon  = muonDzPV(i,0);
-  
-  // Identification and Isolation MUON Selection
-  if ( !theMuonID || !isPFIsolatedMuon2012(i) ) return false;      
   
   // Impact parameters MUON Selection
   if (MuonPt>20) {          // hardcoded
@@ -1586,7 +1572,7 @@ bool tHSelection::isSelectedMuon2012(int i){
   if (_selectionEEE->getSwitch("muonDz") && (!_selectionEEE->passCut("muonDz",dzMuon)) ) return false;         
 
   Muon.Clear();
-  
+
   return true;
 
 }
@@ -1762,10 +1748,6 @@ std::vector<int> tHSelection::getBestEEE(){
   int index2 = -1;
   int index3 = -1;
   
-  // Maps for positive and negative electrons, separately
-  std::map<float,std::pair<int,int> > PositiveElecIndexMap;
-  std::map<float,std::pair<int,int> > NegativeElecIndexMap;
-  
   // Map for all electrons (do not care about the charge)
   std::map<float,std::pair<int,int> > AllElecIndexMap;
 
@@ -1804,13 +1786,8 @@ std::vector<int> tHSelection::getBestEEE(){
     AllElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i);
     NumberAllElec++;
 
-    if (ElectronCharge < 0 ){ 
-      NegativeElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i); 
-      NumberNegativeElec++; 
-    }else{ 
-      PositiveElecIndexMap[ElectronPt] = std::make_pair(ElectronCharge,i); 
-      NumberPositiveElec++;
-    }
+    if      (ElectronCharge < 0 ) NumberNegativeElec++; 
+    else if (ElectronCharge > 0 ) NumberPositiveElec++;
     
   }
   
@@ -1822,22 +1799,6 @@ std::vector<int> tHSelection::getBestEEE(){
       std::cout << (*_iterAllElec).first << " ][" 
 		<< ((*_iterAllElec).second).first  << "," 
 		<< ((*_iterAllElec).second).second << "]" << std::endl;
-    }
-    
-    std::map<float,std::pair<int,int> >::reverse_iterator _iterPosElec;
-    for(_iterPosElec = PositiveElecIndexMap.rbegin(); _iterPosElec != PositiveElecIndexMap.rend(); ++_iterPosElec) {
-      std::cout << "PositiveElecIndexMap[pT][ch,index] = [";
-      std::cout << (*_iterPosElec).first << " ][" 
-		<< ((*_iterPosElec).second).first  << "," 
-		<< ((*_iterPosElec).second).second << "]" << std::endl;
-    }
-    
-    std::map<float,std::pair<int,int> >::reverse_iterator _iterNegElec;
-    for(_iterNegElec = NegativeElecIndexMap.rbegin(); _iterNegElec != NegativeElecIndexMap.rend(); ++_iterNegElec) {
-      std::cout << "NegativeElecIndexMap[pT][ch,index] = [";
-      std::cout << (*_iterNegElec).first << " ][" 
-		<< ((*_iterNegElec).second).first  << "," 
-		<< ((*_iterNegElec).second).second << "]" << std::endl;
     }
   }
 
@@ -1910,8 +1871,6 @@ std::vector<int> tHSelection::getBestEEE(){
 
   }
 
-  PositiveElecIndexMap.clear();
-  NegativeElecIndexMap.clear();
   AllElecIndexMap.clear();
 
   selectedElectrons.push_back(index1);
@@ -1934,10 +1893,6 @@ std::vector<int> tHSelection::getBestMMM(){
   int index2 = -1;
   int index3 = -1;
   
-  // Maps for positive and negative muons, separately
-  std::map<float,std::pair<int,int> > PositiveMuonsIndexMap;
-  std::map<float,std::pair<int,int> > NegativeMuonsIndexMap;
-  
   // Map for all muons (do not care about the charge)
   std::map<float,std::pair<int,int> > AllMuonsIndexMap;
 
@@ -1950,8 +1905,6 @@ std::vector<int> tHSelection::getBestMMM(){
     std::cout<< " ... Looping over the most general muon collection:" << std::endl;
   }
 
-  RochCor2012 *tmprmcor;  
-
   for(int i=0;i<nMuon;i++) {
     
     float MuonPt     = GetPt(pxMuon[i],pyMuon[i]);
@@ -1963,7 +1916,7 @@ std::vector<int> tHSelection::getBestMMM(){
     
     if (tightMuonSelection){
       
-      if (! isSelectedMuon2012(i))continue;
+      if (! isSelectedMuon2012(i)) continue;
       
     }else if(LeptonMVAMuonSelection){
       
@@ -1978,13 +1931,8 @@ std::vector<int> tHSelection::getBestMMM(){
     AllMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i);
     NumberAllMuons++;
 
-    if ( MuonCharge < 0 ){ 
-      NegativeMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i); 
-      NumberNegativeMuons++; 
-    }else{ 
-      PositiveMuonsIndexMap[MuonPt] = std::make_pair(MuonCharge,i); 
-      NumberPositiveMuons++;
-    }
+    if     ( MuonCharge < 0 ) NumberNegativeMuons++; 
+    else if( MuonCharge > 0 ) NumberPositiveMuons++;
     
   }
 
@@ -1999,21 +1947,6 @@ std::vector<int> tHSelection::getBestMMM(){
 		<< ((*_iterAllMuons).second).second << "]" << std::endl;
     }
   
-    std::map<float,std::pair<int,int> >::reverse_iterator _iterPosMuons;
-    for(_iterPosMuons = PositiveMuonsIndexMap.rbegin(); _iterPosMuons != PositiveMuonsIndexMap.rend(); ++_iterPosMuons) {
-      std::cout << "PositiveMuonsIndexMap[pT][ch,index] = [";
-      std::cout << (*_iterPosMuons).first << " ][" 
-		<< ((*_iterPosMuons).second).first  << "," 
-		<< ((*_iterPosMuons).second).second << "]" << std::endl;
-    }
-    
-    std::map<float,std::pair<int,int> >::reverse_iterator _iterNegMuons;
-    for(_iterNegMuons = NegativeMuonsIndexMap.rbegin(); _iterNegMuons != NegativeMuonsIndexMap.rend(); ++_iterNegMuons) {
-      std::cout << "NegativeMuonsIndexMap[pT][ch,index] = [";
-      std::cout << (*_iterNegMuons).first << " ][" 
-		<< ((*_iterNegMuons).second).first  << "," 
-		<< ((*_iterNegMuons).second).second << "]" << std::endl;
-    }
   }
 
   float Pt1 = -999;
@@ -2054,8 +1987,7 @@ std::vector<int> tHSelection::getBestMMM(){
       }else if(selectedMuons == 2){
 
 	// For the third muon selection, we take the muon with third highest pT that
-	// also has opposite charge with respect to the second muon (we asumme the 
-	// 2nd and 3rd muons come from the H --> W+W- --> l+l-nn decay
+	// also has opposite charge with respect to some of the other selected ones
 
 	int charge = ((*it).second).first;	
 
@@ -2077,8 +2009,8 @@ std::vector<int> tHSelection::getBestMMM(){
     }
 
     if (check){
-    std::cout << "***********************" << std::endl;
-    std::cout << "mmm CHANNEL" << std::endl;
+      std::cout << "***********************" << std::endl;
+      std::cout << "mmm CHANNEL" << std::endl;
       std::cout << "the muon with 1st highest pT is muon[pT][ch,index] = ["
 		<<Pt1<<"]["<<charge1<<","<<index1<<"]"<< std::endl; 
       std::cout << "the muon with 2nd highest pT is muon[pT][ch,index] = ["
@@ -2089,8 +2021,6 @@ std::vector<int> tHSelection::getBestMMM(){
 
   }
 
-  PositiveMuonsIndexMap.clear();
-  NegativeMuonsIndexMap.clear();
   AllMuonsIndexMap.clear();
 
   selectedMuons.push_back(index1);
@@ -2861,8 +2791,6 @@ std::vector<int> tHSelection::getBestMM(){
     std::cout<< " ... Looping over the most general muon collection:" << std::endl;
   }
 
-  RochCor2012 *tmprmcor;  
-
   for(int i=0;i<nMuon;i++) {
     
     float MuonPt     = GetPt(pxMuon[i],pyMuon[i]);
@@ -3092,9 +3020,11 @@ void tHSelection::setKinematicsEEE(int myEle1, int myEle2, int myEle3){
     m_ch[eee][0] = chargeEle[myEle1];
     m_ch[eee][1] = chargeEle[myEle2];
     m_ch[eee][2] = chargeEle[myEle3];
+
     m_iso[eee][0] = pfCombinedIsoEle[myEle1] / Electron1Pt;
     m_iso[eee][1] = pfCombinedIsoEle[myEle2] / Electron2Pt;
     m_iso[eee][2] = pfCombinedIsoEle[myEle3] / Electron3Pt;
+
     m_lh[eee][0] = eleIdLikelihoodEle[myEle1];
     m_lh[eee][1] = eleIdLikelihoodEle[myEle2];    
     m_lh[eee][2] = eleIdLikelihoodEle[myEle3];    
@@ -3159,10 +3089,6 @@ void tHSelection::setKinematicsMMM(int myMu1, int myMu2, int myMu3){
       m23 = (Muon2 + Muon3).M();
     }
 
-    //std::cout << "m12 = " << m12 << std::endl;
-    //std::cout << "m13 = " << m13 << std::endl;
-    //std::cout << "m23 = " << m23 << std::endl;
-    
     float closestmll = -999.9;
     float diffmll    = fabs(m12 - 91.1876); // start with m12
     // if m12 is negative, then diffml is going to be > 1091,
@@ -3179,8 +3105,6 @@ void tHSelection::setKinematicsMMM(int myMu1, int myMu2, int myMu3){
       diffmll = fabs(m23-91.1876);
     }
     
-    //std::cout << " The selected minv is " << closestmll << std::endl;
-
     hardestLeptonPt[mmm] = TMath::Max( TMath::Max(Muon1Pt,Muon2Pt), Muon3Pt );
     slowestLeptonPt[mmm] = TMath::Min( TMath::Min(Muon1Pt,Muon2Pt), Muon3Pt );
     
@@ -3223,17 +3147,21 @@ void tHSelection::setKinematicsMMM(int myMu1, int myMu2, int myMu3){
     m_ch[mmm][0] = chargeMuon[myMu1];
     m_ch[mmm][1] = chargeMuon[myMu2];
     m_ch[mmm][2] = chargeMuon[myMu3];
+
     m_iso[mmm][0] = pfCombinedIsoMuon[myMu1] / Muon1Pt;
     m_iso[mmm][1] = pfCombinedIsoMuon[myMu2] / Muon2Pt;
     m_iso[mmm][2] = pfCombinedIsoMuon[myMu3] / Muon3Pt;
+
     m_lh[mmm][0] = -999.9;
     m_lh[mmm][1] = -999.9;    
     m_lh[mmm][2] = -999.9;    
+
     /*
     m_bdt[mmm][0] = -999.9;
     m_bdt[mmm][1] = -999.9;
     m_bdt[mmm][2] = -999.9;
     */
+    
     m_bdt[mmm][0] = leptBDTForBs(fMVAMuon,myMu1,false);
     m_bdt[mmm][1] = leptBDTForBs(fMVAMuon,myMu2,false);
     m_bdt[mmm][2] = leptBDTForBs(fMVAMuon,myMu3,false);
@@ -3292,11 +3220,6 @@ void tHSelection::setKinematicsMME(int myMu1 , int myMu2 , int myEle1){
       m23 = (Muon2 + Electron1).M();
     }
 
-    //std::cout << "m12 = " << m12 << std::endl;
-    //std::cout << "m13 = " << m13 << std::endl;
-    //std::cout << "m23 = " << m23 << std::endl;
-
-    
     float closestmll = -999.9;
     float diffmll    = fabs(m12 - 91.1876); // start with m12
     // if m12 is negative, then diffml is going to be > 1091,
@@ -3313,8 +3236,6 @@ void tHSelection::setKinematicsMME(int myMu1 , int myMu2 , int myEle1){
       diffmll = fabs(m23-91.1876);
     }
     
-    //std::cout << " The selected minv is " << closestmll << std::endl;
-
     hardestLeptonPt[mme] = TMath::Max( TMath::Max(Muon1Pt,Muon2Pt), Electron1Pt );
     slowestLeptonPt[mme] = TMath::Min( TMath::Min(Muon1Pt,Muon2Pt), Electron1Pt );
     
@@ -3357,20 +3278,25 @@ void tHSelection::setKinematicsMME(int myMu1 , int myMu2 , int myEle1){
     m_ch[mme][0] = chargeMuon[myMu1];
     m_ch[mme][1] = chargeMuon[myMu2];
     m_ch[mme][2] = chargeEle[myEle1];
+
     m_iso[mme][0] = pfCombinedIsoMuon[myMu1] / Muon1Pt;
     m_iso[mme][1] = pfCombinedIsoMuon[myMu2] / Muon2Pt;
     m_iso[mme][2] = pfCombinedIsoEle[myEle1] / Electron1Pt;
+
     m_lh[mme][0] = -999.9;
     m_lh[mme][1] = -999.9;    
     m_lh[mme][2] = eleIdLikelihoodEle[myEle1];    
+
     /*
     m_bdt[mme][0] = -999.9;
     m_bdt[mme][1] = -999.9;
     m_bdt[mme][2] = eleBDT(fMVA,myEle1);
     */
+
     m_bdt[mme][0] = leptBDTForBs(fMVAMuon,myMu1,false);
     m_bdt[mme][1] = leptBDTForBs(fMVAMuon,myMu2,false);
     m_bdt[mme][2] = leptBDTForBs(fMVAElectron,myEle1,true);
+
     m_chmaj[mme][0] = -999.9;
     m_chmaj[mme][1] = -999.9;    
     m_chmaj[mme][2] = eleChargeMajority(myEle1);
@@ -3425,11 +3351,6 @@ void tHSelection::setKinematicsEEM(int myEle1 , int myEle2 , int myMu1){
       m23 = (Electron2 + Muon1).M();
     }
 
-    //std::cout << "m12 = " << m12 << std::endl;
-    //std::cout << "m13 = " << m13 << std::endl;
-    //std::cout << "m23 = " << m23 << std::endl;
-
-    
     float closestmll = -999.9;
     float diffmll    = fabs(m12 - 91.1876); // start with m12
     // if m12 is negative, then diffml is going to be > 1091,
@@ -3446,8 +3367,6 @@ void tHSelection::setKinematicsEEM(int myEle1 , int myEle2 , int myMu1){
       diffmll = fabs(m23-91.1876);
     }
     
-    //std::cout << " The selected minv is " << closestmll << std::endl;
-
     hardestLeptonPt[eem] = TMath::Max( TMath::Max(Electron1Pt,Electron2Pt), Muon1Pt );
     slowestLeptonPt[eem] = TMath::Min( TMath::Min(Electron1Pt,Electron2Pt), Muon1Pt );
     
@@ -3490,20 +3409,25 @@ void tHSelection::setKinematicsEEM(int myEle1 , int myEle2 , int myMu1){
     m_ch[eem][0] = chargeEle[myEle1];
     m_ch[eem][1] = chargeEle[myEle2];
     m_ch[eem][2] = chargeMuon[myMu1];
+
     m_iso[eem][0] = pfCombinedIsoEle[myEle1] / Electron1Pt;
     m_iso[eem][1] = pfCombinedIsoEle[myEle2] / Electron2Pt;
     m_iso[eem][2] = pfCombinedIsoMuon[myMu1] / Muon1Pt;
+
     m_lh[eem][0] = eleIdLikelihoodEle[myEle1];
     m_lh[eem][1] = eleIdLikelihoodEle[myEle2];    
     m_lh[eem][2] = -999.9;    
+
     /*
     m_bdt[eem][0] = eleBDT(fMVA,myEle1);
     m_bdt[eem][1] = eleBDT(fMVA,myEle2);
     m_bdt[eem][2] = -999.9;
     */
+
     m_bdt[eem][0] = leptBDTForBs(fMVAElectron,myEle1,true);
     m_bdt[eem][2] = leptBDTForBs(fMVAElectron,myEle2,true);
     m_bdt[eem][3] = leptBDTForBs(fMVAMuon,myMu1,false);
+
     m_chmaj[eem][0] = eleChargeMajority(myEle1);
     m_chmaj[eem][1] = eleChargeMajority(myEle2);    
     m_chmaj[eem][2] = -999.9;
@@ -3676,17 +3600,21 @@ void tHSelection::setKinematicsMM(int myMu1, int myMu2){
     m_ch[mm][0] = chargeMuon[myMu1];
     m_ch[mm][1] = chargeMuon[myMu2];
     m_ch[mm][2] = -999.9;
+
     m_iso[mm][0] = pfCombinedIsoMuon[myMu1] / Muon1Pt;
     m_iso[mm][1] = pfCombinedIsoMuon[myMu2] / Muon2Pt;
     m_iso[mm][2] = -999.9;
+
     m_lh[mm][0] = -999.9;
     m_lh[mm][1] = -999.9;    
     m_lh[mm][2] = -999.9;    
+
     /*
     m_bdt[mm][0] = -999.9;
     m_bdt[mm][1] = -999.9;
     m_bdt[mm][2] = -999.9;
     */
+
     m_bdt[mm][0] = leptBDTForBs(fMVAMuon,myMu1,false);
     m_bdt[mm][1] = leptBDTForBs(fMVAMuon,myMu2,false);
     m_bdt[mm][2] = -999.9;

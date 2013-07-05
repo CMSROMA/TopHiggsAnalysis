@@ -269,17 +269,35 @@ private:
   // jet studies
   int m_numbtagjets[6];
 
-  int m_numbtagCSVMmvaIDcentraljets[6];//MVA ID for jets
-  int m_numbtagCSVLmvaIDcentraljets[6];
-  int m_numbtagCSVTmvaIDcentraljets[6];
+  int m_numbtagCSVMcbIDaccepjets[6];//Cut Based ID for jets
+  int m_numbtagCSVLcbIDaccepjets[6];
+  int m_numbtagCSVTcbIDaccepjets[6];
 
   int m_numbtagCSVMcbIDcentraljets[6];//Cut Based ID for jets
   int m_numbtagCSVLcbIDcentraljets[6];
   int m_numbtagCSVTcbIDcentraljets[6];
 
-  int m_nummvaIDforwardjets[6];//MVA ID for jets
+  int m_numcbIDcentraljets [6];//Cut Based ID for jets
   int m_numcbIDforwardjets [6];//Cut Based ID for jets
-  
+
+  int m_numcbIDaccepINjets [6];//Cut Based ID for jets
+  int m_numcbIDaccepOUTjets [6];//Cut Based ID for jets
+
+  int m_numbtagCSVMmvaIDaccepjets[6];//MVA ID for jets
+  int m_numbtagCSVLmvaIDaccepjets[6];
+  int m_numbtagCSVTmvaIDaccepjets[6];
+
+  int m_numbtagCSVMmvaIDcentraljets[6];//MVA ID for jets
+  int m_numbtagCSVLmvaIDcentraljets[6];
+  int m_numbtagCSVTmvaIDcentraljets[6];
+
+  int m_nummvaIDcentraljets[6];//MVA ID for jets
+  int m_nummvaIDforwardjets[6];//MVA ID for jets
+
+  int m_nummvaIDaccepOUTjets[6];//MVA ID for jets
+  int m_nummvaIDaccepINjets [6];//MVA ID for jets
+
+
   int _theGenEle, _theGenPos;
   int _theGenMuMinus, _theGenMuPlus;
 
@@ -346,6 +364,9 @@ private:
 
   float _genForwardQuark_Pt;
   float _genForwardQuark_Eta;
+
+  float _genbQuark_Pt;
+  float _genbQuark_Eta;
 
   float _highestPtGen[1], _lowestPtGen[1];
   float _nGenJet[1];

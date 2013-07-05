@@ -13,11 +13,11 @@
 #include <iostream>
 #endif
 
-enum samp { itH, iWZ, iZZ, iWW, itt, ittw, ittz, iwww, iwwz, iwzz, idy, nSamples };
+enum samp { itH, iWZ, iZZ, iWW, itt, ittw, ittz, iwww, iwwz, iwzz, idyl, idy, nSamples };
 
-float xPos[nSamples+1] = {0.22,0.22,0.22, 0.22, 0.39, 0.39, 0.39, 0.39, 0.56, 0.56, 0.56, 0.56}; 
+float xPos[nSamples+1] = {0.22,0.22,0.22, 0.22, 0.39, 0.39, 0.39, 0.39, 0.56, 0.56, 0.56, 0.56, 0.56}; 
 //float xPos[2+1] = {0.22,0.22,0.22,0.39,0.39,0.39,0.39}; 
-float yOff[nSamples+1] = {0,1,2,3,0,1,2,3,0,1,2,3};
+float yOff[nSamples+1] = {0,1,2,3,0,1,2,3,0,1,2,3,3};
 //float yOff[2+1] = {0,1,2,0,1,2,3};
 
 const Float_t _tsize   = 0.03;
@@ -180,6 +180,7 @@ class LatinoPlot {
             _sampleColor[iwww  ] = kSpring+9;
             _sampleColor[iwwz  ] = kSpring+3;
             _sampleColor[iwzz  ] = kSpring-7;
+            _sampleColor[idyl  ] = kViolet-1;
             _sampleColor[idy   ] = kViolet-1;
 	    
             //setUpStyle();
@@ -264,6 +265,7 @@ class LatinoPlot {
             TString higgsLabel = " tH";
             if(_mass != 0) higgsLabel.Form(" m_{H}=%d",_mass);
 
+	    /*
             if(_data        ) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _data,         " data",    "lp"); j++; }
             if(_hist[itH   ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[itH   ], higgsLabel, "l" ); j++; }
             if(_hist[iWZ   ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[iWZ   ], " WZ",      "f" ); j++; }
@@ -276,6 +278,7 @@ class LatinoPlot {
             if(_hist[iwwz  ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[iwwz  ], " WWZ",     "f" ); j++; }
             if(_hist[iwzz  ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[iwzz  ], " WZZ",     "f" ); j++; }
             if(_hist[idy   ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[idy   ], " Drell-Yan","f" ); j++; }
+	    */
 
             //TLatex* luminosity = new TLatex(0.9, 0.815, TString::Format("L = %.1f fb^{-1}",_lumi));
             TLatex* luminosity = new TLatex(0.9, 0.95, TString::Format("CMS Preliminary \\sqrt{s} = 8 TeV, L = %.1f fb^{-1}",_lumi));

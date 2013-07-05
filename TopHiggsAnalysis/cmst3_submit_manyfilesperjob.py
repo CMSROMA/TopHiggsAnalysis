@@ -32,7 +32,7 @@ else:
 # to write on local disks
 ################################################
 
-diskoutputdir = "/cmsrm/pc24_2/jorda/data/TopHiggs5.3.X_prueba2/"
+diskoutputdir = "/cmsrm/pc24_2/jorda/data/TopHiggs5.3.X_V04/"
 diskoutputmain = diskoutputdir+"/"+prefix+"/"+process+"/"+output
 
 # prepare job to write on the cmst3 cluster disks
@@ -76,8 +76,9 @@ while (len(inputfiles) > 0):
     outputfile.write('cp -r '+pwd+"/"+prefix+'/config $WORKDIR\n')
     outputfile.write('cp -r '+pwd+"/"+'/data $WORKDIR\n')
     outputfile.write('cp -r '+pwd+"/"+'/elebdtweights $WORKDIR\n')
+    outputfile.write('cp -r '+pwd+"/"+'/leptonMVA $WORKDIR\n')
 
-    outputfile.write('export SCRAM_ARCH=slc5_amd64_gcc462\n')
+    outputfile.write('export SCRAM_ARCH=slc5_amd64_gcc462\n') 
     outputfile.write('cd /afs/cern.ch/work/j/jorda/prueba3/CMSSW_5_3_6/src/TopHiggsAnalysis\n')
 
     outputfile.write('eval `scramv1 runtime -sh`\n')

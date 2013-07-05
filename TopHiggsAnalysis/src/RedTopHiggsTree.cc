@@ -67,19 +67,37 @@ void RedTopHiggsTree::addMLVars() {
   myTree->Branch("numExtraLep", &myNumExtraLep, "numExtraLep/I");   
   myTree->Branch("nsoftjet"   , &myNumSoftJets, "nsoftjet/I");
   myTree->Branch("nsoftbjet"  , &myNumSoftBJets, "nsoftbjet/I");
+
+  //! cut based id jets
+  myTree->Branch("numbtagCSVLcbIDaccepjets", &myNumbtagCSVLcbIDaccepjets, "numbtagCSVLcbIDaccepjets/I");
+  myTree->Branch("numbtagCSVMcbIDaccepjets", &myNumbtagCSVMcbIDaccepjets, "numbtagCSVMcbIDaccepjets/I");
+  myTree->Branch("numbtagCSVTcbIDaccepjets", &myNumbtagCSVTcbIDaccepjets, "numbtagCSVTcbIDaccepjets/I");
   
   myTree->Branch("numbtagCSVLcbIDcentraljets", &myNumbtagCSVLcbIDcentraljets, "numbtagCSVLcbIDcentraljets/I");
   myTree->Branch("numbtagCSVMcbIDcentraljets", &myNumbtagCSVMcbIDcentraljets, "numbtagCSVMcbIDcentraljets/I");
   myTree->Branch("numbtagCSVTcbIDcentraljets", &myNumbtagCSVTcbIDcentraljets, "numbtagCSVTcbIDcentraljets/I");
 
+  myTree->Branch("numbcbIDcentraljets"       , &myNumcbIDcentraljets        , "numcbIDcentraljets/I");
   myTree->Branch("numbcbIDforwardjets"       , &myNumcbIDforwardjets        , "numcbIDforwardjets/I");
+
+  myTree->Branch("numbcbIDaccepINjets"       , &myNumcbIDaccepINjets        , "numcbIDaccepINjets/I");
+  myTree->Branch("numbcbIDaccepOUTjets"      , &myNumcbIDaccepOUTjets       , "numcbIDaccepOUTjets/I");
+
+  //! mva based id jets
+  myTree->Branch("numbtagCSVLmvaIDaccepjets", &myNumbtagCSVLmvaIDaccepjets, "numbtagCSVLmvaIDaccepjets/I");
+  myTree->Branch("numbtagCSVMmvaIDaccepjets", &myNumbtagCSVMmvaIDaccepjets, "numbtagCSVMmvaIDaccepjets/I");
+  myTree->Branch("numbtagCSVTmvaIDaccepjets", &myNumbtagCSVTmvaIDaccepjets, "numbtagCSVTmvaIDaccepjets/I");
 
   myTree->Branch("numbtagCSVLmvaIDcentraljets", &myNumbtagCSVLmvaIDcentraljets, "numbtagCSVLmvaIDcentraljets/I");
   myTree->Branch("numbtagCSVMmvaIDcentraljets", &myNumbtagCSVMmvaIDcentraljets, "numbtagCSVMmvaIDcentraljets/I");
   myTree->Branch("numbtagCSVTmvaIDcentraljets", &myNumbtagCSVTmvaIDcentraljets, "numbtagCSVTmvaIDcentraljets/I");
 
+  myTree->Branch("nummvaIDcentraljets"        , &myNummvaIDcentraljets        , "nummvaIDcentraljets/I");
   myTree->Branch("nummvaIDforwardjets"        , &myNummvaIDforwardjets        , "nummvaIDforwardjets/I");
   
+  myTree->Branch("numbmvaIDaccepINjets"       , &myNummvaIDaccepINjets        , "nummvaIDaccepINjets/I");
+  myTree->Branch("numbmvaIDaccepOUTjets"      , &myNummvaIDaccepOUTjets       , "nummvaIDaccepOUTjets/I");
+
 }
 
 void RedTopHiggsTree::addJetsVars() {
@@ -305,6 +323,9 @@ void RedTopHiggsTree::addtHMcTruthInfos(){
 
   myTree->Branch("genForwardQuark_Pt" , &myGenForwardQuark_Pt , "genForwardQuark_Pt/F");
   myTree->Branch("genForwardQuark_Eta", &myGenForwardQuark_Eta, "genForwardQuark_Eta/F");
+
+  myTree->Branch("genbQuark_Pt" , &myGenbQuark_Pt , "genbQuark_Pt/F");
+  myTree->Branch("genbQuark_Eta", &myGenbQuark_Eta, "genbQuark_Eta/F");
   
 }
 
@@ -392,17 +413,36 @@ void RedTopHiggsTree::fillMLVars(int   njets,
 				 int   nsoftmunojets, 
 				 int   nSoftBJets, 
 				 int   nSoftJets,
+
+				 // cb
+				 int   numbtagCSVLcbIDaccepjets,
+				 int   numbtagCSVMcbIDaccepjets,
+				 int   numbtagCSVTcbIDaccepjets,
+
 				 int   numbtagCSVLcbIDcentraljets,
 				 int   numbtagCSVMcbIDcentraljets,
 				 int   numbtagCSVTcbIDcentraljets,
 
+				 int   numcbIDcentraljets,
 				 int   numcbIDforwardjets,
+
+				 int   numcbIDaccepINjets ,
+				 int   numcbIDaccepOUTjets,
+
+				 // mva
+				 int   numbtagCSVLmvaIDaccepjets,
+				 int   numbtagCSVMmvaIDaccepjets,
+				 int   numbtagCSVTmvaIDaccepjets,
 
 				 int   numbtagCSVLmvaIDcentraljets,
 				 int   numbtagCSVMmvaIDcentraljets,
 				 int   numbtagCSVTmvaIDcentraljets,
 
-				 int   nummvaIDforwardjets
+				 int   nummvaIDcentraljets,
+				 int   nummvaIDforwardjets,
+
+				 int   nummvaIDaccepINjets ,
+				 int   nummvaIDaccepOUTjets				 
 ) {
  
   myNjets   = njets;
@@ -425,17 +465,35 @@ void RedTopHiggsTree::fillMLVars(int   njets,
   myNumSoftBJets = nSoftBJets;
   myNumSoftJets = nSoftJets;
 
+  // cb
+  myNumbtagCSVLcbIDaccepjets = numbtagCSVLcbIDaccepjets;
+  myNumbtagCSVMcbIDaccepjets = numbtagCSVMcbIDaccepjets;
+  myNumbtagCSVTcbIDaccepjets = numbtagCSVTcbIDaccepjets;
+
   myNumbtagCSVLcbIDcentraljets = numbtagCSVLcbIDcentraljets;
   myNumbtagCSVMcbIDcentraljets = numbtagCSVMcbIDcentraljets;
   myNumbtagCSVTcbIDcentraljets = numbtagCSVTcbIDcentraljets;
 
+  myNumcbIDcentraljets = numcbIDcentraljets;
   myNumcbIDforwardjets = numcbIDforwardjets;
+
+  myNumcbIDaccepINjets  = numcbIDaccepINjets;
+  myNumcbIDaccepOUTjets = numcbIDaccepOUTjets;
+
+  // mva
+  myNumbtagCSVLmvaIDaccepjets = numbtagCSVLmvaIDaccepjets;
+  myNumbtagCSVMmvaIDaccepjets = numbtagCSVMmvaIDaccepjets;
+  myNumbtagCSVTmvaIDaccepjets = numbtagCSVTmvaIDaccepjets;
 
   myNumbtagCSVLmvaIDcentraljets = numbtagCSVLmvaIDcentraljets;
   myNumbtagCSVMmvaIDcentraljets = numbtagCSVMmvaIDcentraljets;
   myNumbtagCSVTmvaIDcentraljets = numbtagCSVTmvaIDcentraljets;
 
+  myNummvaIDcentraljets = nummvaIDcentraljets;
   myNummvaIDforwardjets = nummvaIDforwardjets;
+
+  myNummvaIDaccepINjets  = nummvaIDaccepINjets;
+  myNummvaIDaccepOUTjets = nummvaIDaccepOUTjets;
 
  }
 
@@ -685,7 +743,10 @@ void RedTopHiggsTree::filltHMcTruthInfos(float genHiggsPt,
 					 float genNeutrinofromWfromT_Eta,
 
 					 float genForwardQuark_Pt,
-					 float genForwardQuark_Eta){
+					 float genForwardQuark_Eta,
+
+					 float genbQuark_Pt,
+					 float genbQuark_Eta){
   
   myGenHiggsPt = genHiggsPt;
   myGenHiggsEta = genHiggsEta;
@@ -722,5 +783,8 @@ void RedTopHiggsTree::filltHMcTruthInfos(float genHiggsPt,
 
   myGenForwardQuark_Pt = genForwardQuark_Pt;  
   myGenForwardQuark_Eta = genForwardQuark_Eta;
+
+  myGenbQuark_Pt = genbQuark_Pt;  
+  myGenbQuark_Eta = genbQuark_Eta;
 
 }

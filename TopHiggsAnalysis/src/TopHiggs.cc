@@ -573,6 +573,8 @@ bool TopHiggs::isEleDenomFake(int theEle, bool *isDenomEleID, bool *isDenomEleIs
   *isDenomEleID = isGoodDenomID;
   *isDenomEleIso = isGoodDenomIso;
 
+  p3Ele.Clear();
+
   return isGoodDenom;
 }
 
@@ -605,6 +607,8 @@ bool TopHiggs::isMuonDenomFake(int theMuon, bool *isDenomMuonID, bool *isDenomMu
   
   *isDenomMuonID  = isGoodDenomID;
   *isDenomMuonIso = isGoodDenomIso;
+
+  p3Muon.Clear();
 
   return isGoodDenom;
 }
@@ -701,10 +705,10 @@ bool TopHiggs::isPFIsolatedMuon2012(int muonIndex) {
   float bdtiso = mvaisoMuon[muonIndex];
 
   bool MUON_ISO_ICHEP2012 = (
-                             ( pt <= 20 && abseta >= 0.000 && abseta < 0.479 && bdtiso > 0.86 ) ||
-                             ( pt <= 20 && abseta >= 0.479 && abseta < 2.400 && bdtiso > 0.82 ) ||
-                             ( pt >  20 && abseta >= 0.000 && abseta < 0.479 && bdtiso > 0.82 ) ||
-                             ( pt >  20 && abseta >= 0.479 && abseta < 2.400 && bdtiso > 0.86 )
+                             ( pt <= 20 && abseta >= 0.000 && abseta < 1.479 && bdtiso > 0.86 ) ||
+                             ( pt <= 20 && abseta >= 1.479 && abseta < 2.400 && bdtiso > 0.82 ) ||
+                             ( pt >  20 && abseta >= 0.000 && abseta < 1.479 && bdtiso > 0.82 ) ||
+                             ( pt >  20 && abseta >= 1.479 && abseta < 2.400 && bdtiso > 0.86 )
                              );
 
   return MUON_ISO_ICHEP2012;
@@ -863,19 +867,19 @@ void TopHiggs::isEleID2012(int eleIndex, bool *eleIdOutput, bool *isolOutput, bo
 
   // calculate the PU subtracted isolation
   float iso = corrEleIso2012(eleIndex);
-//   ElectronEffectiveArea::ElectronEffectiveAreaTarget effAreaTarget_ = ElectronEffectiveArea::kEleEAData2012;
-//   ElectronEffectiveArea::ElectronEffectiveAreaType effAreaGamma_   = ElectronEffectiveArea::kEleGammaIso04;
-//   ElectronEffectiveArea::ElectronEffectiveAreaType effAreaNeutralHad_ = ElectronEffectiveArea::kEleNeutralHadronIso04;
-//   ElectronEffectiveArea::ElectronEffectiveAreaType effAreaGammaAndNeutralHad_ = ElectronEffectiveArea::kEleGammaAndNeutralHadronIso04;
-
-//   float eff_area_ga  = ElectronEffectiveArea::GetElectronEffectiveArea(effAreaGamma_, abseta, effAreaTarget_);
-//   float eff_area_nh  = ElectronEffectiveArea::GetElectronEffectiveArea(effAreaNeutralHad_, abseta, effAreaTarget_);
-//   float eff_area_ganh = ElectronEffectiveArea::GetElectronEffectiveArea(effAreaGammaAndNeutralHad_, abseta, effAreaTarget_);
-
-//   float iso = pfCandChargedIso04Ele[eleIndex];
-//   //  iso += max<float>(0.,pfCandNeutralIso04Ele[eleIndex]-eff_area_nh*rhoJetsFastJet + pfCandPhotonIso04Ele[eleIndex]-eff_area_ga*rhoJetsFastJet);
-//   iso += max<float>(0.,pfCandNeutralIso04Ele[eleIndex]+pfCandPhotonIso04Ele[eleIndex]-eff_area_ganh*rhoJetsFastJet);
-
+  //   ElectronEffectiveArea::ElectronEffectiveAreaTarget effAreaTarget_ = ElectronEffectiveArea::kEleEAData2012;
+  //   ElectronEffectiveArea::ElectronEffectiveAreaType effAreaGamma_   = ElectronEffectiveArea::kEleGammaIso04;
+  //   ElectronEffectiveArea::ElectronEffectiveAreaType effAreaNeutralHad_ = ElectronEffectiveArea::kEleNeutralHadronIso04;
+  //   ElectronEffectiveArea::ElectronEffectiveAreaType effAreaGammaAndNeutralHad_ = ElectronEffectiveArea::kEleGammaAndNeutralHadronIso04;
+  
+  //   float eff_area_ga  = ElectronEffectiveArea::GetElectronEffectiveArea(effAreaGamma_, abseta, effAreaTarget_);
+  //   float eff_area_nh  = ElectronEffectiveArea::GetElectronEffectiveArea(effAreaNeutralHad_, abseta, effAreaTarget_);
+  //   float eff_area_ganh = ElectronEffectiveArea::GetElectronEffectiveArea(effAreaGammaAndNeutralHad_, abseta, effAreaTarget_);
+  
+  //   float iso = pfCandChargedIso04Ele[eleIndex];
+  //   //  iso += max<float>(0.,pfCandNeutralIso04Ele[eleIndex]-eff_area_nh*rhoJetsFastJet + pfCandPhotonIso04Ele[eleIndex]-eff_area_ga*rhoJetsFastJet);
+  //   iso += max<float>(0.,pfCandNeutralIso04Ele[eleIndex]+pfCandPhotonIso04Ele[eleIndex]-eff_area_ganh*rhoJetsFastJet);
+  
   float pt = GetPt(pxEle[eleIndex],pyEle[eleIndex]);
 
   bool ELE_ID_EGAMMA_2012 = (
@@ -921,7 +925,7 @@ void TopHiggs::isEleID2012AndDenom(int eleIndex, bool *eleIdOutput, bool *isolOu
   bool denomId, denomIso;
   denomId = denomIso = true;
   bool fullDenom = isEleDenomFake(eleIndex,&denomId,&denomIso);
-
+  
   *eleIdOutput = (tightId && denomId && denomIso); // apply the full denom on top of the ID to be consistent with the others for synch reasons
   *isolOutput = (tightIso);
   *convRejOutput = tightConvRej; // num and denom conv rej are the same
@@ -1064,6 +1068,8 @@ float TopHiggs::eleBDT(ElectronIDMVA *mva, int eleIndex) {
     }
   }
 
+  pInGsf.Clear();
+
   return mva->MVAValue(ElePt, EleSCEta,
                        EleSigmaIEtaIEta,
                        EleDEtaIn,
@@ -1131,6 +1137,7 @@ float TopHiggs::leptBDTForBs(IDForBsMVA *mva, int leptIndex, bool isEle) {
 	minDr = dR;
 	closestGen = imc;
       }
+      trueP.Clear();
     }
   }
 
@@ -1186,6 +1193,8 @@ float TopHiggs::leptBDTForBs(IDForBsMVA *mva, int leptIndex, bool isEle) {
 	minDr = theDr;
 	closestJet = ii;
       }
+      pJet.Clear();
+
     }      
 
     if (closestJet<0) {
@@ -1248,6 +1257,7 @@ float TopHiggs::leptBDTForBs(IDForBsMVA *mva, int leptIndex, bool isEle) {
 	minDr = theDr;
 	closestJet = ii;
       }
+      pJet.Clear();
     }      
     
     if (closestJet<0) {
@@ -1277,6 +1287,8 @@ float TopHiggs::leptBDTForBs(IDForBsMVA *mva, int leptIndex, bool isEle) {
     logdz = log(fabs(dzMu));
     if(applyMcCorr) logdz = tHMcCorr->scaleDzMC(logdz, pdgId, leptPt, leptEta, mcMatchId, mcMatchAny);
   } 
+
+  pLept.Clear();
 
   return mva->MVAValue(leptPt,
 		       leptEta,

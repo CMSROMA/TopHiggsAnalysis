@@ -5,6 +5,7 @@
 #include <TMath.h>
 #include <algorithm>
 #include <iostream>
+#include <TLorentzVector.h>
 
 // HiggsAnalysisTools includes
 #include "LumiReweightingStandAlone.h"
@@ -105,17 +106,35 @@ void addWeightsToTreetH::addWeights() {
     Int_t           ncbIDjets;
     Int_t           nuncorrjets;
 
-    Int_t numbtagCSVMmvaIDcentraljets;//MVA ID for jets
+    // cb
+    Int_t numbtagCSVMcbIDcentraljets;
+    Int_t numbtagCSVLcbIDcentraljets;
+    Int_t numbtagCSVTcbIDcentraljets;
+
+    Int_t numbtagCSVMcbIDaccepjets;
+    Int_t numbtagCSVLcbIDaccepjets;
+    Int_t numbtagCSVTcbIDaccepjets;
+    
+    Int_t numcbIDcentraljets;
+    Int_t numcbIDforwardjets;
+
+    Int_t numcbIDaccepINjets;
+    Int_t numcbIDaccepOUTjets;
+
+    // mva
+    Int_t numbtagCSVMmvaIDcentraljets;
     Int_t numbtagCSVLmvaIDcentraljets;
     Int_t numbtagCSVTmvaIDcentraljets;
 
-    Int_t nummvaIDforwardjets;//MVA ID for jets
+    Int_t numbtagCSVMmvaIDaccepjets;
+    Int_t numbtagCSVLmvaIDaccepjets;
+    Int_t numbtagCSVTmvaIDaccepjets;
 
-    Int_t numbtagCSVMcbIDcentraljets;//Cut Based ID for jets
-    Int_t numbtagCSVLcbIDcentraljets;
-    Int_t numbtagCSVTcbIDcentraljets;
-    
-    Int_t numcbIDforwardjets;//Cut Based ID for jets
+    Int_t nummvaIDcentraljets;
+    Int_t nummvaIDforwardjets;
+
+    Int_t nummvaIDaccepINjets;
+    Int_t nummvaIDaccepOUTjets;
 
     Int_t           nVtx;
     Float_t         dxyEVT;
@@ -255,17 +274,33 @@ void addWeightsToTreetH::addWeights() {
     treeOrig->SetBranchAddress("ncbIDjets", &ncbIDjets);
     treeOrig->SetBranchAddress("nuncorrjets", &nuncorrjets);
 
-    treeOrig->SetBranchAddress("numbtagCSVMmvaIDcentraljets", &numbtagCSVMmvaIDcentraljets);
-    treeOrig->SetBranchAddress("numbtagCSVLmvaIDcentraljets", &numbtagCSVLmvaIDcentraljets);
-    treeOrig->SetBranchAddress("numbtagCSVTmvaIDcentraljets", &numbtagCSVTmvaIDcentraljets);
-
-    treeOrig->SetBranchAddress("nummvaIDforwardjets", &nummvaIDforwardjets);
+    treeOrig->SetBranchAddress("numbtagCSVMcbIDaccepjets", &numbtagCSVMcbIDaccepjets);
+    treeOrig->SetBranchAddress("numbtagCSVLcbIDaccepjets", &numbtagCSVLcbIDaccepjets);
+    treeOrig->SetBranchAddress("numbtagCSVTcbIDaccepjets", &numbtagCSVTcbIDaccepjets);
 
     treeOrig->SetBranchAddress("numbtagCSVMcbIDcentraljets", &numbtagCSVMcbIDcentraljets);
     treeOrig->SetBranchAddress("numbtagCSVLcbIDcentraljets", &numbtagCSVLcbIDcentraljets);
     treeOrig->SetBranchAddress("numbtagCSVTcbIDcentraljets", &numbtagCSVTcbIDcentraljets);
 
-    treeOrig->SetBranchAddress("numcbIDforwardjets", &numcbIDforwardjets);
+    treeOrig->SetBranchAddress("numbcbIDcentraljets", &numcbIDcentraljets);
+    treeOrig->SetBranchAddress("numbcbIDforwardjets", &numcbIDforwardjets);
+
+    treeOrig->SetBranchAddress("numbcbIDaccepINjets",   &numcbIDaccepINjets);
+    treeOrig->SetBranchAddress("numbcbIDaccepOUTjets", &numcbIDaccepOUTjets);
+
+    treeOrig->SetBranchAddress("numbtagCSVMmvaIDaccepjets", &numbtagCSVMmvaIDaccepjets);
+    treeOrig->SetBranchAddress("numbtagCSVLmvaIDaccepjets", &numbtagCSVLmvaIDaccepjets);
+    treeOrig->SetBranchAddress("numbtagCSVTmvaIDaccepjets", &numbtagCSVTmvaIDaccepjets);
+
+    treeOrig->SetBranchAddress("numbtagCSVMmvaIDcentraljets", &numbtagCSVMmvaIDcentraljets);
+    treeOrig->SetBranchAddress("numbtagCSVLmvaIDcentraljets", &numbtagCSVLmvaIDcentraljets);
+    treeOrig->SetBranchAddress("numbtagCSVTmvaIDcentraljets", &numbtagCSVTmvaIDcentraljets);
+
+    treeOrig->SetBranchAddress("nummvaIDcentraljets", &nummvaIDcentraljets);
+    treeOrig->SetBranchAddress("nummvaIDforwardjets", &nummvaIDforwardjets);
+
+    treeOrig->SetBranchAddress("numbmvaIDaccepINjets",   &nummvaIDaccepINjets);
+    treeOrig->SetBranchAddress("numbmvaIDaccepOUTjets", &nummvaIDaccepOUTjets);
 
     treeOrig->SetBranchAddress("dxyEVT", &dxyEVT);
     treeOrig->SetBranchAddress("dszEVT", &dszEVT);
@@ -356,6 +391,7 @@ void addWeightsToTreetH::addWeights() {
     float jetpt1, jeteta1, jetphi1;
     float jetpt2, jeteta2, jetphi2;
     float chmet;
+    float mlll;
     float pmet, pmet2;
     float L1pt, L1eta, L1phi;
     float L2pt, L2eta, L2phi;
@@ -373,11 +409,36 @@ void addWeightsToTreetH::addWeights() {
     float f_run, f_lumi;
     float f_hlt, f_nVtx, f_njets, f_ncbIDjets, f_nuncorrjets;
 
-    float f_numbtagCSVMmvaIDcentraljets, f_numbtagCSVLmvaIDcentraljets, f_numbtagCSVTmvaIDcentraljets;
+    
+
+    float f_numbtagCSVMmvaIDaccepjets;
+    float f_numbtagCSVLmvaIDaccepjets; 
+    float f_numbtagCSVTmvaIDaccepjets;
+
+    float f_numbtagCSVMmvaIDcentraljets;
+    float f_numbtagCSVLmvaIDcentraljets; 
+    float f_numbtagCSVTmvaIDcentraljets;
+
+    float f_nummvaIDcentraljets;
     float f_nummvaIDforwardjets;
-    float f_numbtagCSVMcbIDcentraljets, f_numbtagCSVLcbIDcentraljets, f_numbtagCSVTcbIDcentraljets;
+
+    float f_nummvaIDaccepINjets;
+    float f_nummvaIDaccepOUTjets;
+
+    float f_numbtagCSVMcbIDaccepjets;
+    float f_numbtagCSVLcbIDaccepjets; 
+    float f_numbtagCSVTcbIDaccepjets;
+
+    float f_numbtagCSVMcbIDcentraljets;
+    float f_numbtagCSVLcbIDcentraljets; 
+    float f_numbtagCSVTcbIDcentraljets;
+
+    float f_numcbIDcentraljets;
     float f_numcbIDforwardjets;
- 
+
+    float f_numcbIDaccepINjets;
+    float f_numcbIDaccepOUTjets;
+
     float f_zveto, f_bveto_ip, f_bveto_mu, f_bveto_munj, f_bveto, f_dphiveto, f_typeL1, f_typeL2, f_typeL3,
       f_nSoftMu, f_nSoftMuNoJets, f_numExtraLep, f_finalstate, f_processId, sameflav, f_nsoftbjet, f_nsoftjet;
     float f_ch[3];
@@ -424,6 +485,7 @@ void addWeightsToTreetH::addWeights() {
       theTreeNew->Branch("dphill", &dphill, "dphill/F");
       theTreeNew->Branch("drll", &deltaR, "drll/F");
       theTreeNew->Branch("mll", &eleInvMass, "mll/F");
+      theTreeNew->Branch("mlll", &mlll, "mlll/F");
       theTreeNew->Branch("mth", &transvMass, "mth/F");
       theTreeNew->Branch("mthUp", &transvMassUp, "mthUp/F");
       theTreeNew->Branch("mthDown", &transvMassDown, "mthDown/F");
@@ -451,18 +513,34 @@ void addWeightsToTreetH::addWeights() {
       theTreeNew->Branch("promptDecay", &i_promptDecay, "promptDecay/I");
       theTreeNew->Branch("njet", &f_njets, "njet/F");
       theTreeNew->Branch("ncbIDjet", &f_ncbIDjets, "ncbIDjet/F");
+
+      theTreeNew->Branch("numbtagCSVMmvaIDaccepjets", &f_numbtagCSVMmvaIDaccepjets, "numbtagCSVMmvaIDaccepjets/F");
+      theTreeNew->Branch("numbtagCSVLmvaIDaccepjets", &f_numbtagCSVLmvaIDaccepjets, "numbtagCSVLmvaIDaccepjets/F");
+      theTreeNew->Branch("numbtagCSVTmvaIDaccepjets", &f_numbtagCSVTmvaIDaccepjets, "numbtagCSVTmvaIDaccepjets/F");
       
       theTreeNew->Branch("numbtagCSVMmvaIDcentraljets", &f_numbtagCSVMmvaIDcentraljets, "numbtagCSVMmvaIDcentraljets/F");
       theTreeNew->Branch("numbtagCSVLmvaIDcentraljets", &f_numbtagCSVLmvaIDcentraljets, "numbtagCSVLmvaIDcentraljets/F");
       theTreeNew->Branch("numbtagCSVTmvaIDcentraljets", &f_numbtagCSVTmvaIDcentraljets, "numbtagCSVTmvaIDcentraljets/F");
 
+      theTreeNew->Branch("nummvaIDcentraljets", &f_nummvaIDcentraljets, "nummvaIDcentraljets/F");
       theTreeNew->Branch("nummvaIDforwardjets", &f_nummvaIDforwardjets, "nummvaIDforwardjets/F");
+
+      theTreeNew->Branch("nummvaIDaccepINjets" , &f_nummvaIDaccepINjets , "nummvaIDaccepINjets/F");
+      theTreeNew->Branch("nummvaIDaccepOUTjets", &f_nummvaIDaccepOUTjets, "nummvaIDaccepOUTjets/F");
+
+      theTreeNew->Branch("numbtagCSVMcbIDaccepjets", &f_numbtagCSVMcbIDaccepjets, "numbtagCSVMcbIDaccepjets/F");
+      theTreeNew->Branch("numbtagCSVLcbIDaccepjets", &f_numbtagCSVLcbIDaccepjets, "numbtagCSVLcbIDaccepjets/F");
+      theTreeNew->Branch("numbtagCSVTcbIDaccepjets", &f_numbtagCSVTcbIDaccepjets, "numbtagCSVTcbIDaccepjets/F");
 
       theTreeNew->Branch("numbtagCSVMcbIDcentraljets", &f_numbtagCSVMcbIDcentraljets, "numbtagCSVMcbIDcentraljets/F");
       theTreeNew->Branch("numbtagCSVLcbIDcentraljets", &f_numbtagCSVLcbIDcentraljets, "numbtagCSVLcbIDcentraljets/F");
       theTreeNew->Branch("numbtagCSVTcbIDcentraljets", &f_numbtagCSVTcbIDcentraljets, "numbtagCSVTcbIDcentraljets/F");
 
+      theTreeNew->Branch("numcbIDcentraljets", &f_numcbIDcentraljets, "numcbIDcentraljets/F");
       theTreeNew->Branch("numcbIDforwardjets", &f_numcbIDforwardjets, "numcbIDforwardjets/F");
+
+      theTreeNew->Branch("numcbIDaccepINjets" , &f_numcbIDaccepINjets , "numcbIDaccepINjets/F");
+      theTreeNew->Branch("numcbIDaccepOUTjets", &f_numcbIDaccepOUTjets, "numcbIDaccepOUTjets/F");
 
       theTreeNew->Branch("nuncorrjets", &f_nuncorrjets, "nuncorrjets/F");
       theTreeNew->Branch("dxyEVT", &dxyEVT, "dxyEVT/F");
@@ -628,19 +706,37 @@ void addWeightsToTreetH::addWeights() {
 
       TVector3 TV_L1( pxL1, pyL1, pzL1 );
       TVector3 TV_L2( pxL2, pyL2, pzL2 );
-      TVector3 TV_L3( pxL3, pyL3, pzL3 );
+      TVector3 TV_L3;
+      if (finalstate_ < 4) 
+	TV_L3.SetXYZ( pxL3, pyL3, pzL3 );
+
+      TLorentzVector Lepton1(pxL1, pyL1, pzL1, eneL1 );
+      TLorentzVector Lepton2(pxL2, pyL2, pzL2, eneL2 );
+      TLorentzVector Lepton3;
+      if (finalstate_ < 4)  
+	Lepton3.SetPxPyPzE(pxL3, pyL3, pzL3, eneL3 );
+      
       TVector3 TV_L1p2   = TV_L1 + TV_L2;
-      TVector3 TV_L1p2p3 = TV_L1 + TV_L2 + TV_L3;
+      TVector3 TV_L1p2p3;
+      if (finalstate_ < 4)
+	TV_L1p2p3 = TV_L1 + TV_L2 + TV_L3;
+      else
+	TV_L1p2p3 = TV_L1 + TV_L2;
+
       TVector3 TV_chmet( pxChMet, pyChMet, pzChMet );
       TVector3 TV_jet1( pxLeadJet[0], pyLeadJet[0], pzLeadJet[0] );
       TVector3 TV_jet2( pxSecondJet[0], pySecondJet[0], pzSecondJet[0] );
       deltaPhi_LL_MET   = (180./3.14) * TV_chmet.DeltaPhi(TV_L1p2);
+
       float l1eta = TV_L1.Eta();
       float l2eta = TV_L2.Eta();
-      float l3eta = TV_L3.Eta();
+      float l3eta = -999.;
+      if (finalstate_ < 4) l3eta = TV_L3.Eta();
+
       float l1pt  = TV_L1.Pt();
       float l2pt  = TV_L2.Pt();
-      float l3pt  = TV_L3.Pt();
+      float l3pt = -999.;
+      if (finalstate_ < 4) l3pt  = TV_L3.Pt();
 
       zveto = (fabs(eleInvMass-91.1876)>15) ? 1 : 0;
       bveto_ip = 1;
@@ -668,6 +764,7 @@ void addWeightsToTreetH::addWeights() {
       iMet = projMet * cos(TV_chmet.Angle(*pfmetV));
 
       dphill = deltaPhi * TMath::Pi() / 180.;
+
       //! razor-like variables
       TLorentzVector FV_L1(TV_L1,eneL1);
       TLorentzVector FV_L2(TV_L2,eneL2);
@@ -687,6 +784,7 @@ void addWeightsToTreetH::addWeights() {
       Float_t eff3=1.;
       Float_t effA1, effA2, effB1, effB2;
       effA1 = effA2 = effB1 = effB2 = 1.;
+
       if (processId_>0) { // MC => apply scale factors
         if (finalstate_ == 0) {   // eee
 	  eff1 = getOfflineEff(l1pt, l1eta, histoSFele52);    
@@ -702,9 +800,17 @@ void addWeightsToTreetH::addWeights() {
 	  eff3 = getOfflineEff(l3pt, l3eta, histoSFmuons52);
         } else if (finalstate_ == 3) { // mme
 	  eff1 = getOfflineEff(l1pt, l1eta, histoSFmuons52);
-	  eff2 = getOfflineEff(l2pt, l2eta, histoSFele52);
+	  eff2 = getOfflineEff(l2pt, l2eta, histoSFmuons52);
 	  eff3 = getOfflineEff(l3pt, l3eta, histoSFele52);
-        } 
+        } else if (finalstate_ == 2) { // ee
+	  eff1 = getOfflineEff(l1pt, l1eta, histoSFele52);
+	  eff2 = getOfflineEff(l2pt, l2eta, histoSFele52);
+	  eff3 = 1.;
+        } else if (finalstate_ == 3) { // mme
+	  eff1 = getOfflineEff(l1pt, l1eta, histoSFmuons52);
+	  eff2 = getOfflineEff(l2pt, l2eta, histoSFmuons52);
+	  eff3 = 1.0;
+	}
         effW = eff1*eff2*eff3;
       } else { // data
         effW = 1.;
@@ -744,22 +850,30 @@ void addWeightsToTreetH::addWeights() {
 
       dileptonPt   = TV_L1p2.Pt();
       trileptonPt  = TV_L1p2p3.Pt();
+      if (finalstate_ < 4){
+	TLorentzVector TriLepton = Lepton1 + Lepton2 + Lepton3;
+	mlll         = TriLepton.M();
+      }else{
+	mlll         = -999.;
+      }
 
       L1pt  = TV_L1.Pt();
       L2pt  = TV_L2.Pt();
-      L3pt  = TV_L3.Pt();
+      if (finalstate_ < 4) L3pt  = TV_L3.Pt();
 
       L1eta = TV_L1.Eta();
       L2eta = TV_L2.Eta();
-      L3eta = TV_L3.Eta();
+      if (finalstate_ < 4) L3eta = TV_L3.Eta();
 
       L1phi = TV_L1.Phi();
       L2phi = TV_L2.Phi();
-      L3phi = TV_L3.Phi();
+      if (finalstate_ < 4) L3phi = TV_L3.Phi();
 
       consecevent = (float)j;
       
       sameflav = (finalstate_<2) ? 1. : 0;
+
+      
 
       i_WWSel0j = (step[14] && (dymva1>0.6 || !sameflav) && njets==0) ? 1 : 0;
       i_WWSel1j = (step[14] && (dymva1>0.3 || !sameflav) && njets==1) ? 1 : 0;

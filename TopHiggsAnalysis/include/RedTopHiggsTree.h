@@ -1,4 +1,4 @@
- 
+
 #ifndef RedTopHiggsTree_h
 #define RedTopHiggsTree_h
 
@@ -88,10 +88,35 @@ public:
                   float leadJetBTagTrackCount, float subleadJetBTagTrackCount, float subleadJetsMaxBTagTrackCount, 
                   float leadJetBTagBProb, float subleadJetBTagBProb, float subleadJetsMaxBTagBProb, 
                   int numExtraLep, int nSoftMuNoJets, int nSoftBJets, int nSoftJets,
-		  int numbtagCSVLcbIDcentraljets,  int numbtagCSVMcbIDcentraljets,  int numbtagCSVTcbIDcentraljets,
+		  // cb
+		  int numbtagCSVLcbIDaccepjets,  
+		  int numbtagCSVMcbIDaccepjets,  
+		  int numbtagCSVTcbIDaccepjets,
+
+		  int numbtagCSVLcbIDcentraljets,  
+		  int numbtagCSVMcbIDcentraljets,  
+		  int numbtagCSVTcbIDcentraljets,
+
+		  int numcbIDcentraljets,  
 		  int numcbIDforwardjets,  
-		  int numbtagCSVLmvaIDcentraljets, int numbtagCSVMmvaIDcentraljets, int numbtagCSVTmvaIDcentraljets,
-		  int nummvaIDforwardjets);
+
+		  int numcbIDaccepINjets ,  
+		  int numcbIDaccepOUTjets,  
+
+		  // mva
+		  int numbtagCSVLmvaIDaccepjets,  
+		  int numbtagCSVMmvaIDaccepjets,  
+		  int numbtagCSVTmvaIDaccepjets,
+
+		  int numbtagCSVLmvaIDcentraljets, 
+		  int numbtagCSVMmvaIDcentraljets, 
+		  int numbtagCSVTmvaIDcentraljets,
+
+		  int nummvaIDcentraljets,
+		  int nummvaIDforwardjets,
+
+		  int nummvaIDaccepINjets  ,  
+		  int nummvaIDaccepOUTjets);
 
   //! fill infos for jetId studies
   void fillJetsVars(float ljpt, float ljeta, int ljpfid, int ljmatch, float ljmva, int ljl, float sljpt, float sljeta, int sljpfid, int sljmatch, float sljmva, int sljl);
@@ -152,7 +177,10 @@ public:
 			  float genNeutrinofromWfromT_Eta,
 
 			  float genForwardQuark_Pt,
-			  float genForwardQuark_Eta);
+			  float genForwardQuark_Eta,
+
+			  float genbQuark_Pt,
+			  float genbQuark_Eta);
   
 
   //! effectively store the events in the tree
@@ -199,10 +227,33 @@ private:
   float myLeadingJetBTagJetBProb, mySubleadingJetBTagJetBProb, mySubleadingJetsMaxBTagJetBProb;
   int  myNumExtraLep, myNumSoftBJets, myNumSoftJets;
 
-  int myNumbtagCSVLcbIDcentraljets , myNumbtagCSVMcbIDcentraljets , myNumbtagCSVTcbIDcentraljets;
+  int myNumbtagCSVLcbIDaccepjets; 
+  int myNumbtagCSVMcbIDaccepjets; 
+  int myNumbtagCSVTcbIDaccepjets;
+
+  int myNumbtagCSVLcbIDcentraljets;
+  int myNumbtagCSVMcbIDcentraljets; 
+  int myNumbtagCSVTcbIDcentraljets;
+
+  int myNumcbIDcentraljets;
   int myNumcbIDforwardjets;
-  int myNumbtagCSVLmvaIDcentraljets, myNumbtagCSVMmvaIDcentraljets, myNumbtagCSVTmvaIDcentraljets;
+
+  int myNumcbIDaccepINjets;
+  int myNumcbIDaccepOUTjets;
+
+  int myNumbtagCSVLmvaIDaccepjets; 
+  int myNumbtagCSVMmvaIDaccepjets; 
+  int myNumbtagCSVTmvaIDaccepjets;
+
+  int myNumbtagCSVLmvaIDcentraljets; 
+  int myNumbtagCSVMmvaIDcentraljets; 
+  int myNumbtagCSVTmvaIDcentraljets;
+
+  int myNummvaIDcentraljets;
   int myNummvaIDforwardjets;
+
+  int myNummvaIDaccepINjets;
+  int myNummvaIDaccepOUTjets;
 
   bool myFinalLeptons;
   bool myJetVeto;
@@ -288,6 +339,9 @@ private:
 
   float myGenForwardQuark_Pt;
   float myGenForwardQuark_Eta;
+
+  float myGenbQuark_Pt;
+  float myGenbQuark_Eta;
 
   // latinos
   bool mySteps[2];
