@@ -172,6 +172,9 @@ private:
   double ErrEt( double Et, double Eta);
   bool isLooseJetMva(float pt, float eta, float id);
 
+  //! for calculating lepton mva variables
+  void estimateLeptonMVAvariables(int channel, int lepton1, int lepton2, int lepton3);
+
   //! to evaluate eleID
   bool m_useBDTEleID;
 
@@ -273,15 +276,11 @@ private:
   int m_numbtagCSVLcbIDaccepjets[6];
   int m_numbtagCSVTcbIDaccepjets[6];
 
-  int m_numbtagCSVMcbIDcentraljets[6];//Cut Based ID for jets
-  int m_numbtagCSVLcbIDcentraljets[6];
-  int m_numbtagCSVTcbIDcentraljets[6];
+  int m_numcbIDcentralLjets [6];//Cut Based ID for jets
+  int m_numcbIDforwardLjets [6];//Cut Based ID for jets
 
-  int m_numcbIDcentraljets [6];//Cut Based ID for jets
-  int m_numcbIDforwardjets [6];//Cut Based ID for jets
-
-  int m_numcbIDaccepINjets [6];//Cut Based ID for jets
-  int m_numcbIDaccepOUTjets [6];//Cut Based ID for jets
+  int m_numcbIDcentralMjets [6];//Cut Based ID for jets
+  int m_numcbIDforwardMjets [6];//Cut Based ID for jets
 
   int m_numbtagCSVMmvaIDaccepjets[6];//MVA ID for jets
   int m_numbtagCSVLmvaIDaccepjets[6];
@@ -297,6 +296,41 @@ private:
   int m_nummvaIDaccepOUTjets[6];//MVA ID for jets
   int m_nummvaIDaccepINjets [6];//MVA ID for jets
 
+  float ptCVStaggedM [6][5];
+  float etaCVStaggedM[6][5];
+  float phiCVStaggedM[6][5];
+  float eneCVStaggedM[6][5];
+  float cvsCVStaggedM[6][5];
+
+  float ptForwardM [6][5];
+  float etaForwardM[6][5];
+  float phiForwardM[6][5];
+  float eneForwardM[6][5];
+  float cvsForwardM[6][5];
+
+  float ptCentralM [6][5];
+  float etaCentralM[6][5];
+  float phiCentralM[6][5];
+  float eneCentralM[6][5];
+  float cvsCentralM[6][5];
+
+  float ptCVStaggedL [6][5];
+  float etaCVStaggedL[6][5];
+  float phiCVStaggedL[6][5];
+  float eneCVStaggedL[6][5];
+  float cvsCVStaggedL[6][5];
+
+  float ptForwardL [6][5];
+  float etaForwardL[6][5];
+  float phiForwardL[6][5];
+  float eneForwardL[6][5];
+  float cvsForwardL[6][5];
+
+  float ptCentralL [6][5];
+  float etaCentralL[6][5];
+  float phiCentralL[6][5];
+  float eneCentralL[6][5];
+  float cvsCentralL[6][5];
 
   int _theGenEle, _theGenPos;
   int _theGenMuMinus, _theGenMuPlus;
@@ -372,7 +406,6 @@ private:
   float _nGenJet[1];
   float _emFracEle[50], _hadFracEle[50];
 
-
   //! counters
   int nWWtoLLdecays;
   int nWfromTtoLdecay;
@@ -395,6 +428,20 @@ private:
 
   //! Rochester correction for muons
   RochCor2012 *rmcor;
+
+  //! Lepton MVA input variables
+  float leptPt[6][3];
+  float leptEta[6][3];
+  float neuRelIs[6][3];
+  float chRelIso[6][3];
+  float jetDR_in[6][3];
+  float jetPtRatio_in[6][3];
+  float jetBTagCSV_in[6][3];
+  float sip3d[6][3];
+  float mvaId[6][3];
+  int   innerHits[6][3];
+  float logdxy[6][3];
+  float logdz[6][3];
 
 };
 #endif

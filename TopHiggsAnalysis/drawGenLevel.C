@@ -12,7 +12,7 @@
 
 void drawGenLevel(){
 
-  TFile *file = TFile::Open("genLevelInfo.root");
+  TFile *file = TFile::Open("genLevelInfo_tHYminus1.root");
 
   TTree *tree = (TTree*)file->Get("latino");
   
@@ -28,6 +28,9 @@ void drawGenLevel(){
 
   TH1F* hGenForwardQuarkEta = new TH1F("hGenForwardQuarkEta","",40,-5.0,5.0);
   TH1F* hGenbQuarkEta       = new TH1F("hGenbQuarkEta"      ,"",40,-5.0,5.0);
+
+  TH1F* hGenForwardQuarkPt = new TH1F("hGenForwardQuarkPt","",40,0.,200.0);
+  TH1F* hGenbQuarkPt       = new TH1F("hGenbQuarkPt"      ,"",40,0.,200.0);
 
   TCanvas *c1 = new TCanvas("canvas1","canvas1");
   c1->cd();
@@ -129,8 +132,9 @@ void drawGenLevel(){
   TCanvas *c10 = new TCanvas("canvas10","canvas10");
   c10->cd();
   hGenTopEta->GetXaxis()->SetTitle("\\eta^{gen}");
-  hGenTopEta->Draw();
-  hGenHiggsEta->Draw("same");
+  hGenHiggsEta->GetXaxis()->SetTitle("\\eta^{gen}");
+  hGenHiggsEta->Draw("");
+  hGenTopEta->Draw("same");
 
   l4 = new TLegend(0.5,0.3,0.6,0.4,NULL,"brNDC");
   l4->AddEntry(hGenTopEta  , " Top","l");
@@ -173,6 +177,39 @@ void drawGenLevel(){
   l5->SetBorderSize(0);  
   l5->Draw("same");
 
+  TCanvas *c14 = new TCanvas("canvas14","canvas14");
+  c14->cd();
+  hGenForwardQuarkPt->SetNormFactor(1.);
+  hGenForwardQuarkPt->SetLineWidth(2);
+  hGenForwardQuarkPt->SetLineColor(kOrange+4);
+  //hGenForwardQuarkPt->SetTitle("quark q \\eta");
+  hGenForwardQuarkPt->GetXaxis()->SetTitle("p_{T}^{q}");
+  hGenForwardQuarkPt->GetYaxis()->SetTitle("normalized to 1");
+  tree->Draw("genForwardQuark_Pt>>hGenForwardQuarkPt");
+  
+  TCanvas *c15 = new TCanvas("canvas15","canvas15");
+  c15->cd();
+  hGenbQuarkPt->SetNormFactor(1.);
+  hGenbQuarkPt->SetLineWidth(2);
+  //hGenbQuarkPt->SetTitle("quark b \\eta");
+  hGenbQuarkPt->SetLineColor(kOrange+7);
+  hGenbQuarkPt->GetXaxis()->SetTitle("p_{T}^{q}");
+  hGenbQuarkPt->GetYaxis()->SetTitle("normalized to 1");
+  tree->Draw("genbQuark_Pt>>hGenbQuarkPt");
+
+  TCanvas *c16 = new TCanvas("canvas16","canvas16");
+  c16->cd(); 
+  hGenForwardQuarkPt->Draw();
+  hGenbQuarkPt->Draw("same");
+
+
+  l6 = new TLegend(0.2,0.7,0.3,0.8,NULL,"brNDC");
+  l6->AddEntry(hGenForwardQuarkPt, " q quark","l");
+  l6->AddEntry(hGenbQuarkPt      , " b quark","l");
+  l6->SetTextSize(0.03);
+  l6->SetFillColor(kWhite);
+  l6->SetBorderSize(0);  
+  l6->Draw("same");
 
 } 
 

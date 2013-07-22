@@ -69,7 +69,7 @@ void addWeightsToTreetH::addWeights() {
     int nentriesOrig = treeOrig->GetEntries();
     
     TFile *fileNew = TFile::Open(filename_.c_str(),"recreate");
-    TTree *treeNew = new TTree("latino","tree with 2 lepton selection");
+    TTree *treeNew = new TTree("latino","tree with 3 lepton selection");
 
     std::vector<TTree*> trees; 
     trees.push_back(treeNew);
@@ -107,19 +107,15 @@ void addWeightsToTreetH::addWeights() {
     Int_t           nuncorrjets;
 
     // cb
-    Int_t numbtagCSVMcbIDcentraljets;
-    Int_t numbtagCSVLcbIDcentraljets;
-    Int_t numbtagCSVTcbIDcentraljets;
-
     Int_t numbtagCSVMcbIDaccepjets;
     Int_t numbtagCSVLcbIDaccepjets;
     Int_t numbtagCSVTcbIDaccepjets;
     
-    Int_t numcbIDcentraljets;
-    Int_t numcbIDforwardjets;
+    Int_t numcbIDcentralLjets;
+    Int_t numcbIDforwardLjets;
 
-    Int_t numcbIDaccepINjets;
-    Int_t numcbIDaccepOUTjets;
+    Int_t numcbIDcentralMjets;
+    Int_t numcbIDforwardMjets;
 
     // mva
     Int_t numbtagCSVMmvaIDcentraljets;
@@ -185,6 +181,42 @@ void addWeightsToTreetH::addWeights() {
     Int_t           nsoftbjet;
     Int_t           numExtraLep;
 
+    float ptCVStaggedM [5];
+    float etaCVStaggedM[5];
+    float phiCVStaggedM[5];
+    float eneCVStaggedM[5];
+    float cvsCVStaggedM[5];
+    
+    float ptForwardM [5];
+    float etaForwardM[5];
+    float phiForwardM[5];
+    float eneForwardM[5];
+    float cvsForwardM[5];
+
+    float ptCentralM [5];
+    float etaCentralM[5];
+    float phiCentralM[5];
+    float eneCentralM[5];
+    float cvsCentralM[5];
+
+    float ptCVStaggedL [5];
+    float etaCVStaggedL[5];
+    float phiCVStaggedL[5];
+    float eneCVStaggedL[5];
+    float cvsCVStaggedL[5];
+    
+    float ptForwardL [5];
+    float etaForwardL[5];
+    float phiForwardL[5];
+    float eneForwardL[5];
+    float cvsForwardL[5];
+
+    float ptCentralL [5];
+    float etaCentralL[5];
+    float phiCentralL[5];
+    float eneCentralL[5];
+    float cvsCentralL[5];
+    
     // lepton quantities. Depending on the channel ...
     Int_t           ch[3];
     Float_t         lepiso[3];
@@ -278,15 +310,11 @@ void addWeightsToTreetH::addWeights() {
     treeOrig->SetBranchAddress("numbtagCSVLcbIDaccepjets", &numbtagCSVLcbIDaccepjets);
     treeOrig->SetBranchAddress("numbtagCSVTcbIDaccepjets", &numbtagCSVTcbIDaccepjets);
 
-    treeOrig->SetBranchAddress("numbtagCSVMcbIDcentraljets", &numbtagCSVMcbIDcentraljets);
-    treeOrig->SetBranchAddress("numbtagCSVLcbIDcentraljets", &numbtagCSVLcbIDcentraljets);
-    treeOrig->SetBranchAddress("numbtagCSVTcbIDcentraljets", &numbtagCSVTcbIDcentraljets);
+    treeOrig->SetBranchAddress("numcbIDcentralLjets", &numcbIDcentralLjets);
+    treeOrig->SetBranchAddress("numcbIDforwardLjets", &numcbIDforwardLjets);
 
-    treeOrig->SetBranchAddress("numbcbIDcentraljets", &numcbIDcentraljets);
-    treeOrig->SetBranchAddress("numbcbIDforwardjets", &numcbIDforwardjets);
-
-    treeOrig->SetBranchAddress("numbcbIDaccepINjets",   &numcbIDaccepINjets);
-    treeOrig->SetBranchAddress("numbcbIDaccepOUTjets", &numcbIDaccepOUTjets);
+    treeOrig->SetBranchAddress("numcbIDcentralMjets", &numcbIDcentralMjets);
+    treeOrig->SetBranchAddress("numcbIDforwardMjets", &numcbIDforwardMjets);
 
     treeOrig->SetBranchAddress("numbtagCSVMmvaIDaccepjets", &numbtagCSVMmvaIDaccepjets);
     treeOrig->SetBranchAddress("numbtagCSVLmvaIDaccepjets", &numbtagCSVLmvaIDaccepjets);
@@ -299,8 +327,44 @@ void addWeightsToTreetH::addWeights() {
     treeOrig->SetBranchAddress("nummvaIDcentraljets", &nummvaIDcentraljets);
     treeOrig->SetBranchAddress("nummvaIDforwardjets", &nummvaIDforwardjets);
 
-    treeOrig->SetBranchAddress("numbmvaIDaccepINjets",   &nummvaIDaccepINjets);
-    treeOrig->SetBranchAddress("numbmvaIDaccepOUTjets", &nummvaIDaccepOUTjets);
+    treeOrig->SetBranchAddress("nummvaIDaccepINjets",  &nummvaIDaccepINjets);
+    treeOrig->SetBranchAddress("nummvaIDaccepOUTjets", &nummvaIDaccepOUTjets);
+
+    treeOrig->SetBranchAddress("ptCVStaggedM" , &ptCVStaggedM);
+    treeOrig->SetBranchAddress("etaCVStaggedM", &etaCVStaggedM);
+    treeOrig->SetBranchAddress("phiCVStaggedM", &phiCVStaggedM);
+    treeOrig->SetBranchAddress("eneCVStaggedM", &eneCVStaggedM);
+    treeOrig->SetBranchAddress("cvsCVStaggedM", &cvsCVStaggedM);
+
+    treeOrig->SetBranchAddress("ptCVStaggedL" , &ptCVStaggedL);
+    treeOrig->SetBranchAddress("etaCVStaggedL", &etaCVStaggedL);
+    treeOrig->SetBranchAddress("phiCVStaggedL", &phiCVStaggedL);
+    treeOrig->SetBranchAddress("eneCVStaggedL", &eneCVStaggedL);
+    treeOrig->SetBranchAddress("cvsCVStaggedL", &cvsCVStaggedL);
+   
+    treeOrig->SetBranchAddress("ptForwardM" , &ptForwardM);
+    treeOrig->SetBranchAddress("etaForwardM", &etaForwardM);
+    treeOrig->SetBranchAddress("phiForwardM", &phiForwardM);
+    treeOrig->SetBranchAddress("eneForwardM", &eneForwardM);
+    treeOrig->SetBranchAddress("cvsForwardM", &cvsForwardM);
+
+    treeOrig->SetBranchAddress("ptForwardL" , &ptForwardL);
+    treeOrig->SetBranchAddress("etaForwardL", &etaForwardL);
+    treeOrig->SetBranchAddress("phiForwardL", &phiForwardL);
+    treeOrig->SetBranchAddress("eneForwardL", &eneForwardL);
+    treeOrig->SetBranchAddress("cvsForwardL", &cvsForwardL);
+
+    treeOrig->SetBranchAddress("ptCentralM" , &ptCentralM);
+    treeOrig->SetBranchAddress("etaCentralM", &etaCentralM);
+    treeOrig->SetBranchAddress("phiCentralM", &phiCentralM);
+    treeOrig->SetBranchAddress("eneCentralM", &eneCentralM);
+    treeOrig->SetBranchAddress("cvsCentralM", &cvsCentralM);
+
+    treeOrig->SetBranchAddress("ptCentralL" , &ptCentralL);
+    treeOrig->SetBranchAddress("etaCentralL", &etaCentralL);
+    treeOrig->SetBranchAddress("phiCentralL", &phiCentralL);
+    treeOrig->SetBranchAddress("eneCentralL", &eneCentralL);
+    treeOrig->SetBranchAddress("cvsCentralL", &cvsCentralL);
 
     treeOrig->SetBranchAddress("dxyEVT", &dxyEVT);
     treeOrig->SetBranchAddress("dszEVT", &dszEVT);
@@ -409,35 +473,29 @@ void addWeightsToTreetH::addWeights() {
     float f_run, f_lumi;
     float f_hlt, f_nVtx, f_njets, f_ncbIDjets, f_nuncorrjets;
 
-    
+    int f_numbtagCSVMmvaIDaccepjets;
+    int f_numbtagCSVLmvaIDaccepjets; 
+    int f_numbtagCSVTmvaIDaccepjets;
 
-    float f_numbtagCSVMmvaIDaccepjets;
-    float f_numbtagCSVLmvaIDaccepjets; 
-    float f_numbtagCSVTmvaIDaccepjets;
+    int f_numbtagCSVMmvaIDcentraljets;
+    int f_numbtagCSVLmvaIDcentraljets; 
+    int f_numbtagCSVTmvaIDcentraljets;
 
-    float f_numbtagCSVMmvaIDcentraljets;
-    float f_numbtagCSVLmvaIDcentraljets; 
-    float f_numbtagCSVTmvaIDcentraljets;
+    int f_nummvaIDcentraljets;
+    int f_nummvaIDforwardjets;
 
-    float f_nummvaIDcentraljets;
-    float f_nummvaIDforwardjets;
+    int f_nummvaIDaccepINjets;
+    int f_nummvaIDaccepOUTjets;
 
-    float f_nummvaIDaccepINjets;
-    float f_nummvaIDaccepOUTjets;
+    int f_numbtagCSVMcbIDaccepjets;
+    int f_numbtagCSVLcbIDaccepjets; 
+    int f_numbtagCSVTcbIDaccepjets;
 
-    float f_numbtagCSVMcbIDaccepjets;
-    float f_numbtagCSVLcbIDaccepjets; 
-    float f_numbtagCSVTcbIDaccepjets;
+    int f_numcbIDcentralLjets;
+    int f_numcbIDforwardLjets;
 
-    float f_numbtagCSVMcbIDcentraljets;
-    float f_numbtagCSVLcbIDcentraljets; 
-    float f_numbtagCSVTcbIDcentraljets;
-
-    float f_numcbIDcentraljets;
-    float f_numcbIDforwardjets;
-
-    float f_numcbIDaccepINjets;
-    float f_numcbIDaccepOUTjets;
+    int f_numcbIDcentralMjets;
+    int f_numcbIDforwardMjets;
 
     float f_zveto, f_bveto_ip, f_bveto_mu, f_bveto_munj, f_bveto, f_dphiveto, f_typeL1, f_typeL2, f_typeL3,
       f_nSoftMu, f_nSoftMuNoJets, f_numExtraLep, f_finalstate, f_processId, sameflav, f_nsoftbjet, f_nsoftjet;
@@ -514,33 +572,77 @@ void addWeightsToTreetH::addWeights() {
       theTreeNew->Branch("njet", &f_njets, "njet/F");
       theTreeNew->Branch("ncbIDjet", &f_ncbIDjets, "ncbIDjet/F");
 
-      theTreeNew->Branch("numbtagCSVMmvaIDaccepjets", &f_numbtagCSVMmvaIDaccepjets, "numbtagCSVMmvaIDaccepjets/F");
-      theTreeNew->Branch("numbtagCSVLmvaIDaccepjets", &f_numbtagCSVLmvaIDaccepjets, "numbtagCSVLmvaIDaccepjets/F");
-      theTreeNew->Branch("numbtagCSVTmvaIDaccepjets", &f_numbtagCSVTmvaIDaccepjets, "numbtagCSVTmvaIDaccepjets/F");
+      theTreeNew->Branch("numbtagCSVMmvaIDaccepjets", &f_numbtagCSVMmvaIDaccepjets, "numbtagCSVMmvaIDaccepjets/I");
+      theTreeNew->Branch("numbtagCSVLmvaIDaccepjets", &f_numbtagCSVLmvaIDaccepjets, "numbtagCSVLmvaIDaccepjets/I");
+      theTreeNew->Branch("numbtagCSVTmvaIDaccepjets", &f_numbtagCSVTmvaIDaccepjets, "numbtagCSVTmvaIDaccepjets/I");
       
-      theTreeNew->Branch("numbtagCSVMmvaIDcentraljets", &f_numbtagCSVMmvaIDcentraljets, "numbtagCSVMmvaIDcentraljets/F");
-      theTreeNew->Branch("numbtagCSVLmvaIDcentraljets", &f_numbtagCSVLmvaIDcentraljets, "numbtagCSVLmvaIDcentraljets/F");
-      theTreeNew->Branch("numbtagCSVTmvaIDcentraljets", &f_numbtagCSVTmvaIDcentraljets, "numbtagCSVTmvaIDcentraljets/F");
+      theTreeNew->Branch("numbtagCSVMmvaIDcentraljets", &f_numbtagCSVMmvaIDcentraljets, "numbtagCSVMmvaIDcentraljets/I");
+      theTreeNew->Branch("numbtagCSVLmvaIDcentraljets", &f_numbtagCSVLmvaIDcentraljets, "numbtagCSVLmvaIDcentraljets/I");
+      theTreeNew->Branch("numbtagCSVTmvaIDcentraljets", &f_numbtagCSVTmvaIDcentraljets, "numbtagCSVTmvaIDcentraljets/I");
 
-      theTreeNew->Branch("nummvaIDcentraljets", &f_nummvaIDcentraljets, "nummvaIDcentraljets/F");
-      theTreeNew->Branch("nummvaIDforwardjets", &f_nummvaIDforwardjets, "nummvaIDforwardjets/F");
+      theTreeNew->Branch("nummvaIDcentraljets", &f_nummvaIDcentraljets, "nummvaIDcentraljets/I");
+      theTreeNew->Branch("nummvaIDforwardjets", &f_nummvaIDforwardjets, "nummvaIDforwardjets/I");
 
-      theTreeNew->Branch("nummvaIDaccepINjets" , &f_nummvaIDaccepINjets , "nummvaIDaccepINjets/F");
-      theTreeNew->Branch("nummvaIDaccepOUTjets", &f_nummvaIDaccepOUTjets, "nummvaIDaccepOUTjets/F");
+      theTreeNew->Branch("nummvaIDaccepINjets" , &f_nummvaIDaccepINjets , "nummvaIDaccepINjets/I");
+      theTreeNew->Branch("nummvaIDaccepOUTjets", &f_nummvaIDaccepOUTjets, "nummvaIDaccepOUTjets/I");
 
-      theTreeNew->Branch("numbtagCSVMcbIDaccepjets", &f_numbtagCSVMcbIDaccepjets, "numbtagCSVMcbIDaccepjets/F");
-      theTreeNew->Branch("numbtagCSVLcbIDaccepjets", &f_numbtagCSVLcbIDaccepjets, "numbtagCSVLcbIDaccepjets/F");
-      theTreeNew->Branch("numbtagCSVTcbIDaccepjets", &f_numbtagCSVTcbIDaccepjets, "numbtagCSVTcbIDaccepjets/F");
+      theTreeNew->Branch("numbtagCSVMcbIDaccepjets", &f_numbtagCSVMcbIDaccepjets, "numbtagCSVMcbIDaccepjets/I");
+      theTreeNew->Branch("numbtagCSVLcbIDaccepjets", &f_numbtagCSVLcbIDaccepjets, "numbtagCSVLcbIDaccepjets/I");
+      theTreeNew->Branch("numbtagCSVTcbIDaccepjets", &f_numbtagCSVTcbIDaccepjets, "numbtagCSVTcbIDaccepjets/I");
 
-      theTreeNew->Branch("numbtagCSVMcbIDcentraljets", &f_numbtagCSVMcbIDcentraljets, "numbtagCSVMcbIDcentraljets/F");
-      theTreeNew->Branch("numbtagCSVLcbIDcentraljets", &f_numbtagCSVLcbIDcentraljets, "numbtagCSVLcbIDcentraljets/F");
-      theTreeNew->Branch("numbtagCSVTcbIDcentraljets", &f_numbtagCSVTcbIDcentraljets, "numbtagCSVTcbIDcentraljets/F");
+      theTreeNew->Branch("numcbIDcentralLjets", &f_numcbIDcentralLjets, "numcbIDcentralLjets/I");
+      theTreeNew->Branch("numcbIDforwardLjets", &f_numcbIDforwardLjets, "numcbIDforwardLjets/I");
 
-      theTreeNew->Branch("numcbIDcentraljets", &f_numcbIDcentraljets, "numcbIDcentraljets/F");
-      theTreeNew->Branch("numcbIDforwardjets", &f_numcbIDforwardjets, "numcbIDforwardjets/F");
+      theTreeNew->Branch("numcbIDcentralMjets", &f_numcbIDcentralMjets, "numcbIDcentralMjets/I");
+      theTreeNew->Branch("numcbIDforwardMjets", &f_numcbIDforwardMjets, "numcbIDforwardMjets/I");
 
-      theTreeNew->Branch("numcbIDaccepINjets" , &f_numcbIDaccepINjets , "numcbIDaccepINjets/F");
-      theTreeNew->Branch("numcbIDaccepOUTjets", &f_numcbIDaccepOUTjets, "numcbIDaccepOUTjets/F");
+      theTreeNew->Branch("ptCVStaggedM1",&ptCVStaggedM[0],"ptCVStaggedM1/F");
+      theTreeNew->Branch("ptCVStaggedM2",&ptCVStaggedM[1],"ptCVStaggedM2/F");
+      theTreeNew->Branch("ptCVStaggedM3",&ptCVStaggedM[2],"ptCVStaggedM3/F");
+
+      theTreeNew->Branch("etaCVStaggedM1",&etaCVStaggedM[0],"etaCVStaggedM1/F");
+      theTreeNew->Branch("etaCVStaggedM2",&etaCVStaggedM[1],"etaCVStaggedM2/F");
+      theTreeNew->Branch("etaCVStaggedM3",&etaCVStaggedM[2],"etaCVStaggedM3/F");
+
+      theTreeNew->Branch("ptForwardM1",&ptForwardM[0],"ptForwardM1/F");
+      theTreeNew->Branch("ptForwardM2",&ptForwardM[1],"ptForwardM2/F");
+      theTreeNew->Branch("ptForwardM3",&ptForwardM[2],"ptForwardM3/F");
+
+      theTreeNew->Branch("etaForwardM1",&etaForwardM[0],"etaForwardM1/F");
+      theTreeNew->Branch("etaForwardM2",&etaForwardM[1],"etaForwardM2/F");
+      theTreeNew->Branch("etaForwardM3",&etaForwardM[2],"etaForwardM3/F");
+
+      theTreeNew->Branch("ptCentralM1",&ptCentralM[0],"ptCentralM1/F");
+      theTreeNew->Branch("ptCentralM2",&ptCentralM[1],"ptCentralM2/F");
+      theTreeNew->Branch("ptCentralM3",&ptCentralM[2],"ptCentralM3/F");
+
+      theTreeNew->Branch("etaCentralL1",&etaCentralL[0],"etaCentralL1/F");
+      theTreeNew->Branch("etaCentralL2",&etaCentralL[1],"etaCentralL2/F");
+      theTreeNew->Branch("etaCentralL3",&etaCentralL[2],"etaCentralL3/F");
+
+      theTreeNew->Branch("ptCVStaggedL1",&ptCVStaggedL[0],"ptCVStaggedL1/F");
+      theTreeNew->Branch("ptCVStaggedL2",&ptCVStaggedL[1],"ptCVStaggedL2/F");
+      theTreeNew->Branch("ptCVStaggedL3",&ptCVStaggedL[2],"ptCVStaggedL3/F");
+
+      theTreeNew->Branch("etaCVStaggedL1",&etaCVStaggedL[0],"etaCVStaggedL1/F");
+      theTreeNew->Branch("etaCVStaggedL2",&etaCVStaggedL[1],"etaCVStaggedL2/F");
+      theTreeNew->Branch("etaCVStaggedL3",&etaCVStaggedL[2],"etaCVStaggedL3/F");
+
+      theTreeNew->Branch("ptForwardL1",&ptForwardL[0],"ptForwardL1/F");
+      theTreeNew->Branch("ptForwardL2",&ptForwardL[1],"ptForwardL2/F");
+      theTreeNew->Branch("ptForwardL3",&ptForwardL[2],"ptForwardL3/F");
+
+      theTreeNew->Branch("etaForwardL1",&etaForwardL[0],"etaForwardL1/F");
+      theTreeNew->Branch("etaForwardL2",&etaForwardL[1],"etaForwardL2/F");
+      theTreeNew->Branch("etaForwardL3",&etaForwardL[2],"etaForwardL3/F");
+
+      theTreeNew->Branch("ptCentralL1",&ptCentralL[0],"ptCentralL1/F");
+      theTreeNew->Branch("ptCentralL2",&ptCentralL[1],"ptCentralL2/F");
+      theTreeNew->Branch("ptCentralL3",&ptCentralL[2],"ptCentralL3/F");
+
+      theTreeNew->Branch("etaCentralL1",&etaCentralL[0],"etaCentralL1/F");
+      theTreeNew->Branch("etaCentralL2",&etaCentralL[1],"etaCentralL2/F");
+      theTreeNew->Branch("etaCentralL3",&etaCentralL[2],"etaCentralL3/F");
 
       theTreeNew->Branch("nuncorrjets", &f_nuncorrjets, "nuncorrjets/F");
       theTreeNew->Branch("dxyEVT", &dxyEVT, "dxyEVT/F");
@@ -724,7 +826,7 @@ void addWeightsToTreetH::addWeights() {
 	TV_L1p2p3 = TV_L1 + TV_L2;
 
       TVector3 TV_chmet( pxChMet, pyChMet, pzChMet );
-      TVector3 TV_jet1( pxLeadJet[0], pyLeadJet[0], pzLeadJet[0] );
+      TVector3 TV_jet1( pxLeadJet  [0], pyLeadJet  [0], pzLeadJet  [0] );
       TVector3 TV_jet2( pxSecondJet[0], pySecondJet[0], pzSecondJet[0] );
       deltaPhi_LL_MET   = (180./3.14) * TV_chmet.DeltaPhi(TV_L1p2);
 
@@ -815,7 +917,7 @@ void addWeightsToTreetH::addWeights() {
       } else { // data
         effW = 1.;
       }
-
+      
       if(sqrt(pow(pxLeadJet[0],2)+pow(pyLeadJet[0],2))>15) {
         jetpt1 = TV_jet1.Pt();
         jeteta1 = TV_jet1.Eta();
@@ -886,17 +988,29 @@ void addWeightsToTreetH::addWeights() {
       f_njets = (float)njets;
       f_ncbIDjets = (float)ncbIDjets;
 
-      f_numbtagCSVMmvaIDcentraljets = (float)numbtagCSVMmvaIDcentraljets;
-      f_numbtagCSVLmvaIDcentraljets = (float)numbtagCSVLmvaIDcentraljets;
-      f_numbtagCSVTmvaIDcentraljets = (float)numbtagCSVTmvaIDcentraljets;
+      f_numbtagCSVMmvaIDaccepjets = numbtagCSVMmvaIDaccepjets;
+      f_numbtagCSVLmvaIDaccepjets = numbtagCSVLmvaIDaccepjets;
+      f_numbtagCSVTmvaIDaccepjets = numbtagCSVTmvaIDaccepjets;
 
-      f_nummvaIDforwardjets = (float)nummvaIDforwardjets;
+      f_numbtagCSVMmvaIDcentraljets = numbtagCSVMmvaIDcentraljets;
+      f_numbtagCSVLmvaIDcentraljets = numbtagCSVLmvaIDcentraljets;
+      f_numbtagCSVTmvaIDcentraljets = numbtagCSVTmvaIDcentraljets;
 
-      f_numbtagCSVMcbIDcentraljets = (float)numbtagCSVMcbIDcentraljets;
-      f_numbtagCSVLcbIDcentraljets = (float)numbtagCSVLcbIDcentraljets;
-      f_numbtagCSVTcbIDcentraljets = (float)numbtagCSVTcbIDcentraljets;
+      f_nummvaIDcentraljets = nummvaIDcentraljets;
+      f_nummvaIDforwardjets = nummvaIDforwardjets;
 
-      f_numcbIDforwardjets = (float)numcbIDforwardjets;
+      f_nummvaIDaccepINjets  = nummvaIDaccepINjets;
+      f_nummvaIDaccepOUTjets = nummvaIDaccepOUTjets;
+
+      f_numbtagCSVMcbIDaccepjets = numbtagCSVMcbIDaccepjets;
+      f_numbtagCSVLcbIDaccepjets = numbtagCSVLcbIDaccepjets;
+      f_numbtagCSVTcbIDaccepjets = numbtagCSVTcbIDaccepjets;
+
+      f_numcbIDcentralLjets = numcbIDcentralLjets;
+      f_numcbIDforwardLjets = numcbIDforwardLjets;
+
+      f_numcbIDcentralMjets = numcbIDcentralMjets;
+      f_numcbIDforwardMjets = numcbIDforwardMjets;
 
       f_nuncorrjets = (float)nuncorrjets;
       f_zveto = (float)zveto;

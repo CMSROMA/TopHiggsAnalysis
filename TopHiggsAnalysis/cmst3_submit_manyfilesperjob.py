@@ -32,7 +32,7 @@ else:
 # to write on local disks
 ################################################
 
-diskoutputdir = "/cmsrm/pc24_2/jorda/data/TopHiggs5.3.X_V04/"
+diskoutputdir = "/cmsrm/pc24_2/jorda/data/TopHiggs5.3.X_V05/"
 diskoutputmain = diskoutputdir+"/"+prefix+"/"+process+"/"+output
 
 # prepare job to write on the cmst3 cluster disks

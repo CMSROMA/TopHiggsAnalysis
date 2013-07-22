@@ -28,7 +28,7 @@ void countEvents() {
     chains[isample] = new TChain(nametree);
   }
 
-  TString pathname = "/cmsrm/pc24_2/jorda/data/results_V04/";
+  TString pathname = "/cmsrm/pc24_2/jorda/data/results_V05/";
 
   // nominal sample first, then the systematics ones
   chains[0]->Add(pathname+"MC/tH125q_blvu_Yt1_H126toWW-Counters.root");
@@ -77,7 +77,7 @@ void countEvents() {
 
   // xs from: https://docs.google.com/spreadsheet/ccc?key=0Aq5OAopf_dtsdDJqREJReGQyY21wbERldVFSZVJHbFE&hl=en#gid=56
   std::vector<float> sampleXsec;
-  sampleXsec.push_back(1.0);            // 0: tH125q_blvu_Yt1_H126toWW
+  sampleXsec.push_back(0.0010449);      // 0: tH125q_blvu_Yt1_H126toWW xs = 15 fb * (BR W->ln)*(BR H->WW) = 15 fb*(3*0.108)*(0.215)
   sampleXsec.push_back(5.8123);         // 1: WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola
   sampleXsec.push_back(1.057512972672); // 2: WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola2
   sampleXsec.push_back(0.364868);       // 3: ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola  
@@ -157,7 +157,7 @@ void countEvents() {
   if (sampleXsec.size() != sampleName.size() ) cout << "nasty error! check sizes..." << endl;
 
   std::ofstream weightsFile;
-  weightsFile.open("weightTreestHV04.sh");
+  weightsFile.open("weightTreestHV05bis.sh");
   weightsFile << "#! /bin/sh\n\n" << std::endl;
   weightsFile << "mkdir -p ../results/MC" << std::endl;
   weightsFile << "lumi=$1" << std::endl;

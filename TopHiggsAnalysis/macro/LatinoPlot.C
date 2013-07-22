@@ -170,7 +170,7 @@ class LatinoPlot {
             //_sampleColor[iWJets] = kViolet-9;
             //_sampleColor[iWJets] = kCyan;
 
-            _sampleColor[itH   ] = kRed;
+	    _sampleColor[itH   ] = kRed;
             _sampleColor[iWZ   ] = kAzure-9;
             _sampleColor[iZZ   ] = kAzure-5;
             _sampleColor[iWW   ] = kAzure-1;
@@ -227,6 +227,9 @@ class LatinoPlot {
             Float_t theMax = hstack->GetMaximum();
             Float_t theMin = hstack->GetMinimum();
 
+	    theMax = 1.0;
+            //Float_t theMin = hstack->GetMinimum();
+
             if (_hist[itH]) {
                 if (_hist[itH]->GetMaximum() > theMax) theMax = _hist[itH]->GetMaximum();
                 if (_hist[itH]->GetMinimum() < theMin) theMin = _hist[itH]->GetMinimum();
@@ -262,10 +265,10 @@ class LatinoPlot {
 
             // total mess to get it nice, should be redone
             size_t j=0;
-            TString higgsLabel = " tH";
-            if(_mass != 0) higgsLabel.Form(" m_{H}=%d",_mass);
+            TString higgsLabel = " tH x 100";
+            //if(_mass != 0) higgsLabel.Form(" m_{H}=%d",_mass);
 
-	    /*
+	    
             if(_data        ) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _data,         " data",    "lp"); j++; }
             if(_hist[itH   ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[itH   ], higgsLabel, "l" ); j++; }
             if(_hist[iWZ   ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[iWZ   ], " WZ",      "f" ); j++; }
@@ -278,7 +281,7 @@ class LatinoPlot {
             if(_hist[iwwz  ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[iwwz  ], " WWZ",     "f" ); j++; }
             if(_hist[iwzz  ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[iwzz  ], " WZZ",     "f" ); j++; }
             if(_hist[idy   ]) { DrawLegend(xPos[j], 0.84 - yOff[j]*_yoffset, _hist[idy   ], " Drell-Yan","f" ); j++; }
-	    */
+	    
 
             //TLatex* luminosity = new TLatex(0.9, 0.815, TString::Format("L = %.1f fb^{-1}",_lumi));
             TLatex* luminosity = new TLatex(0.9, 0.95, TString::Format("CMS Preliminary \\sqrt{s} = 8 TeV, L = %.1f fb^{-1}",_lumi));

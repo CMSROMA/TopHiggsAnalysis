@@ -73,15 +73,11 @@ void RedTopHiggsTree::addMLVars() {
   myTree->Branch("numbtagCSVMcbIDaccepjets", &myNumbtagCSVMcbIDaccepjets, "numbtagCSVMcbIDaccepjets/I");
   myTree->Branch("numbtagCSVTcbIDaccepjets", &myNumbtagCSVTcbIDaccepjets, "numbtagCSVTcbIDaccepjets/I");
   
-  myTree->Branch("numbtagCSVLcbIDcentraljets", &myNumbtagCSVLcbIDcentraljets, "numbtagCSVLcbIDcentraljets/I");
-  myTree->Branch("numbtagCSVMcbIDcentraljets", &myNumbtagCSVMcbIDcentraljets, "numbtagCSVMcbIDcentraljets/I");
-  myTree->Branch("numbtagCSVTcbIDcentraljets", &myNumbtagCSVTcbIDcentraljets, "numbtagCSVTcbIDcentraljets/I");
+  myTree->Branch("numcbIDcentralLjets"     , &myNumcbIDcentralLjets     , "numcbIDcentralLjets/I");
+  myTree->Branch("numcbIDforwardLjets"     , &myNumcbIDforwardLjets     , "numcbIDforwardLjets/I");
 
-  myTree->Branch("numbcbIDcentraljets"       , &myNumcbIDcentraljets        , "numcbIDcentraljets/I");
-  myTree->Branch("numbcbIDforwardjets"       , &myNumcbIDforwardjets        , "numcbIDforwardjets/I");
-
-  myTree->Branch("numbcbIDaccepINjets"       , &myNumcbIDaccepINjets        , "numcbIDaccepINjets/I");
-  myTree->Branch("numbcbIDaccepOUTjets"      , &myNumcbIDaccepOUTjets       , "numcbIDaccepOUTjets/I");
+  myTree->Branch("numcbIDcentralMjets"     , &myNumcbIDcentralMjets     , "numcbIDcentralMjets/I");
+  myTree->Branch("numcbIDforwardMjets"     , &myNumcbIDforwardMjets     , "numcbIDforwardMjets/I");
 
   //! mva based id jets
   myTree->Branch("numbtagCSVLmvaIDaccepjets", &myNumbtagCSVLmvaIDaccepjets, "numbtagCSVLmvaIDaccepjets/I");
@@ -95,8 +91,8 @@ void RedTopHiggsTree::addMLVars() {
   myTree->Branch("nummvaIDcentraljets"        , &myNummvaIDcentraljets        , "nummvaIDcentraljets/I");
   myTree->Branch("nummvaIDforwardjets"        , &myNummvaIDforwardjets        , "nummvaIDforwardjets/I");
   
-  myTree->Branch("numbmvaIDaccepINjets"       , &myNummvaIDaccepINjets        , "nummvaIDaccepINjets/I");
-  myTree->Branch("numbmvaIDaccepOUTjets"      , &myNummvaIDaccepOUTjets       , "nummvaIDaccepOUTjets/I");
+  myTree->Branch("nummvaIDaccepINjets"       , &myNummvaIDaccepINjets        , "nummvaIDaccepINjets/I");
+  myTree->Branch("nummvaIDaccepOUTjets"      , &myNummvaIDaccepOUTjets       , "nummvaIDaccepOUTjets/I");
 
 }
 
@@ -114,6 +110,46 @@ void RedTopHiggsTree::addJetsVars() {
   myTree->Branch("subleadJetGenMatch", &mySubleadJetGenMatch, "subleadJetGenMatch/I");
   myTree->Branch("jetmva2",            &mySubleadJetIdMva,    "jetmva2/F");
   myTree->Branch("jetid2",             &mySubleadJetPassLooseId,  "jetid2/I");
+}
+
+void RedTopHiggsTree::addMoreJetsVars() {
+  
+  myTree->Branch("ptCVStaggedL" , &myptCVStaggedL , "ptCVStaggedL[5]/F");
+  myTree->Branch("etaCVStaggedL", &myetaCVStaggedL, "etaCVStaggedL[5]/F");
+  myTree->Branch("phiCVStaggedL", &myphiCVStaggedL, "phiCVStaggedL[5]/F");
+  myTree->Branch("eneCVStaggedL", &myeneCVStaggedL, "eneCVStaggedL[5]/F");
+  myTree->Branch("cvsCVStaggedL", &mycvsCVStaggedL, "cvsCVStaggedL[5]/F");
+
+  myTree->Branch("ptForwardL" , &myptForwardL,  "ptForwardL[5]/F");
+  myTree->Branch("etaForwardL", &myetaForwardL, "etaForwardL[5]/F");
+  myTree->Branch("phiForwardL", &myphiForwardL, "phiForwardL[5]/F");  
+  myTree->Branch("eneForwardL", &myeneForwardL, "eneForwardL[5]/F");
+  myTree->Branch("cvsForwardL", &mycvsForwardL, "cvsForwardL[5]/F");
+
+  myTree->Branch("ptCentralL" , &myptCentralL,  "ptCentralL[5]/F");
+  myTree->Branch("etaCentralL", &myetaCentralL, "etaCentralL[5]/F");
+  myTree->Branch("phiCentralL", &myphiCentralL, "phiCentralL[5]/F");
+  myTree->Branch("eneCentralL", &myeneCentralL, "eneCentralL[5]/F");
+  myTree->Branch("cvsCentralL", &mycvsCentralL, "cvsCentralL[5]/F");
+
+  myTree->Branch("ptCVStaggedM" , &myptCVStaggedM , "ptCVStaggedM[5]/F");
+  myTree->Branch("etaCVStaggedM", &myetaCVStaggedM, "etaCVStaggedM[5]/F");
+  myTree->Branch("phiCVStaggedM", &myphiCVStaggedM, "phiCVStaggedM[5]/F");
+  myTree->Branch("eneCVStaggedM", &myeneCVStaggedM, "eneCVStaggedM[5]/F");
+  myTree->Branch("cvsCVStaggedM", &mycvsCVStaggedM, "cvsCVStaggedM[5]/F");
+
+  myTree->Branch("ptForwardM" , &myptForwardM,  "ptForwardM[5]/F");
+  myTree->Branch("etaForwardM", &myetaForwardM, "etaForwardM[5]/F");
+  myTree->Branch("phiForwardM", &myphiForwardM, "phiForwardM[5]/F");
+  myTree->Branch("eneForwardM", &myeneForwardM, "eneForwardM[5]/F");
+  myTree->Branch("cvsForwardM", &mycvsForwardM, "cvsForwardM[5]/F");
+
+  myTree->Branch("ptCentralM" , &myptCentralM,  "ptCentralM[5]/F");
+  myTree->Branch("etaCentralM", &myetaCentralM, "etaCentralM[5]/F");
+  myTree->Branch("phiCentralM", &myphiCentralM, "phiCentralM[5]/F");
+  myTree->Branch("eneCentralM", &myeneCentralM, "eneCentralM[5]/F");
+  myTree->Branch("cvsCentralM", &mycvsCentralM, "cvsCentralM[5]/F");
+
 }
 
 void RedTopHiggsTree::addSystematics() {
@@ -329,6 +365,23 @@ void RedTopHiggsTree::addtHMcTruthInfos(){
   
 }
 
+void  RedTopHiggsTree::addLeptonMVAidVariables(){
+
+  myTree->Branch("leptPt" , &myleptPt, "leptPt[3]/F"); 
+  myTree->Branch("leptEta", &myleptEta, "leptEta[3]/F"); 
+  myTree->Branch("neuRelIs", &myneuRelIs, "neuRelIs[3]/F"); 
+  myTree->Branch("chRelIso", &mychRelIso, "chRelIso[3]/F"); 
+  myTree->Branch("jetDR_in", &myjetDR_in, "jetDR_in[3]/F"); 
+  myTree->Branch("jetPtRatio_in", &myjetPtRatio_in, "jetPtRatio_in[3]/F"); 
+  myTree->Branch("jetBTagCSV_in", &myjetBTagCSV_in, "jetBTagCSV_in[3]/F"); 
+  myTree->Branch("sip3d", &mysip3d, "sip3d[3]/F"); 
+  myTree->Branch("mvaId",&mymvaId, "mvaId[3]/F"); 
+  myTree->Branch("innerHits", &myinnerHits, "innerHits[3]/I"); 
+  myTree->Branch("logdxy", &mylogdxy, "logdxy[3]/F"); 
+  myTree->Branch("logdz", &mylogdz, "logdz[3]/F"); 
+
+}
+
 void RedTopHiggsTree::store()
 {
   myTree->Fill();
@@ -419,15 +472,11 @@ void RedTopHiggsTree::fillMLVars(int   njets,
 				 int   numbtagCSVMcbIDaccepjets,
 				 int   numbtagCSVTcbIDaccepjets,
 
-				 int   numbtagCSVLcbIDcentraljets,
-				 int   numbtagCSVMcbIDcentraljets,
-				 int   numbtagCSVTcbIDcentraljets,
+				 int   numcbIDcentralLjets,
+				 int   numcbIDforwardLjets,
 
-				 int   numcbIDcentraljets,
-				 int   numcbIDforwardjets,
-
-				 int   numcbIDaccepINjets ,
-				 int   numcbIDaccepOUTjets,
+				 int   numcbIDcentralMjets,
+				 int   numcbIDforwardMjets,
 
 				 // mva
 				 int   numbtagCSVLmvaIDaccepjets,
@@ -470,15 +519,11 @@ void RedTopHiggsTree::fillMLVars(int   njets,
   myNumbtagCSVMcbIDaccepjets = numbtagCSVMcbIDaccepjets;
   myNumbtagCSVTcbIDaccepjets = numbtagCSVTcbIDaccepjets;
 
-  myNumbtagCSVLcbIDcentraljets = numbtagCSVLcbIDcentraljets;
-  myNumbtagCSVMcbIDcentraljets = numbtagCSVMcbIDcentraljets;
-  myNumbtagCSVTcbIDcentraljets = numbtagCSVTcbIDcentraljets;
+  myNumcbIDcentralLjets = numcbIDcentralLjets;
+  myNumcbIDforwardLjets = numcbIDforwardLjets;
 
-  myNumcbIDcentraljets = numcbIDcentraljets;
-  myNumcbIDforwardjets = numcbIDforwardjets;
-
-  myNumcbIDaccepINjets  = numcbIDaccepINjets;
-  myNumcbIDaccepOUTjets = numcbIDaccepOUTjets;
+  myNumcbIDcentralMjets = numcbIDcentralMjets;
+  myNumcbIDforwardMjets = numcbIDforwardMjets;
 
   // mva
   myNumbtagCSVLmvaIDaccepjets = numbtagCSVLmvaIDaccepjets;
@@ -511,6 +556,56 @@ void RedTopHiggsTree::fillJetsVars(float ljpt, float ljeta, int ljpfid, int ljma
   mySubleadJetGenMatch    = sljmatch;
   mySubleadJetIdMva       = sljmva;
   mySubleadJetPassLooseId = sljl;
+}
+
+void RedTopHiggsTree::fillMoreJetsVars(float ptCVStaggedM[5], float etaCVStaggedM[5], float phiCVStaggedM[5], float eneCVStaggedM[5], float cvsCVStaggedM[5],
+				       float   ptForwardM[5], float   etaForwardM[5], float   phiForwardM[5], float   eneForwardM[5], float cvsForwardM[5],
+				       float   ptCentralM[5], float   etaCentralM[5], float   phiCentralM[5], float   eneCentralM[5], float cvsCentralM[5],
+				       
+				       float ptCVStaggedL[5], float etaCVStaggedL[5], float phiCVStaggedL[5], float eneCVStaggedL[5], float cvsCVStaggedL[5],
+				       float   ptForwardL[5], float   etaForwardL[5], float   phiForwardL[5], float   eneForwardL[5], float   cvsForwardL[5],
+				       float   ptCentralL[5], float   etaCentralL[5], float   phiCentralL[5], float   eneCentralL[5], float   cvsCentralL[5]){
+  
+  for(int k=0;k<5;k++){
+    
+    myptCVStaggedM [k] = ptCVStaggedM[k];
+    myetaCVStaggedM[k] = etaCVStaggedM[k];
+    myphiCVStaggedM[k] = phiCVStaggedM[k];
+    myeneCVStaggedM[k] = eneCVStaggedM[k];
+    mycvsCVStaggedM[k] = cvsCVStaggedM[k];
+    
+    myptForwardM [k] = ptForwardM[k];
+    myetaForwardM[k] = etaForwardM[k];
+    myphiForwardM[k] = phiForwardM[k];
+    myeneForwardM[k] = eneForwardM[k];
+    mycvsForwardM[k] = cvsForwardM[k];
+    
+    myptCentralM [k] = ptCentralM[k];
+    myetaCentralM[k] = etaCentralM[k];
+    myphiCentralM[k] = phiCentralM[k];
+    myeneCentralM[k] = eneCentralM[k];
+    mycvsCentralM[k] = cvsCentralM[k];
+    
+    myptCVStaggedL [k] = ptCVStaggedL[k];
+    myetaCVStaggedL[k] = etaCVStaggedL[k];
+    myphiCVStaggedL[k] = phiCVStaggedL[k];
+    myeneCVStaggedL[k] = eneCVStaggedL[k];
+    mycvsCVStaggedL[k] = cvsCVStaggedL[k];
+    
+    myptForwardL [k] = ptForwardL[k];
+    myetaForwardL[k] = etaForwardL[k];
+    myphiForwardL[k] = phiForwardL[k];
+    myeneForwardL[k] = eneForwardL[k];
+    mycvsForwardL[k] = cvsForwardL[k];
+    
+    myptCentralL [k] = ptCentralL[k];
+    myetaCentralL[k] = etaCentralL[k];
+    myphiCentralL[k] = phiCentralL[k];
+    myeneCentralL[k] = eneCentralL[k];
+    mycvsCentralL[k] = cvsCentralL[k];
+    
+  }
+
 }
 
 void RedTopHiggsTree::fillLatinos(bool s0, bool s1) {
@@ -786,5 +881,38 @@ void RedTopHiggsTree::filltHMcTruthInfos(float genHiggsPt,
 
   myGenbQuark_Pt = genbQuark_Pt;  
   myGenbQuark_Eta = genbQuark_Eta;
+
+}
+
+//! add lepton mva variables
+void RedTopHiggsTree::fillLeptonMVAidVariables(float leptPt[3],
+					       float leptEta[3],
+					       float neuRelIs[3],
+					       float chRelIso[3],
+					       float jetDR_in[3],
+					       float jetPtRatio_in[3],
+					       float jetBTagCSV_in[3],
+					       float sip3d[3],
+					       float mvaId[3],
+					       int   innerHits[3],
+					       float logdxy[3],
+					       float logdz[3]){
+  
+  for (int i=0; i<3; i++){
+    
+    myleptPt[i]  = leptPt[i];
+    myleptEta[i] = leptEta[i];
+    myneuRelIs[i] = neuRelIs[i];
+    mychRelIso[i] = chRelIso[i];
+    myjetDR_in[i] = jetDR_in[i];
+    myjetPtRatio_in[i] = jetPtRatio_in[i];
+    myjetBTagCSV_in[i] = jetBTagCSV_in[i];
+    mysip3d[i] = sip3d[i];
+    mymvaId[i] = mvaId[i];
+    myinnerHits[i] = innerHits[i];
+    mylogdxy[i] = logdxy[i];
+    mylogdz[i] = logdz[i];
+
+  }
 
 }

@@ -204,476 +204,6 @@ tHSelection::~tHSelection(){
   
 }
 
-bool tHSelection::findMcTree(const char* processType) {
-
-  _process = "UNDEFINED";
-  _theGenEle = -1;
-  _theGenPos = -1;
-  
-  // now we look for ee || mumu || emu
-  // in the acceptance and with a loose pT threshold
-  float etaEleAcc_  = 2.5;
-  float ptEleAcc_   = 5.0; // GeV
-  float etaMuonAcc_ = 2.4;
-  float ptMuonAcc_  = 0.0; // GeV
-
-  if(strcmp(processType,"WZ")==0 ){
-
-    int nW = 0;
-    int nZ = 0;
-
-    //std::cout << " imc | st | id | mother id | motherid (motherid) " << std::endl;
-    //std::cout << "-------------------------------------------------" << std::endl;
-        
-    for(int imc=0;imc<30;imc++) {
-
-      if ( !statusMc[imc] == 3 ) continue; // I am only interested in hard-scattering products
-      
-      //std::cout << " " << imc << " | " << statusMc[imc] << " | " << idMc[imc] << " | " << idMc[mothMc[imc]] 
-      //		<< " | " << idMc[mothMc[mothMc[imc]]]   << std::endl;
-      
-      if( idMc[imc] == 23 ) nZ++;
-      if( fabs(idMc[imc]) == 24) nW++;
-
-    
-    }
-
-    return ( nZ > 0 && nW > 0 );
-
-  }
-
-  // tH gen level
-  if(strcmp(processType,"tH")==0) {
-
-    bool tHevent = false;
-
-    int index_Top              = 999; // top  quark
-    int index_Higgs            = 999; // Higgs boson
-
-    int index_WfromTop         = 999;
-    int index_WplusfromH       = 999;
-    int index_WminusfromH      = 999;
-
-    int index_lminusfromWfromH = 999; // lepton(-) coming from W(-) from H
-    int index_lplusfromWfromH  = 999; // lepton(+) coming from W(+) from H
-    int index_lfromWfromT      = 999; // lepton(+) coming from W from T
-
-    int index_nminusfromWfromH = 999; // neutrino(-) coming from W(-) from H
-    int index_nplusfromWfromH  = 999; // neutrino(+) coming from W(+) from H
-    int index_nfromWfromT      = 999; // neutrino(+) coming from W from T
-
-    //std::cout << " imc | st | id | mother id | motherid (motherid) " << std::endl;
-    //std::cout << "-------------------------------------------------" << std::endl;
-
-    int nLeptonsfromWfromH = 0;
-    int nLeptonsfromWfromT = 0;
-
-    int nPlusLepton  = 0;
-    int nMinusLepton = 0;
-
-    int nWfromH            = 0;
-
-    for(int imc=0;imc<30;imc++) {
-
-      if ( !(statusMc[imc] == 3) ) continue; // I am only interested in hard-scattering products
-      
-      //std::cout << " " << imc << " | " << statusMc[imc] << " | " << idMc[imc] << " | " << idMc[mothMc[imc]] 
-      //	<< " | " << idMc[mothMc[mothMc[imc]]]   << std::endl;
-
-      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-
-      if (imc == 7){
-	_genForwardQuark_Pt  = pMc[imc]*fabs(sin(thetaMc[imc]));
-	_genForwardQuark_Eta = etaMc[imc];
-      }
-
-      if (imc == 10){
-	_genbQuark_Pt  = pMc[imc]*fabs(sin(thetaMc[imc]));
-	_genbQuark_Eta = etaMc[imc];
-      }
-      
-      if( fabs(idMc[imc]) == 6  ) index_Top   = imc;
-      if( fabs(idMc[imc]) == 25 ) index_Higgs = imc;
-
-      if( fabs(idMc[imc]) == 24 && fabs(idMc[mothMc[imc]]) == 6  ) index_WfromTop = imc;
-      
-      if( idMc[imc] == -24 && fabs(idMc[mothMc[imc]]) == 25 ){
-	index_WminusfromH = imc;
-	nWfromH++;
-      }
-      if( idMc[imc] == +24 && fabs(idMc[mothMc[imc]]) == 25 ){
-	index_WplusfromH  = imc;
-	nWfromH++;
-      }
-
-      // Lepton(-) from W(-) decay
-      if     ( (idMc[imc] == +11 || idMc[imc] == +13 || idMc[imc] == +15)  && idMc[mothMc[imc]] == -24 ){ 
-	
-	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){  // W from Top decay
-	  index_lfromWfromT = imc;
-	  nLeptonsfromWfromT++;
-	  nMinusLepton++;
-	}
-	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
-	  index_lminusfromWfromH = imc; 
-	  nLeptonsfromWfromH++;
-	  nMinusLepton++;
-	}
-
-      }      
-
-      // Neutrino(+) from W(-) decay
-      else if( (idMc[imc] == -12 || idMc[imc] == -14 || idMc[imc] == -16)  && idMc[mothMc[imc]] == -24 ){ 
-
-	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){ // W from Top decay
-	  index_nfromWfromT = imc;
-	  nLeptonsfromWfromT++;
-	}
-	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
-	  index_nplusfromWfromH = imc; 
-	  nLeptonsfromWfromH++;
-	}
-	
-      }
-
-      // Lepton(+) from W(+) decay
-      else if( (idMc[imc] == -11 || idMc[imc] == -13 || idMc[imc] == -15)  && idMc[mothMc[imc]] == +24 ){ 
-	
-	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){ // W from Top decay
-	  index_lfromWfromT = imc;
-	  nLeptonsfromWfromT++;
-	  nPlusLepton++;
-	}
-	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
-	  index_lplusfromWfromH = imc; 
-	  nLeptonsfromWfromH++;
-	  nPlusLepton++;
-	}
-
-      }      
-
-      // Neutrino(-) from W(+) decay
-      else if( (idMc[imc] == 12 || idMc[imc] == +14 || idMc[imc] == +16)  && idMc[mothMc[imc]] == +24 ){ 
-
-	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){ // W from Top decay
-	  index_nfromWfromT = imc;
-	  nLeptonsfromWfromT++;
-	}
-	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
-	  index_nminusfromWfromH = imc; 
-	  nLeptonsfromWfromH++;
-	}
-
-      }
-
-    }
-
-    if ( nLeptonsfromWfromH == 4){
-      nWWtoLLdecays++;
-    }
-    if ( nLeptonsfromWfromT == 2){ // (lepton + neutrino)
-      nWfromTtoLdecay++;
-    }
-
-    if ( (nPlusLepton == 2 && nMinusLepton == 0) || ( nMinusLepton == 2 && nPlusLepton == 0 ) ){
-      nSSevent++;
-    }
-
-    _genHiggsPt  = pMc[index_Higgs]*fabs(sin(thetaMc[index_Higgs]));
-    _genHiggsEta = etaMc[index_Higgs]; 
-
-    _genTopPt  = pMc[index_Top]*fabs(sin(thetaMc[index_Top]));
-    _genTopEta = etaMc[index_Top]; 
-
-    _genWpfromH_Pt  = pMc[index_WplusfromH]*fabs(sin(thetaMc[index_WplusfromH]));
-    _genWpfromH_Eta = etaMc[index_WplusfromH];
-    
-    _genWmfromH_Pt  = pMc[index_WminusfromH]*fabs(sin(thetaMc[index_WminusfromH])) ;
-    _genWmfromH_Eta = etaMc[index_WminusfromH];
-    
-    _genWfromT_Pt  = pMc[index_WfromTop]*fabs(sin(thetaMc[index_WfromTop]));
-    _genWfromT_Eta = etaMc[index_WfromTop];
-
-    if ( nLeptonsfromWfromH > 1 ){
-
-      _genNeutrinoPlusfromWfromH_Pt  = pMc[index_nplusfromWfromH]*fabs(sin(thetaMc[index_nplusfromWfromH]));
-      _genNeutrinoPlusfromWfromH_Eta = etaMc[index_nplusfromWfromH];
-      
-      _genNeutrinoMinusfromWfromH_Pt  = pMc[index_nminusfromWfromH]*fabs(sin(thetaMc[index_nminusfromWfromH]));
-      _genNeutrinoMinusfromWfromH_Eta = etaMc[index_nminusfromWfromH];
-      
-      _genLeptonPlusfromWfromH_Pt  = pMc[index_lplusfromWfromH]*fabs(sin(thetaMc[index_lplusfromWfromH]));
-      _genLeptonPlusfromWfromH_Eta = etaMc[index_lplusfromWfromH];
-      
-      _genLeptonMinusfromWfromH_Pt  = pMc[index_lminusfromWfromH]*fabs(sin(thetaMc[index_lminusfromWfromH]));
-      _genLeptonMinusfromWfromH_Eta = etaMc[index_lminusfromWfromH];
-
-    } 
-     
-    if(nLeptonsfromWfromT > 0){
-
-      _genLeptonfromWfromT_Pt  = pMc[index_lfromWfromT]*fabs(sin(thetaMc[index_lfromWfromT]));
-      _genLeptonfromWfromT_Eta = etaMc[index_lfromWfromT];
-
-      _genNeutrinofromWfromT_Pt  = pMc[index_nfromWfromT]*fabs(sin(thetaMc[index_nfromWfromT]));
-      _genNeutrinofromWfromT_Eta = etaMc[index_nfromWfromT]; 
-
-    }
-    
-    if (index_Top < 30 && index_Higgs < 30 ) tHevent = true;
-
-    return ( tHevent );
-
-  }
-  
-  // signal: 2e2nu
-  if(strcmp(processType,"HtoWWto2e2nu")==0) {
-    int indeminus=999, indeplus=999;
-    for(int imc=6;imc<25;imc++) {
-      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-      if( idMc[imc] == -11 && fabs(etaMc[imc]) < etaEleAcc_ && ptMc > ptEleAcc_ ) indeplus = imc;
-      if( idMc[imc] ==  11 && fabs(etaMc[imc]) < etaEleAcc_ && ptMc > ptEleAcc_ ) indeminus = imc;
-    }
-    if( indeminus<25 && indeplus<25 ) {
-      _theGenPos = indeplus;
-      _theGenEle = indeminus;
-    }
-    return ( indeplus < 25 && indeminus < 25 );
-  }
-
-  // signal: 2m2nu
-  if(strcmp(processType,"HtoWWto2m2nu")==0) {
-    int indmuminus=999, indmuplus=999;
-    for(int imc=6;imc<25;imc++) {
-      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-      if( idMc[imc] == -13 && fabs(etaMc[imc]) < etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuplus = imc;
-      if( idMc[imc] ==  13 && fabs(etaMc[imc]) < etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuminus = imc;
-    }
-    if( indmuminus<25 && indmuplus<25 ) {
-      _theGenMuPlus  = indmuplus;
-      _theGenMuMinus = indmuminus;
-    }
-    return ( indmuplus < 25 && indmuminus < 25 );
-  }
-
-  // signal: em2nu
-  if(strcmp(processType,"HtoWWtoem2nu")==0) {
-    int indeminus=999, indeplus=999, indmuminus=999, indmuplus=999;
-
-    bool isEM = false;
-
-    for(int imc=6;imc<25;imc++) {
-      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-      if( idMc[imc]  == -11 && fabs(etaMc[imc]) < etaEleAcc_  && ptMc > ptEleAcc_ )  indeplus = imc;
-      if( idMc[imc]  ==  13 && fabs(etaMc[imc]) < etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuminus = imc;
-      if( idMc[imc]  == -13 && fabs(etaMc[imc]) < etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuplus = imc;
-      if( idMc[imc]  ==  11 && fabs(etaMc[imc]) < etaEleAcc_  && ptMc > ptEleAcc_ )  indeminus = imc;
-    }
-
-    if( indeplus<25 && indmuminus<25 ) {
-      _theGenPos     = indeplus;
-      _theGenMuMinus = indmuminus;
-      float ptMcPos     = pMc[indeplus]*fabs(sin(thetaMc[indeplus]));      
-      float ptMcMuMinus = pMc[indmuminus]*fabs(sin(thetaMc[indmuminus]));      
-      if ( ptMcPos>ptMcMuMinus) isEM = true;
-    } else if( indeminus<25 && indmuplus<25 ) {
-      _theGenEle = indeminus;
-      _theGenMuPlus = indmuplus;
-      float ptMcEle    = pMc[indeminus]*fabs(sin(thetaMc[indeminus]));      
-      float ptMcMuPlus = pMc[indmuplus]*fabs(sin(thetaMc[indmuplus]));      
-      if ( ptMcEle>ptMcMuPlus) isEM = true;
-    }
-    
-    return ( (indeplus<25 && indmuminus<25 && isEM) || (indeminus<25 && indmuplus<25 && isEM) );
-  }
-
-  // signal: me2nu
-  if(strcmp(processType,"HtoWWtome2nu")==0) {
-    int indeminus=999, indeplus=999, indmuminus=999, indmuplus=999;
-    
-    bool isME = false;
-
-    for(int imc=6;imc<25;imc++) {
-      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-      if( idMc[imc]  == -11 && fabs(etaMc[imc]) < etaEleAcc_  && ptMc > ptEleAcc_ )  indeplus = imc;
-      if( idMc[imc]  ==  13 && fabs(etaMc[imc]) < etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuminus = imc;
-      if( idMc[imc]  == -13 && fabs(etaMc[imc]) < etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuplus = imc;
-      if( idMc[imc]  ==  11 && fabs(etaMc[imc]) < etaEleAcc_  && ptMc > ptEleAcc_ )  indeminus = imc;
-    }
-
-    if( indeplus<25 && indmuminus<25 ) {
-      _theGenPos     = indeplus;
-      _theGenMuMinus = indmuminus;
-      float ptMcPos     = pMc[indeplus]*fabs(sin(thetaMc[indeplus]));      
-      float ptMcMuMinus = pMc[indmuminus]*fabs(sin(thetaMc[indmuminus]));      
-      if ( ptMcPos<ptMcMuMinus) isME = true;
-    } else if( indeminus<25 && indmuplus<25 ) {
-      _theGenEle = indeminus;
-      _theGenMuPlus = indmuplus;
-      float ptMcEle    = pMc[indeminus]*fabs(sin(thetaMc[indeminus]));      
-      float ptMcMuPlus = pMc[indmuplus]*fabs(sin(thetaMc[indmuplus]));      
-      if ( ptMcEle<ptMcMuPlus) isME = true;
-    }
-    
-    return ( (indeplus<25 && indmuminus<25 && isME) || (indeminus<25 && indmuplus<25 && isME) );
-  }
-
-  // signal ee excluding taus
-  if(strcmp(processType,"HtoWWto2e2nu_prompt")==0) {
-    int indeminus=999, indeplus=999;
-    for(int imc=6;imc<25;imc++) {
-      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-      if(idMc[imc] == -11 && idMc[mothMc[imc]]==24 && fabs(etaMc[imc])<etaEleAcc_ && ptMc > ptEleAcc_ ) indeplus = imc;
-      if(idMc[imc] == 11 && idMc[mothMc[imc]]==-24 && fabs(etaMc[imc])<etaEleAcc_ && ptMc > ptEleAcc_ ) indeminus = imc;
-    }
-    if( indeminus<25 && indeplus<25 ) {
-      _theGenPos = indeplus;
-      _theGenEle = indeminus;
-    }
-    return ( indeplus < 25 && indeminus < 25 );
-  }
-
-  // signal mm excluding taus
-  if(strcmp(processType,"HtoWWto2m2nu_prompt")==0) {
-    int indmuminus=999, indmuplus=999;
-    for(int imc=6;imc<25;imc++) {
-      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-      if(idMc[imc] == -13 && idMc[mothMc[imc]]==24 && fabs(etaMc[imc])<etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuplus = imc;
-      if(idMc[imc] == 13 && idMc[mothMc[imc]]==-24 && fabs(etaMc[imc])<etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuminus = 11;
-    }
-    if( indmuminus<25 && indmuplus<25 ) {
-      _theGenMuPlus = indmuplus;
-      _theGenMuMinus = indmuminus;
-    }
-    return ( indmuplus < 25 && indmuminus < 25 );
-  }
-
-  // signal em excluding taus
-  if(strcmp(processType,"HtoWWtoem2nu_prompt")==0) {
-    int indeminus=999, indeplus=999, indmuminus=999, indmuplus=999;
-
-    bool isEM = false;
-
-    for(int imc=6;imc<25;imc++) {
-      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-      if(idMc[imc] == -11 && idMc[mothMc[imc]]==24 && fabs(etaMc[imc])<etaEleAcc_ && ptMc > ptEleAcc_ ) indeplus = imc;
-      if(idMc[imc] == 13 && idMc[mothMc[imc]]==-24 && fabs(etaMc[imc])<etaMuonAcc_ && ptMc > ptMuonAcc_ )indmuminus = imc;
-      if(idMc[imc] == -13 && idMc[mothMc[imc]]==24 && fabs(etaMc[imc])<etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuplus = imc;
-      if(idMc[imc] == 11 && idMc[mothMc[imc]]==-24 && fabs(etaMc[imc])<etaEleAcc_ && ptMc > ptEleAcc_ ) indeminus = imc;
-    }
-
-    if( indeplus<25 && indmuminus<25 ) {
-      _theGenPos     = indeplus;
-      _theGenMuMinus = indmuminus;
-      float ptMcPos     = pMc[indeplus]*fabs(sin(thetaMc[indeplus]));      
-      float ptMcMuMinus = pMc[indmuminus]*fabs(sin(thetaMc[indmuminus]));      
-      if ( ptMcPos>ptMcMuMinus) isEM = true;
-    } else if( indeminus<25 && indmuplus<25 ) {
-      _theGenEle = indeminus;
-      _theGenMuPlus = indmuplus;
-      float ptMcEle    = pMc[indeminus]*fabs(sin(thetaMc[indeminus]));      
-      float ptMcMuPlus = pMc[indmuplus]*fabs(sin(thetaMc[indmuplus]));      
-      if ( ptMcEle>ptMcMuPlus) isEM = true;
-    }
-    
-    return ( (indeplus<25 && indmuminus<25 && isEM) || (indeminus<25 && indmuplus<25 && isEM) );
-  }
-
-  // signal me excluding taus
-  if(strcmp(processType,"HtoWWtome2nu_prompt")==0) {
-    int indeminus=999, indeplus=999, indmuminus=999, indmuplus=999;
-
-    bool isME = false;
-
-    for(int imc=6;imc<25;imc++) {
-      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
-      if(idMc[imc] == -11 && idMc[mothMc[imc]]==24 && fabs(etaMc[imc])<etaEleAcc_ && ptMc > ptEleAcc_ ) indeplus = imc;
-      if(idMc[imc] == 13 && idMc[mothMc[imc]]==-24 && fabs(etaMc[imc])<etaMuonAcc_ && ptMc > ptMuonAcc_ )indmuminus = imc;
-      if(idMc[imc] == -13 && idMc[mothMc[imc]]==24 && fabs(etaMc[imc])<etaMuonAcc_ && ptMc > ptMuonAcc_ ) indmuplus = imc;
-      if(idMc[imc] == 11 && idMc[mothMc[imc]]==-24 && fabs(etaMc[imc])<etaEleAcc_ && ptMc > ptEleAcc_ ) indeminus = imc;
-    }
-    
-    if( indeplus<25 && indmuminus<25 ) {
-      _theGenPos     = indeplus;
-      _theGenMuMinus = indmuminus;
-      float ptMcPos     = pMc[indeplus]*fabs(sin(thetaMc[indeplus]));      
-      float ptMcMuMinus = pMc[indmuminus]*fabs(sin(thetaMc[indmuminus]));      
-      if ( ptMcPos<ptMcMuMinus) isME = true;
-    } else if( indeminus<25 && indmuplus<25 ) {
-      _theGenEle = indeminus;
-      _theGenMuPlus = indmuplus;
-      float ptMcEle    = pMc[indeminus]*fabs(sin(thetaMc[indeminus]));      
-      float ptMcMuPlus = pMc[indmuplus]*fabs(sin(thetaMc[indmuplus]));      
-      if ( ptMcEle<ptMcMuPlus) isME = true;
-    }
-    
-    return ( (indeplus<25 && indmuminus<25 && isME) || (indeminus<25 && indmuplus<25 && isME) );
-  }
-  
-  // signal: 2l2nu
-  if(strcmp(processType,"HtoWWto2l2nu")==0) {
-    int indlminus=999, indlplus=999;
-    for(int imc=6;imc<25;imc++) {
-      if(idMc[imc]>10 && idMc[imc]<19 && idMc[mothMc[imc]]==-24)  indlminus=imc;
-      if(idMc[imc]<-10 && idMc[imc]>-19 && idMc[mothMc[imc]]==24) indlplus=imc;
-    }
-    if(indlminus<25 && indlplus<25) {
-      if( (idMc[indlminus]==-11) || (idMc[indlminus]==-13) || (idMc[indlminus]==-15))  
-	_theGenEle = indlminus;
-      if( (idMc[indlplus]==11) || (idMc[indlplus]==13) || (idMc[indlplus]==15) )
-	_theGenPos = indlplus;
-    }
-    return (indlminus<25 && indlplus<25);
-  }
-  
-
-  // WW: e / mu / tau
-  else if(strcmp(processType,"WW")==0) {
-    _process = "WW";
-    TVector3 WminusP, WplusP;
-    WminusP.SetMagThetaPhi(pMc[6],thetaMc[6],phiMc[6]);
-    WplusP.SetMagThetaPhi(pMc[7],thetaMc[7],phiMc[7]);
-    float pT = (WminusP+WplusP).Pt();
-    _theGenEle = 6;
-    _theGenPos = 7;
-    _genHiggsPt = pT;
-    return (
-	    (abs(idMc[6])==24) && (abs(idMc[7])==24) &&
-	    (abs(idMc[8])>10 && abs(idMc[8])<19 && abs(idMc[mothMc[8]])==24) &&
-	    (abs(idMc[10])>10 && abs(idMc[10])<19 && abs(idMc[mothMc[10]])==24)
-	    );
-  }
-
-  // w+jets: e / mu / tau
-  else if(strcmp(processType,"Wjets")==0) {
-    _process = "Wjets";
-    return ( ((abs(idMc[8])==11) && abs(idMc[9])==12) || ((abs(idMc[8])==13) && abs(idMc[9])==14) || ((abs(idMc[8])==15) && abs(idMc[9])==16));
-  }
-  // ttbar: e / mu / tau
-  else if(strcmp(processType,"ttbar")==0) {
-    _process = "ttbar";
-    _theGenEle = 13;
-    _theGenPos = 15;
-    return ( 
-	    abs(idMc[9])==24 && abs(idMc[15])>10 && abs(idMc[15])<19 &&
-	    abs(idMc[11])==24 && abs(idMc[13])>10 && abs(idMc[13])<19 &&
-	    (idMc[13]*idMc[15]<0)
-	    );
-  }
-  else if(strcmp(processType,"ZZleptonic")==0) {
-    _process = "ZZleptonic";
-    // 8,9; 10,11 are the daughters of the Z;Z
-    return (fabs(idMc[8])>10 && fabs(idMc[8])<19 &&
-	    fabs(idMc[9])>10 && fabs(idMc[9])<19 &&
-	    fabs(idMc[10])>10 && fabs(idMc[10])<19 &&
-	    fabs(idMc[11])>10 && fabs(idMc[11])<19);
-  }
-  else {
-    std::cout << "This processType: " << processType << " is not expected, you should put MTtruth switch off" <<std::endl;
-    return false;
-  }
-}
-
 void tHSelection::Loop() {
 
   _verbose=false;
@@ -717,6 +247,8 @@ void tHSelection::Loop() {
     
     if (wantJetIdStuff) myOutTree[theChannel]->addJetsVars();
 
+    myOutTree[theChannel]->addMoreJetsVars();
+
     myOutTree[theChannel]->addLatinos();
   
     myOutTree[theChannel]->addKinematics();
@@ -727,6 +259,8 @@ void tHSelection::Loop() {
 
     myOutTree[theChannel]->addMetStudies();
 
+    myOutTree[theChannel]->addLeptonMVAidVariables();
+
   }
   
   unsigned int lastLumi = 0;
@@ -735,8 +269,8 @@ void tHSelection::Loop() {
   //PUWeight* fPUWeight = new PUWeight();
 
   Long64_t nbytes = 0, nb = 0;
-  Long64_t nentries = fChain->GetEntries();
-  //Long64_t nentries = 50000;
+  //Long64_t nentries = fChain->GetEntries();
+  Long64_t nentries = 1000;
   std::cout << "Number of entries = " << nentries << std::endl;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
@@ -746,7 +280,7 @@ void tHSelection::Loop() {
     if (jentry%1000 == 0) std::cout << ">>> Processing event # " << jentry << std::endl;
 
     nTotal++;
-    
+
     // for each event, reset the estimation of the variables
     resetKinematicsStart();
 
@@ -760,22 +294,14 @@ void tHSelection::Loop() {
       for(int i=0; i<3; i++) nputosave[i] = -1.;
     }
 
-    // look to the MC truth decay tree 
-    // bool decayEE = findMcTree("HtoWWto2e2nu");
-    // bool decayMM = findMcTree("HtoWWto2m2nu");
-    // bool decayEM = findMcTree("HtoWWtoem2nu");
-
-    // MC Truth information
-    bool promptEE, promptMM, promptEM, promptME;
-    promptEE = promptMM = promptEM = promptME = false;
-
     _genmll = _genptll = _genyll = -1.;
 
     bool WZgenerated = false;
     bool tHgenerated = false;
 
     if( !_selectionEEE->getSwitch("isData") ) {
-      //tHgenerated = findMcTree("tH");  
+      tHgenerated = findMcTree("tH");  
+      //std::cout<<"th generated!"<<std::endl;
       //WZgenerated = findMcTree("WZ");  
     }
 
@@ -839,7 +365,7 @@ void tHSelection::Loop() {
       lastLumi = lumiBlock;
       std::cout << "[GoodRunLS]::Run " << lastRun << " LS " << lastLumi << " is OK" << std::endl;
     }
-    
+
     // IMPORTANT: FOR DATA RELOAD THE TRIGGER MASK PER FILE WHICH IS SUPPOSED TO CONTAIN UNIFORM CONDITIONS X FILE
     reloadTriggerMask(runNumber);
     bool passedHLT[6];
@@ -922,7 +448,7 @@ void tHSelection::Loop() {
     m_channel[mm] = false;
 
     if(isGoodVertex){
-      
+
       // Give priority to the channels with muons
       if ( theBestMMM.at(0)> -1 && theBestMMM.at(1) > -1 && theBestMMM.at(2) > -1 ) {
 	m_channel[mmm] = true;
@@ -986,18 +512,6 @@ void tHSelection::Loop() {
       
     }
 
-    /*
-    std::cout << " This event has been selected as: " << std::endl;
-    std::cout << " EEE = [" << m_channel[eee] << "]" << std::endl;
-    std::cout << " MMM = [" << m_channel[mmm] << "]" << std::endl;
-    std::cout << " EEM = [" << m_channel[eem] << "]" << std::endl;
-    std::cout << " MME = [" << m_channel[mme] << "]" << std::endl;
-    */
-
-    //if( !m_channel[eee] && !m_channel[eem] && !m_channel[mme] && !m_channel[mmm] ) continue;
-  
-    //std::cout<< " we continue ..." << std::endl;
-
     // -------------------------------------------------------------
     // Set of kinematics: : now I've all the final leptons 
     resetKinematics();
@@ -1055,26 +569,62 @@ void tHSelection::Loop() {
       m_numbtagCSVMmvaIDaccepjets[ichan] = 0; // medium
       m_numbtagCSVTmvaIDaccepjets[ichan] = 0; // tight
 
-      // Initialize the number of b-tagged of Cut Based Id jets
-      m_numbtagCSVLcbIDcentraljets[ichan] = 0; // loose
-      m_numbtagCSVMcbIDcentraljets[ichan] = 0; // medium
-      m_numbtagCSVTcbIDcentraljets[ichan] = 0; // tight
+      m_nummvaIDcentraljets[ichan] = 0;
+      m_nummvaIDforwardjets[ichan] = 0;
 
+      m_nummvaIDaccepINjets[ichan] = 0;
+      m_nummvaIDaccepOUTjets[ichan] = 0;
+
+      // Initialize the number of b-tagged of Cut Based Id jets
       m_numbtagCSVLcbIDaccepjets[ichan] = 0; // loose
       m_numbtagCSVMcbIDaccepjets[ichan] = 0; // medium
       m_numbtagCSVTcbIDaccepjets[ichan] = 0; // tight
 
-      m_nummvaIDcentraljets[ichan] = 0;
-      m_numcbIDcentraljets [ichan] = 0; // loose
+      m_numcbIDcentralMjets [ichan] = 0; // medium
+      m_numcbIDforwardMjets [ichan] = 0; // medium
 
-      m_nummvaIDforwardjets[ichan] = 0;
-      m_numcbIDforwardjets [ichan] = 0; // loose
+      m_numcbIDcentralLjets [ichan] = 0; // loose
+      m_numcbIDforwardLjets [ichan] = 0; // loose
 
-      m_nummvaIDaccepINjets[ichan] = 0;
-      m_numcbIDaccepINjets [ichan] = 0; // loose
+      for(int k=0; k<5; k++){
 
-      m_nummvaIDaccepOUTjets[ichan] = 0;
-      m_numcbIDaccepOUTjets [ichan] = 0; // loose
+	ptCVStaggedM [ichan][k] = -999.9;
+	etaCVStaggedM[ichan][k] = -999.9;
+	phiCVStaggedM[ichan][k] = -999.9;
+	eneCVStaggedM[ichan][k] = -999.9;
+	cvsCVStaggedM[ichan][k] = -999.9;
+	
+	ptForwardM [ichan][k] = -999.9;
+	etaForwardM[ichan][k] = -999.9;
+	phiForwardM[ichan][k] = -999.9;
+	eneForwardM[ichan][k] = -999.9;
+	cvsForwardM[ichan][k] = -999.9;
+	
+	ptCentralM [ichan][k] = -999.9;
+	etaCentralM[ichan][k] = -999.9;
+	phiCentralM[ichan][k] = -999.9;
+	eneCentralM[ichan][k] = -999.9;
+	cvsCentralM[ichan][k] = -999.9;
+	
+	ptCVStaggedL [ichan][k] = -999.9;
+	etaCVStaggedL[ichan][k] = -999.9;
+	phiCVStaggedL[ichan][k] = -999.9;
+	eneCVStaggedL[ichan][k] = -999.9;
+	cvsCVStaggedL[ichan][k] = -999.9;
+	
+	ptForwardL [ichan][k] = -999.9;
+	etaForwardL[ichan][k] = -999.9;
+	phiForwardL[ichan][k] = -999.9;
+	eneForwardL[ichan][k] = -999.9;
+	cvsForwardL[ichan][k] = -999.9;
+	
+	ptCentralL [ichan][k] = -999.9;
+	etaCentralL[ichan][k] = -999.9;
+	phiCentralL[ichan][k] = -999.9;
+	eneCentralL[ichan][k] = -999.9;
+	cvsCentralL[ichan][k] = -999.9;
+
+      }
 
       // Initialize variables for jetId studies
       if (wantJetIdStuff) {
@@ -1137,10 +687,8 @@ void tHSelection::Loop() {
 
     for(int theChannel=0; theChannel<6; theChannel++) {
 
-      //std::cout<<"estoy en el channel theChannel == "<<theChannel<<std::endl;
-      
       CutBasedHiggsSelection[theChannel].SetWeight       (weight);               
-      //CutBasedHiggsSelection[theChannel].SetMcTruth    (promptEE); 
+      CutBasedHiggsSelection[theChannel].SetMcTruth      (true); 
       CutBasedHiggsSelection[theChannel].SetHLT          (passedHLT[theChannel]);               
       CutBasedHiggsSelection[theChannel].SetIsChannel    (m_channel[theChannel]);     
       CutBasedHiggsSelection[theChannel].SetHighElePt    (hardestLeptonPt[theChannel]); 
@@ -1170,6 +718,8 @@ void tHSelection::Loop() {
       // latinos
       bool outputStep0  = CutBasedHiggsSelection[theChannel].outputStep0();
       bool outputStep1  = CutBasedHiggsSelection[theChannel].outputStep1();
+
+      //std::cout<<"step0/step1 = "<<outputStep0<<"/"<<outputStep1<<std::endl;
       
       // Filling the tree
 
@@ -1177,12 +727,7 @@ void tHSelection::Loop() {
       // Not for the moment
       if(!_selectionEEE->getSwitch("isData")) {
 
-
-	myOutTree[theChannel] -> fillMcTruth(promptEE,
-	                                     _genmll ,
-					     _genptll,
-					     _genyll);
-	myOutTree[theChannel] -> fillPDFs(wCTEQ66,wMRST2006NNLO,wNNPDF10100);
+      myOutTree[theChannel] -> fillPDFs(wCTEQ66,wMRST2006NNLO,wNNPDF10100);
 	
       }
       */ 
@@ -1198,8 +743,7 @@ void tHSelection::Loop() {
       // Index for the leading and subleading jets (obtained previously for each channel)
       int   theLJ = theLeadingJet[theChannel];
       int   theSJ = theSecondJet [theChannel];
-      float ptLJ  = sqrt(  pxAK5PFPUcorrJet[theLJ]*pxAK5PFPUcorrJet[theLJ] 
-			+ pyAK5PFPUcorrJet[theLJ]*pyAK5PFPUcorrJet[theLJ]);
+      float ptLJ  = sqrt(  pxAK5PFPUcorrJet[theLJ]*pxAK5PFPUcorrJet[theLJ] + pyAK5PFPUcorrJet[theLJ]*pyAK5PFPUcorrJet[theLJ]);
       
       myOutTree[theChannel] -> fillAll(m_chMet          [theChannel], 
 				       GetPt(m_p3PFMET->x(), m_p3PFMET->y()), 
@@ -1240,9 +784,9 @@ void tHSelection::Loop() {
       }else if (theChannel == eem){
 
 	if(muCands[eem].size()==1 && eleCands[eem].size()==2){
-	  setLepIdVariables( (muCands[eem])[0] , (eleCands[eem])[0] , (eleCands[eem])[1] , 13, 11, 11);
+	  setLepIdVariables( (eleCands[eem])[0] , (eleCands[eem])[1] , (muCands[eem])[0], 11, 11, 13); 
 	}else{
-	  setLepIdVariables(-1,-1,-1,13,11,11);
+	  setLepIdVariables(-1,-1,-1,11,11,13);
 	}
 	
       /// eee channel
@@ -1311,15 +855,11 @@ void tHSelection::Loop() {
 					  m_numbtagCSVMcbIDaccepjets [theChannel],
 					  m_numbtagCSVTcbIDaccepjets [theChannel],
 
-					  m_numbtagCSVLcbIDcentraljets [theChannel],
-					  m_numbtagCSVMcbIDcentraljets [theChannel],
-					  m_numbtagCSVTcbIDcentraljets [theChannel],
+					  m_numcbIDcentralLjets [theChannel],
+					  m_numcbIDforwardLjets [theChannel],
 
-					  m_numcbIDcentraljets [theChannel],
-					  m_numcbIDforwardjets [theChannel],
-
-					  m_numcbIDaccepINjets [theChannel],
-					  m_numcbIDaccepOUTjets[theChannel],
+					  m_numcbIDcentralMjets [theChannel],
+					  m_numcbIDforwardMjets [theChannel],
 
 					  //mva
 					  m_numbtagCSVLmvaIDaccepjets [theChannel],
@@ -1349,6 +889,42 @@ void tHSelection::Loop() {
 					      subleadJetMatchGen [theChannel], 
 					      subleadJetMvaJetId [theChannel], 
 					      subleadJetLooseId  [theChannel]);
+
+      myOutTree[theChannel] ->fillMoreJetsVars(  ptCVStaggedM [theChannel],
+						 etaCVStaggedM[theChannel],
+						 phiCVStaggedM[theChannel],
+						 eneCVStaggedM[theChannel],
+						 cvsCVStaggedM[theChannel],
+
+						 ptForwardM [theChannel],
+						 etaForwardM[theChannel],
+						 phiForwardM[theChannel],
+						 eneForwardM[theChannel],
+						 cvsForwardM[theChannel],
+						 
+						 ptCentralM [theChannel],
+						 etaCentralM[theChannel],
+						 phiCentralM[theChannel],
+						 eneCentralM[theChannel],
+						 cvsCentralM[theChannel],
+						 
+						 ptCVStaggedL [theChannel],
+						 etaCVStaggedL[theChannel],
+						 phiCVStaggedL[theChannel],
+						 eneCVStaggedL[theChannel],
+						 cvsCVStaggedL[theChannel],
+						 
+						 ptForwardL [theChannel],
+						 etaForwardL[theChannel],
+						 phiForwardL[theChannel],
+						 eneForwardL[theChannel],
+						 cvsForwardL[theChannel],
+						
+						 ptCentralL [theChannel],
+						 etaCentralL[theChannel],
+						 phiCentralL[theChannel],
+						 eneCentralL[theChannel],
+						 cvsCentralL[theChannel]);
 
       if (tHgenerated)
 	myOutTree[theChannel] -> filltHMcTruthInfos(_genHiggsPt,
@@ -1457,11 +1033,56 @@ void tHSelection::Loop() {
 					       jesMtUp          [theChannel], 
 					       jesMtDown        [theChannel]);
       
-      
-      // dumping final tree, only if it passes the trigger and there are 3 final leptons
-      if(m_channel[theChannel] && outputStep0 && outputStep1) 
-	myOutTree[theChannel] -> store();
+      if(theChannel!=4 || theChannel!=5){
 
+	int lep1,lep2,lep3;
+	
+	if(theChannel==eee){
+	  lep1 = theBestEEE.at(0);
+	  lep2 = theBestEEE.at(1);
+	  lep3 = theBestEEE.at(2);
+	}
+
+	if(theChannel==mmm){
+	  lep1 = theBestMMM.at(0);
+	  lep2 = theBestMMM.at(1);
+	  lep3 = theBestMMM.at(2);
+	}
+
+	if(theChannel==eem){
+	  lep1 = theBestEEM.at(0);
+	  lep2 = theBestEEM.at(1);
+	  lep3 = theBestEEM.at(2);
+	}
+
+	if(theChannel==mme){
+	  lep1 = theBestMME.at(0);
+	  lep2 = theBestMME.at(1);
+	  lep3 = theBestMME.at(2);
+	}
+
+	estimateLeptonMVAvariables(theChannel, lep1, lep2, lep3);
+
+	myOutTree[theChannel] -> fillLeptonMVAidVariables( leptPt[theChannel],
+							   leptEta[theChannel],
+							   neuRelIs[theChannel],
+							   chRelIso[theChannel],
+							   jetDR_in[theChannel],
+							   jetPtRatio_in[theChannel],
+							   jetBTagCSV_in[theChannel],
+							   sip3d[theChannel],
+							   mvaId[theChannel],
+							   innerHits[theChannel],
+							   logdxy[theChannel],
+							   logdz[theChannel]);
+
+      }
+      
+
+      // dumping final tree, only if it passes the trigger and there are 3 final leptons
+      if(m_channel[theChannel] && outputStep0 && outputStep1) {
+	myOutTree[theChannel] -> store();
+      }
     }
 
   }
@@ -1534,18 +1155,17 @@ bool tHSelection::isSelectedMuon2012(int i){
   TLorentzVector Muon;
   Muon.SetPxPyPzE(double(pxMuon[i]), double(pyMuon[i]), double(pzMuon[i]), double(energyMuon[i]));
 
-  rmcor->momcor_mc(Muon, chargeMuon[i], 0, 1.0);
+  //rmcor->momcor_mc(Muon, chargeMuon[i], 0, 1.0);
   
-  //std::cout << " ** [GetBestMMM Function] :: Rochester Correction ** " << std::endl;
+  //std::cout << " ::: isSelectedMuon2012 with Rochester Correction ::: " << std::endl;
   //std::cout << " [Before] with TLorentz pT[muon] = [" << Muon.Pt() << "]" << std::endl;
   
   double MuonPt = double(GetPt(pxMuon[i],pyMuon[i]));
   //float MuonPt = Muon.Pt();
-  /*
-    std::cout << " Muon.Pt()  = " << Muon.Pt() << std::endl;
-    std::cout << " GetPt(...) = " << MuonPt    << std::endl;
-  */
   
+  //std::cout << " Muon.Pt()  = " << Muon.Pt() << std::endl;
+  //std::cout << " GetPt(...) = " << MuonPt    << std::endl;
+   
   //std::cout << " [After] pT[muon] = [" << float(Muon.Pt()) << "]" << std::endl;
   
   //std::cout<< " muon [pT][eta] = ["<< MuonPt << "][" << etaMuon[i] << "]"<<std::endl;  
@@ -1580,8 +1200,17 @@ bool tHSelection::isSelectedMuon2012(int i){
 bool tHSelection::isSelectedMuon2013(int i){
 
   bool print = false;
+  
+  TLorentzVector Muon;
+  Muon.SetPxPyPzE(double(pxMuon[i]), double(pyMuon[i]), double(pzMuon[i]), double(energyMuon[i]));
 
-  double MuonPt = double(GetPt(pxMuon[i],pyMuon[i]));
+  rmcor->momcor_mc(Muon, chargeMuon[i], 0, 1.0);
+  
+  //std::cout << " ::: isSelectedMuon2012 with Rochester Correction ::: " << std::endl;
+  //std::cout << " [Before] with TLorentz pT[muon] = [" << Muon.Pt() << "]" << std::endl;
+  
+  //double MuonPt = double(GetPt(pxMuon[i],pyMuon[i]));
+  float MuonPt = Muon.Pt();
 
   // Kinematics
   if ( MuonPt < 5 || etaMuon[i] > 2.4 ) return false;
@@ -1590,13 +1219,13 @@ bool tHSelection::isSelectedMuon2013(int i){
 
   if ( !pfmuonIdMuon[i] ) return false;
 
-  int track      = trackIndexMuon[i];
+  int   track    = trackIndexMuon[i];
   float theIp    = impactPar3DTrack[track];
   float theIpErr = impactPar3DErrorTrack[track];
   float sip3d    = theIp/theIpErr;
   if ( sip3d > 10 ) return false;
 
-  int ctfMuon   = trackIndexMuon[i]; 
+  int   ctfMuon = trackIndexMuon[i]; 
   float dxyMuon = transvImpactParTrack[ctfMuon];
   float dzMuon  = muonDzPV(i,0);
   if ( dxyMuon > 0.5 || dzMuon > 1.0 ) return false;
@@ -1607,6 +1236,9 @@ bool tHSelection::isSelectedMuon2013(int i){
 
   // Lepton MVA ID
   float bdtValue = leptBDTForBs(fMVAMuon, i, false);
+
+  if(eventNumber==500850) std::cout<< "bdtValue == "<<bdtValue<<std::endl;
+
   if ( bdtValue < 0.7 ) return false;
   if (print) std::cout<< " [FinalBDT]= 1" << std::endl;  
 
@@ -1729,10 +1361,365 @@ bool tHSelection::isSelectedElectron2013(int i){
 
   // Lepton MVA ID
   float bdtValue = leptBDTForBs(fMVAElectron, i, true);
+
+  if(eventNumber==500850) std::cout<< "[electron] bdtValue == "<<bdtValue<<std::endl;
+
   if ( bdtValue < 0.7 ) return false;
   if (print) std::cout<< " [FinalBDT]= 1" << std::endl;  
   
   return true;
+
+}
+
+void tHSelection::estimateLeptonMVAvariables(int channel, int lepton1, int lepton2, int lepton3){
+  
+  if (lepton1>-1 && lepton2>-1 && lepton3>-1){
+    
+    float _pt[3];
+    float _eta[3];
+    float _neureliso[3];
+    float _chreliso[3];
+    float _sip3d[3];
+    float _mvaId[3];
+    int   _inhits[3];
+    float _ldxy[3];
+    float _ldz[3];
+    
+    // auxiliar variables
+    float absNeutral1, absNeutral2, absNeutral3;
+    float corrNeutral1, corrNeutral2, corrNeutral3;
+    float corrAbsIso1, corrAbsIso2, corrAbsIso3;
+    int   gsftrack1, gsftrack2, gsftrack3;
+    int   track1, track2, track3;
+    float theIp1, theIp2, theIp3; 
+    float theIpErr1, theIpErr2, theIpErr3;
+    float dxyMu1, dxyMu2, dxyMu3;
+    float dzMu1, dzMu2, dzMu3;
+
+    if (channel==eee){ //eee channel
+      
+      _pt[0] = GetPt(pxEle[lepton1],pyEle[lepton1]); 
+      _pt[1] = GetPt(pxEle[lepton2],pyEle[lepton2]); 
+      _pt[2] = GetPt(pxEle[lepton3],pyEle[lepton3]);
+
+      _eta[0] = etaEle[lepton1]; 
+      _eta[1] = etaEle[lepton2]; 
+      _eta[2] = etaEle[lepton3];
+    
+      absNeutral1  = pfCandNeutralIso04Ele[lepton1] + pfCandPhotonIso04Ele[lepton1]; 
+      absNeutral2  = pfCandNeutralIso04Ele[lepton2] + pfCandPhotonIso04Ele[lepton2]; 
+      absNeutral3  = pfCandNeutralIso04Ele[lepton3] + pfCandPhotonIso04Ele[lepton3];
+
+      corrNeutral1 = absNeutral1 - 0.5*pfCandChargedPUIso04Ele[lepton1];
+      corrNeutral2 = absNeutral2 - 0.5*pfCandChargedPUIso04Ele[lepton2];
+      corrNeutral3 = absNeutral3 - 0.5*pfCandChargedPUIso04Ele[lepton3];
+
+      corrAbsIso1  = pfCandChargedIso04Ele[lepton1]; 
+      corrAbsIso2  = pfCandChargedIso04Ele[lepton2]; 
+      corrAbsIso3  = pfCandChargedIso04Ele[lepton3];
+
+      if (corrNeutral1>0) corrAbsIso1 = corrAbsIso1 + corrNeutral1; 
+      if (corrNeutral2>0) corrAbsIso2 = corrAbsIso2 + corrNeutral2; 
+      if (corrNeutral3>0) corrAbsIso3 = corrAbsIso3 + corrNeutral3;
+
+      _neureliso[0] = corrAbsIso1/_pt[0]; 
+      _neureliso[1] = corrAbsIso2/_pt[1]; 
+      _neureliso[2] = corrAbsIso3/_pt[2];  
+      
+      _chreliso[0] = pfCandChargedIso04Ele[lepton1]/_pt[0]; 
+      _chreliso[1] = pfCandChargedIso04Ele[lepton2]/_pt[1]; 
+      _chreliso[2] = pfCandChargedIso04Ele[lepton3]/_pt[2];
+      
+      // IP
+      gsftrack1 = gsfTrackIndexEle[lepton1]; 
+      gsftrack2 = gsfTrackIndexEle[lepton2]; 
+      gsftrack3 = gsfTrackIndexEle[lepton3]; 
+
+      theIp1 = impactPar3DGsfTrack[gsftrack1]; 
+      theIp2 = impactPar3DGsfTrack[gsftrack2]; 
+      theIp3 = impactPar3DGsfTrack[gsftrack3];
+
+      theIpErr1 = impactPar3DErrorGsfTrack[gsftrack1]; 
+      theIpErr2 = impactPar3DErrorGsfTrack[gsftrack2]; 
+      theIpErr3 = impactPar3DErrorGsfTrack[gsftrack3]; 
+
+      _sip3d[0] = theIp1/theIpErr1; 
+      _sip3d[1] = theIp2/theIpErr2; 
+      _sip3d[2] = theIp3/theIpErr3;
+
+      _mvaId[0] = mvaidnontrigEle[lepton1]; 
+      _mvaId[1] = mvaidnontrigEle[lepton2]; 
+      _mvaId[2] = mvaidnontrigEle[lepton3];
+
+      _inhits[0] = trackLostHitsGsfTrack[gsftrack1]; 
+      _inhits[1] = trackLostHitsGsfTrack[gsftrack2]; 
+      _inhits[2] = trackLostHitsGsfTrack[gsftrack3];
+      
+      // not for electrons
+      _ldxy[0] = -999.; _ldxy[1] = -999.; _ldxy[2] = -999.; 
+      _ldz[0]  = -999.; _ldz[1]  = -999.; _ldz[2]  = -999.; 
+
+    }
+
+    if(channel==mmm){// mmm channel
+      
+      _pt[0] = GetPt(pxMuon[lepton1],pyMuon[lepton1]); 
+      _pt[1] = GetPt(pxMuon[lepton2],pyMuon[lepton2]); 
+      _pt[2] = GetPt(pxMuon[lepton3],pyMuon[lepton3]);
+
+      _eta[0] = etaMuon[lepton1]; 
+      _eta[1] = etaMuon[lepton2]; 
+      _eta[2] = etaMuon[lepton3];
+    
+      absNeutral1  = pfCandNeutralIso04Muon[lepton1] + pfCandPhotonIso04Muon[lepton1]; 
+      absNeutral2  = pfCandNeutralIso04Muon[lepton2] + pfCandPhotonIso04Muon[lepton2]; 
+      absNeutral3  = pfCandNeutralIso04Muon[lepton3] + pfCandPhotonIso04Muon[lepton3];
+
+      corrNeutral1 = absNeutral1 - 0.5*pfCandChargedPUIso04Muon[lepton1];
+      corrNeutral2 = absNeutral2 - 0.5*pfCandChargedPUIso04Muon[lepton2];
+      corrNeutral3 = absNeutral3 - 0.5*pfCandChargedPUIso04Muon[lepton3];
+
+      corrAbsIso1  = pfCandChargedIso04Muon[lepton1]; 
+      corrAbsIso2  = pfCandChargedIso04Muon[lepton2]; 
+      corrAbsIso3  = pfCandChargedIso04Muon[lepton3];
+
+      if (corrNeutral1>0) corrAbsIso1 = corrAbsIso1 + corrNeutral1; 
+      if (corrNeutral2>0) corrAbsIso2 = corrAbsIso2 + corrNeutral2; 
+      if (corrNeutral3>0) corrAbsIso3 = corrAbsIso3 + corrNeutral3;
+
+      _neureliso[0] = corrAbsIso1/_pt[0]; 
+      _neureliso[1] = corrAbsIso2/_pt[1]; 
+      _neureliso[2] = corrAbsIso3/_pt[2];  
+      
+      _chreliso[0] = pfCandChargedIso04Muon[lepton1]/_pt[0]; 
+      _chreliso[1] = pfCandChargedIso04Muon[lepton2]/_pt[1]; 
+      _chreliso[2] = pfCandChargedIso04Muon[lepton3]/_pt[2];
+
+      // IP
+      track1      = trackIndexMuon[lepton1];
+      track2      = trackIndexMuon[lepton2];
+      track3      = trackIndexMuon[lepton3];
+
+      theIp1    = impactPar3DTrack[track1];
+      theIp2    = impactPar3DTrack[track2];
+      theIp3    = impactPar3DTrack[track3];
+
+      theIpErr1 = impactPar3DErrorTrack[track1]; 
+      theIpErr2 = impactPar3DErrorTrack[track2]; 
+      theIpErr3 = impactPar3DErrorTrack[track3]; 
+      
+      _sip3d[0] = theIp1/theIpErr1; 
+      _sip3d[1] = theIp2/theIpErr2; 
+      _sip3d[2] = theIp3/theIpErr3;
+      
+      // not for muons
+      _mvaId[0] = -999.; _mvaId[1] = -999.; _mvaId[2] = -999.;
+      _inhits[0] = -999.; _inhits[1] = -999.; _inhits[2] = -999.;
+      
+      dxyMu1 = transvImpactParTrack[track1];
+      dxyMu2 = transvImpactParTrack[track2];
+      dxyMu3 = transvImpactParTrack[track3];
+
+      _ldxy[0] = log(fabs(dxyMu1));
+      _ldxy[1] = log(fabs(dxyMu2));
+      _ldxy[2] = log(fabs(dxyMu3));
+
+      dzMu1 = dzTrack[track1];
+      dzMu2 = dzTrack[track2];
+      dzMu3 = dzTrack[track3];
+
+      _ldz[0] = log(fabs(dzMu1));
+      _ldz[1] = log(fabs(dzMu2));
+      _ldz[2] = log(fabs(dzMu3));
+
+    }
+    
+    if(channel==eem){ //eem channel
+
+      _pt[0] = GetPt(pxEle[lepton1],pyEle[lepton1]); 
+      _pt[1] = GetPt(pxEle[lepton2],pyEle[lepton2]); 
+      _pt[2] = GetPt(pxMuon[lepton3],pyMuon[lepton3]);
+
+      _eta[0] = etaEle[lepton1]; 
+      _eta[1] = etaEle[lepton2]; 
+      _eta[2] = etaMuon[lepton3];
+
+      absNeutral1  = pfCandNeutralIso04Ele[lepton1] + pfCandPhotonIso04Ele[lepton1]; 
+      absNeutral2  = pfCandNeutralIso04Ele[lepton2] + pfCandPhotonIso04Ele[lepton2]; 
+      absNeutral3  = pfCandNeutralIso04Muon[lepton3] + pfCandPhotonIso04Muon[lepton3];
+      
+      corrNeutral1 = absNeutral1 - 0.5*pfCandChargedPUIso04Ele[lepton1];
+      corrNeutral2 = absNeutral2 - 0.5*pfCandChargedPUIso04Ele[lepton2];
+      corrNeutral3 = absNeutral3 - 0.5*pfCandChargedPUIso04Muon[lepton3];
+
+      corrAbsIso1  = pfCandChargedIso04Ele[lepton1]; 
+      corrAbsIso2  = pfCandChargedIso04Ele[lepton2]; 
+      corrAbsIso3  = pfCandChargedIso04Muon[lepton3];
+
+      if (corrNeutral1>0) corrAbsIso1 = corrAbsIso1 + corrNeutral1; 
+      if (corrNeutral2>0) corrAbsIso2 = corrAbsIso2 + corrNeutral2; 
+      if (corrNeutral3>0) corrAbsIso3 = corrAbsIso3 + corrNeutral3; 
+
+      _neureliso[0] = corrAbsIso1/_pt[0]; 
+      _neureliso[1] = corrAbsIso2/_pt[1]; 
+      _neureliso[2] = corrAbsIso3/_pt[2]; 
+      
+      _chreliso[0] = pfCandChargedIso04Ele[lepton1]/_pt[0]; 
+      _chreliso[1] = pfCandChargedIso04Ele[lepton2]/_pt[1]; 
+      _chreliso[2] = pfCandChargedIso04Ele[lepton3]/_pt[2]; 
+      
+      // IP
+      gsftrack1 = gsfTrackIndexEle[lepton1]; 
+      gsftrack2 = gsfTrackIndexEle[lepton2]; 
+      track3    = trackIndexMuon[lepton3];
+
+      theIp1 = impactPar3DGsfTrack[gsftrack1]; 
+      theIp2 = impactPar3DGsfTrack[gsftrack2]; 
+      theIp3 = impactPar3DTrack[track3];
+
+      theIpErr1 = impactPar3DErrorGsfTrack[gsftrack1]; 
+      theIpErr2 = impactPar3DErrorGsfTrack[gsftrack2]; 
+      theIpErr3 = impactPar3DErrorTrack[track3]; 
+
+      _sip3d[0] = theIp1/theIpErr1; 
+      _sip3d[1] = theIp2/theIpErr2; 
+      _sip3d[2] = theIp3/theIpErr3;
+
+      _mvaId[0] = mvaidnontrigEle[lepton1]; 
+      _mvaId[1] = mvaidnontrigEle[lepton2]; 
+      _mvaId[2] = -999.; //not for muons
+
+      _inhits[0] = trackLostHitsGsfTrack[gsftrack1]; 
+      _inhits[1] = trackLostHitsGsfTrack[gsftrack2]; 
+      _inhits[2] = -999.; //not for muons
+
+      dxyMu3 = transvImpactParTrack[track3];
+
+      _ldxy[0] = -999.; // not for electrons
+      _ldxy[1] = -999.; // not for electrons
+      _ldxy[2] = log(fabs(dxyMu3));
+
+      dzMu3 = dzTrack[track3];
+
+      _ldz[0]  = -999.; // not for electrons 
+      _ldz[1]  = -999.; // not for electrons
+      _ldz[2] = log(fabs(dzMu3));	  
+
+
+    }
+
+    if (channel==mme){ //mme channel
+
+      _pt[0] = GetPt(pxMuon[lepton1],pyMuon[lepton1]); 
+      _pt[1] = GetPt(pxMuon[lepton2],pyMuon[lepton2]); 
+      _pt[2] = GetPt(pxEle[lepton3],pyEle[lepton3]);
+
+      _eta[0] = etaMuon[lepton1]; 
+      _eta[1] = etaMuon[lepton2]; 
+      _eta[2] = etaEle[lepton3];
+    
+      absNeutral1  = pfCandNeutralIso04Muon[lepton1] + pfCandPhotonIso04Muon[lepton1]; 
+      absNeutral2  = pfCandNeutralIso04Muon[lepton2] + pfCandPhotonIso04Muon[lepton2]; 
+      absNeutral3  = pfCandNeutralIso04Ele [lepton3] + pfCandPhotonIso04Ele [lepton3];
+
+      corrNeutral1 = absNeutral1 - 0.5*pfCandChargedPUIso04Muon[lepton1];
+      corrNeutral2 = absNeutral2 - 0.5*pfCandChargedPUIso04Muon[lepton2];
+      corrNeutral3 = absNeutral2 - 0.5*pfCandChargedPUIso04Ele [lepton3];
+
+      corrAbsIso1  = pfCandChargedIso04Muon[lepton1]; 
+      corrAbsIso2  = pfCandChargedIso04Muon[lepton2]; 
+      corrAbsIso3  = pfCandChargedIso04Ele [lepton3]; 
+
+      if (corrNeutral1>0) corrAbsIso1 = corrAbsIso1 + corrNeutral1; 
+      if (corrNeutral2>0) corrAbsIso2 = corrAbsIso2 + corrNeutral2; 
+      if (corrNeutral3>0) corrAbsIso3 = corrAbsIso3 + corrNeutral3;
+
+      _neureliso[0] = corrAbsIso1/_pt[0]; 
+      _neureliso[1] = corrAbsIso2/_pt[1]; 
+      _neureliso[2] = corrAbsIso3/_pt[2];  
+      
+      _chreliso[0] = pfCandChargedIso04Muon[lepton1]/_pt[0]; 
+      _chreliso[1] = pfCandChargedIso04Muon[lepton2]/_pt[1]; 
+      _chreliso[2] = pfCandChargedIso04Ele [lepton3]/_pt[2];
+      
+      // IP
+      track1      = trackIndexMuon[lepton1];
+      track2      = trackIndexMuon[lepton2];
+      gsftrack3   = gsfTrackIndexEle[lepton3]; 
+
+      theIp1 = impactPar3DTrack[track1];
+      theIp2 = impactPar3DTrack[track2];
+      theIp3 = impactPar3DGsfTrack[gsftrack3]; 
+
+      theIpErr1 = impactPar3DErrorTrack[track1]; 
+      theIpErr2 = impactPar3DErrorTrack[track2]; 
+      theIpErr3 = impactPar3DErrorGsfTrack[gsftrack3]; 
+      
+      _sip3d[0] = theIp1/theIpErr1; 
+      _sip3d[1] = theIp2/theIpErr2; 
+      _sip3d[2] = theIp3/theIpErr3;
+      
+      // not for muons
+      _mvaId[0] = -999.; 
+      _mvaId[1] = -999.; 
+      _mvaId[2] = mvaidnontrigEle[lepton3];
+
+      _inhits[0] = -999.; 
+      _inhits[1] = -999.; 
+      _inhits[2] = trackLostHitsGsfTrack[gsftrack3]; 
+      
+      dxyMu1 = transvImpactParTrack[track1];
+      dxyMu2 = transvImpactParTrack[track2];
+
+      _ldxy[0] = log(fabs(dxyMu1));
+      _ldxy[1] = log(fabs(dxyMu2));
+      _ldxy[2] = -999.;
+
+      dzMu1 = dzTrack[track1];
+      dzMu2 = dzTrack[track2];
+
+      _ldz[0] = log(fabs(dzMu1));
+      _ldz[1] = log(fabs(dzMu2));
+      _ldz[2] = -999.;
+
+    }
+
+    if (channel==4 || channel==5){
+      
+      for(int k = 0; k<3; k++){
+      
+	_pt[k] = -999.;
+	_eta[k] = -999.;
+	_neureliso[k] = -999.;
+	_chreliso[k] = -999.;
+	_sip3d[k] = -999.;
+	_mvaId[k] = -999.;
+	_inhits[k] = -999.;
+	_ldxy[k] = -999.;
+	_ldz[k] = -999.;
+	
+      }
+      //std::cout<<"WARNING: Do not use this channel for synchronization"<<std::endl;
+    } 
+
+    for(int k = 0; k<3; k++){
+      
+      leptPt[channel][k] = _pt[k];
+      leptEta[channel][k] = _eta[k];
+      neuRelIs[channel][k] = _neureliso[k];
+      chRelIso[channel][k] = _chreliso[k];
+      jetDR_in[channel][k] = -999.;
+      jetPtRatio_in[channel][k] = -999.;
+      jetBTagCSV_in[channel][k] = -999.;
+      sip3d[channel][k] = _sip3d[k];
+      mvaId[channel][k] = _mvaId[k];
+      innerHits[channel][k] = _inhits[k];
+      logdxy[channel][k] = _ldxy[k];
+      logdz[channel][k] = _ldz[k];
+    
+    }
+    
+  }
 
 }
 
@@ -1766,8 +1753,8 @@ std::vector<int> tHSelection::getBestEEE(){
     float ElectronCharge = chargeEle[i];
 
     // Select the lepton ID
-    bool tightElectronSelection     = true;
-    bool LeptonMVAElectronSelection = false;
+    bool tightElectronSelection     = false;
+    bool LeptonMVAElectronSelection = true;
 
     if (tightElectronSelection){
 
@@ -1911,8 +1898,8 @@ std::vector<int> tHSelection::getBestMMM(){
     float MuonCharge = chargeMuon[i];
     
     // Select the lepton ID
-    bool tightMuonSelection     = true;
-    bool LeptonMVAMuonSelection = false;
+    bool tightMuonSelection     = false;
+    bool LeptonMVAMuonSelection = true;
     
     if (tightMuonSelection){
       
@@ -2063,12 +2050,12 @@ std::vector<int> tHSelection::getBestMME(){
     float MuonCharge = chargeMuon[i];
     
     // Select the lepton ID
-    bool tightMuonSelection     = true;
-    bool LeptonMVAMuonSelection = false;
+    bool tightMuonSelection     = false;
+    bool LeptonMVAMuonSelection = true;
     
     if (tightMuonSelection){
       
-      if (! isSelectedMuon2012(i))continue;
+      if (! isSelectedMuon2012(i)) continue;
       
     }else if(LeptonMVAMuonSelection){
       
@@ -2350,12 +2337,12 @@ std::vector<int> tHSelection::getBestEEM(){
     float MuonCharge = chargeMuon[i];
     
     // Select the lepton ID
-    bool tightMuonSelection     = true;
-    bool LeptonMVAMuonSelection = false;
+    bool tightMuonSelection     = false;
+    bool LeptonMVAMuonSelection = true;
     
     if (tightMuonSelection){
       
-      if (! isSelectedMuon2012(i))continue;
+      if (! isSelectedMuon2012(i)) continue;
       
     }else if(LeptonMVAMuonSelection){
       
@@ -2641,8 +2628,8 @@ std::vector<int> tHSelection::getBestEE(){
     float ElectronCharge = chargeEle[i];
 
     // Select the lepton ID
-    bool tightElectronSelection     = true;
-    bool LeptonMVAElectronSelection = false;
+    bool tightElectronSelection     = false;
+    bool LeptonMVAElectronSelection = true;
 
     if (tightElectronSelection){
 
@@ -2797,8 +2784,8 @@ std::vector<int> tHSelection::getBestMM(){
     float MuonCharge = chargeMuon[i];
     
     // Select the lepton ID
-    bool tightMuonSelection     = true;
-    bool LeptonMVAMuonSelection = false;
+    bool tightMuonSelection     = false;
+    bool LeptonMVAMuonSelection = true;
     
     if (tightMuonSelection){
       
@@ -3425,8 +3412,8 @@ void tHSelection::setKinematicsEEM(int myEle1 , int myEle2 , int myMu1){
     */
 
     m_bdt[eem][0] = leptBDTForBs(fMVAElectron,myEle1,true);
-    m_bdt[eem][2] = leptBDTForBs(fMVAElectron,myEle2,true);
-    m_bdt[eem][3] = leptBDTForBs(fMVAMuon,myMu1,false);
+    m_bdt[eem][1] = leptBDTForBs(fMVAElectron,myEle2,true);
+    m_bdt[eem][2] = leptBDTForBs(fMVAMuon,myMu1,false);
 
     m_chmaj[eem][0] = eleChargeMajority(myEle1);
     m_chmaj[eem][1] = eleChargeMajority(myEle2);    
@@ -3731,6 +3718,23 @@ void tHSelection::resetKinematics() {
     njets[theChannel] = 0; 
     ncbIDjets[theChannel] = 0;
     nuncorrjets[theChannel] = 0;
+
+    for(int k = 0; k<3; k++){
+      
+      leptPt[theChannel][k] = -999.;
+      leptEta[theChannel][k] = -999.;
+      neuRelIs[theChannel][k] = -999.;
+      chRelIso[theChannel][k] = -999.;
+      jetDR_in[theChannel][k] = -999.;
+      jetPtRatio_in[theChannel][k] = -999.;
+      jetBTagCSV_in[theChannel][k] = -999.;
+      sip3d[theChannel][k] = -999.;
+      mvaId[theChannel][k] = -999.;
+      innerHits[theChannel][k] = -999.;
+      logdxy[theChannel][k] = -999.;
+      logdz[theChannel][k] = -999.;
+    
+    }
 
   }
 }
@@ -4068,16 +4072,16 @@ int tHSelection::numcbIDJets( std::vector<int> eleToRemove, std::vector<int> muo
   m_goodcbIDJets.clear();
 
   nsoftjetscbID               [theChannel] = 0;
-  m_numbtagCSVMcbIDcentraljets[theChannel] = 0;//MVA ID for jets
-  m_numbtagCSVLcbIDcentraljets[theChannel] = 0;
-  m_numbtagCSVTcbIDcentraljets[theChannel] = 0;
+
   m_numbtagCSVMcbIDaccepjets  [theChannel] = 0;//MVA ID for jets
   m_numbtagCSVLcbIDaccepjets  [theChannel] = 0;
   m_numbtagCSVTcbIDaccepjets  [theChannel] = 0;
-  m_numcbIDcentraljets        [theChannel] = 0;//MVA ID for jets
-  m_numcbIDforwardjets        [theChannel] = 0;//MVA ID for jets
-  m_numcbIDaccepINjets        [theChannel] = 0;//MVA ID for jets
-  m_numcbIDaccepOUTjets       [theChannel] = 0;//MVA ID for jets
+
+  m_numcbIDcentralMjets        [theChannel] = 0;//MVA ID for jets
+  m_numcbIDforwardMjets        [theChannel] = 0;//MVA ID for jets
+
+  m_numcbIDcentralLjets        [theChannel] = 0;//MVA ID for jets
+  m_numcbIDforwardLjets        [theChannel] = 0;//MVA ID for jets
 
   m_jetscbIDSum[theChannel]->SetXYZT(0.,0.,0.,0);
 
@@ -4160,31 +4164,101 @@ int tHSelection::numcbIDJets( std::vector<int> eleToRemove, std::vector<int> muo
     // Jet Et (pT) acceptance cut
     if(_selectionEEE->getSwitch("etJetAcc") && !_selectionEEE->passCut("etJetAcc", pt)) continue;
 
+    float phi    = phiAK5PFPUcorrJet[j];
+    float energy = energyAK5PFPUcorrJet[j];
+
     // tH
     float CVS = combinedSecondaryVertexBJetTagsAK5PFPUcorrJet[j];
 
-    if      ( fabs(etaAK5PFPUcorrJet[j]) < 1.5 ){ // Central Jets with threshold 1.5
+    // for the analysis, CVS Medium
+    bool btaggedM = false;
+    bool forwardM = false;
 
-      m_numcbIDcentraljets[theChannel]++;
-      
-      if     (CVS > 0.898) m_numbtagCSVTcbIDcentraljets[theChannel]++;
-      else if(CVS > 0.679) m_numbtagCSVMcbIDcentraljets[theChannel]++;
-      else if(CVS > 0.244) m_numbtagCSVLcbIDcentraljets[theChannel]++;
+    if      ( fabs(eta) < 2.4 && CVS > 0.679 ) { // first choose
+      m_numbtagCSVMcbIDaccepjets[theChannel]++;
 
-    } else {
-      m_numcbIDforwardjets[theChannel]++;
+      if (m_numbtagCSVMcbIDaccepjets[theChannel]<=5){ // 5 jets maximum for this category
+	ptCVStaggedM  [theChannel][m_numbtagCSVMcbIDaccepjets[theChannel]-1] = pt;
+	etaCVStaggedM [theChannel][m_numbtagCSVMcbIDaccepjets[theChannel]-1] = eta;
+	phiCVStaggedM [theChannel][m_numbtagCSVMcbIDaccepjets[theChannel]-1] = phi;
+	eneCVStaggedM [theChannel][m_numbtagCSVMcbIDaccepjets[theChannel]-1] = energy;
+	cvsCVStaggedM [theChannel][m_numbtagCSVMcbIDaccepjets[theChannel]-1] = CVS;
+      }
+
+      btaggedM = true;
     }
 
-    if      ( fabs(etaAK5PFPUcorrJet[j]) < 2.4 ){ // Acceptance Jets with threshold 2.4
+    if ( (fabs(eta) > 1.0 && fabs(eta) < 2.4 && CVS <= 0.679) || fabs(eta) >= 2.4 ){ // second choose
+      m_numcbIDforwardMjets[theChannel]++;
+
+      if (m_numcbIDforwardMjets[theChannel]<=5){
+	ptForwardM [theChannel][m_numcbIDforwardMjets[theChannel]-1] = pt;
+	etaForwardM[theChannel][m_numcbIDforwardMjets[theChannel]-1] = eta;
+	phiForwardM[theChannel][m_numcbIDforwardMjets[theChannel]-1] = phi;
+	eneForwardM[theChannel][m_numcbIDforwardMjets[theChannel]-1] = energy;
+	cvsForwardM[theChannel][m_numcbIDforwardMjets[theChannel]-1] = CVS;
+      }
+
+      forwardM = true;
+    }
+
+    if (!btaggedM && !forwardM){ // third choose
+      m_numcbIDcentralMjets[theChannel]++;
+
+      if(m_numcbIDcentralMjets[theChannel]<=5){
+	ptCentralM [theChannel][m_numcbIDcentralMjets[theChannel]-1] = pt;
+	etaCentralM[theChannel][m_numcbIDcentralMjets[theChannel]-1] = eta;
+	phiCentralM[theChannel][m_numcbIDcentralMjets[theChannel]-1] = phi;
+	eneCentralM[theChannel][m_numcbIDcentralMjets[theChannel]-1] = energy;
+	cvsCentralM[theChannel][m_numcbIDcentralMjets[theChannel]-1] = CVS;	
+      }
+
+    }
+
+    // for the analysis, CVS Loose
+    bool btaggedL = false;
+    bool forwardL = false;
+
+    if      ( fabs(eta) < 2.4 && CVS > 0.244 ) { // first choose
+      m_numbtagCSVLcbIDaccepjets[theChannel]++;
+
+      if (m_numbtagCSVLcbIDaccepjets[theChannel]<=5){ // 5 jets maximum for this category
+	ptCVStaggedL  [theChannel][m_numbtagCSVLcbIDaccepjets[theChannel]-1] = pt;
+	etaCVStaggedL [theChannel][m_numbtagCSVLcbIDaccepjets[theChannel]-1] = eta;
+	phiCVStaggedL [theChannel][m_numbtagCSVLcbIDaccepjets[theChannel]-1] = phi;
+	eneCVStaggedL [theChannel][m_numbtagCSVLcbIDaccepjets[theChannel]-1] = energy;
+	cvsCVStaggedL [theChannel][m_numbtagCSVLcbIDaccepjets[theChannel]-1] = CVS;
+      }
+
+      btaggedL = true;
+
+    }
+
+    if ( (fabs(eta) > 1.0 && fabs(eta) < 2.4 && CVS <= 0.244) || fabs(eta) >= 2.4 ){ // second choose
+      m_numcbIDforwardLjets[theChannel]++;
+
+      if (m_numcbIDforwardLjets[theChannel]<=5){
+	ptForwardL [theChannel][m_numcbIDforwardLjets[theChannel]-1] = pt;
+	etaForwardL[theChannel][m_numcbIDforwardLjets[theChannel]-1] = eta;
+	phiForwardL[theChannel][m_numcbIDforwardLjets[theChannel]-1] = phi;
+	eneForwardL[theChannel][m_numcbIDforwardLjets[theChannel]-1] = energy;
+	cvsForwardL[theChannel][m_numcbIDforwardLjets[theChannel]-1] = CVS;
+      }
+
+      forwardL = true;
+    }
+
+    if (!btaggedL && !forwardL){ // third choose
+      m_numcbIDcentralLjets[theChannel]++;
       
-      m_numcbIDaccepINjets[theChannel]++;
+      if(m_numcbIDcentralLjets[theChannel]<=5){
+	ptCentralL [theChannel][m_numcbIDcentralLjets[theChannel]-1] = pt;
+	etaCentralL[theChannel][m_numcbIDcentralLjets[theChannel]-1] = eta;
+	phiCentralL[theChannel][m_numcbIDcentralLjets[theChannel]-1] = phi;
+	eneCentralL[theChannel][m_numcbIDcentralLjets[theChannel]-1] = energy;
+	cvsCentralL[theChannel][m_numcbIDcentralLjets[theChannel]-1] = CVS;	
+      }
 
-      if     (CVS > 0.898) m_numbtagCSVTcbIDaccepjets[theChannel]++;
-      else if(CVS > 0.679) m_numbtagCSVMcbIDaccepjets[theChannel]++;
-      else if(CVS > 0.244) m_numbtagCSVLcbIDaccepjets[theChannel]++;
-
-    } else {
-      m_numcbIDaccepOUTjets[theChannel]++;
     }
 
     if (fabs(etaAK5PFPUcorrJet[j]) >= 2.4 ) continue; // for the numJets, only central
@@ -4196,6 +4270,8 @@ int tHSelection::numcbIDJets( std::vector<int> eleToRemove, std::vector<int> muo
     p4Jet.Clear();
     
   }
+
+  //std::cout<< "number of jets: b-tagged/forward/others = "<< m_numbtagCSVMcbIDaccepjets[theChannel] <<"/"<<m_numcbIDforwardjets[theChannel]<< "/"<<m_numcbIDcentraljets[theChannel]<<std::endl;
 
   return num;
 
@@ -4421,7 +4497,6 @@ float tHSelection::deltaPhiLLJet(int ichan) {
 
     return valueDeltaPhiLLJet;
 
-    //return fabs(180./TMath::Pi() * jjP3.DeltaPhi(m_dilepPt[ichan]));
   }
 
 
@@ -4437,8 +4512,6 @@ float tHSelection::deltaPhiLLJet(int ichan) {
 
       return valueDeltaPhiLLJet;
 
-      //return fabs(180./TMath::Pi() * leadingJetP3.DeltaPhi(m_dilepPt[ichan]));                  
-    
     }else return 0.1;
   } else return 0.1;
 }
@@ -4478,7 +4551,6 @@ int tHSelection::numSoftMuons(std::vector<int> muonToRemove, std::vector<int> je
     if(dzMuon  > 0.200) continue;     // hardcoded  
 
     float isoSumRel = (sumPt03Muon[i] + emEt03Muon[i] + hadEt03Muon[i]) / pt;
-    //    float isoSumRel = pfCombinedIsoMuon[i] / pt;
     if(pt>20 && isoSumRel<0.1) continue;  
     
     num++;
@@ -4719,6 +4791,7 @@ bool tHSelection::reloadTriggerMask(int runN)
   m_requiredTriggersEEE = triggerMask;
   
   // load the triggers NOT required for EEE                                                                           
+  /*
   triggerMask.clear();
   for (std::vector< std::string >::const_iterator fIter=notRequiredTriggersEEE.begin();fIter!=notRequiredTriggersEEE.end();++fIter) {
     std::string pathName = getHLTPathForRun(runN,*fIter);
@@ -4730,6 +4803,7 @@ bool tHSelection::reloadTriggerMask(int runN)
     }
   }
   m_notRequiredTriggersEEE = triggerMask;
+  */
 
   // load the triggers required for MMM
   triggerMask.clear();
@@ -4749,6 +4823,7 @@ bool tHSelection::reloadTriggerMask(int runN)
   m_requiredTriggersMMM = triggerMask;
 
   // load the triggers NOT required for MMM
+  /*
   triggerMask.clear();
   for (std::vector<std::string>::const_iterator fIter=notRequiredTriggersMMM.begin();fIter!=notRequiredTriggersMMM.end();++fIter)
     {   
@@ -4764,6 +4839,7 @@ bool tHSelection::reloadTriggerMask(int runN)
         }
     }
   m_notRequiredTriggersMMM = triggerMask;
+  */
 
   // load the triggers required for EEM
   triggerMask.clear();
@@ -4842,14 +4918,16 @@ bool tHSelection::hasPassedHLT(int channel) {
   if(channel==eee) { 
 
     bool required    = anaUtils.getTriggersOR(m_requiredTriggersEEE   , firedTrg);
-    bool notRequired = anaUtils.getTriggersOR(m_notRequiredTriggersEEE, firedTrg);
-    return (required && !notRequired);
+    //bool notRequired = anaUtils.getTriggersOR(m_notRequiredTriggersEEE, firedTrg);
+    //return (required && !notRequired);
+    return (required);
 
   } else if(channel==mmm) {
 
     bool required    = anaUtils.getTriggersOR(m_requiredTriggersMMM   , firedTrg);
-    bool notRequired = anaUtils.getTriggersOR(m_notRequiredTriggersMMM, firedTrg);
-    return (required && !notRequired);
+    //bool notRequired = anaUtils.getTriggersOR(m_notRequiredTriggersMMM, firedTrg);
+    //return (required && !notRequired);
+    return (required);
 
   } else if(channel==eem) {
 
@@ -4881,9 +4959,9 @@ void tHSelection::setRequiredTriggers(const std::vector<std::string>& reqTrigger
 
 void tHSelection::setNotRequiredTriggers(const std::vector<std::string>& reqTriggers, int channel) {
 
-  if     (channel==eee) notRequiredTriggersEEE=reqTriggers;
-  else if(channel==mmm) notRequiredTriggersMMM=reqTriggers;
-  else if(channel==eem) notRequiredTriggersEEM=reqTriggers;
+  //if     (channel==eee) notRequiredTriggersEEE=reqTriggers;
+  //else if(channel==mmm) notRequiredTriggersMMM=reqTriggers;
+  if(channel==eem) notRequiredTriggersEEM=reqTriggers;
   else if(channel==mme) notRequiredTriggersMME=reqTriggers;
   else std::cout << "WARNING: triggers are set for an unknown channel!" << std::endl;
 
@@ -5172,3 +5250,230 @@ bool tHSelection::isLooseJetMva(float pt, float eta, float id) {
   return isOk;
 }
 
+bool tHSelection::findMcTree(const char* processType) {
+
+  _process = "UNDEFINED";
+  _theGenEle = -1;
+  _theGenPos = -1;
+  
+  // now we look for ee || mumu || emu
+  // in the acceptance and with a loose pT threshold
+  float etaEleAcc_  = 2.5;
+  float ptEleAcc_   = 5.0; // GeV
+  float etaMuonAcc_ = 2.4;
+  float ptMuonAcc_  = 0.0; // GeV
+
+  if(strcmp(processType,"WZ")==0 ){
+
+    int nW = 0;
+    int nZ = 0;
+
+    //std::cout << " imc | st | id | mother id | motherid (motherid) " << std::endl;
+    //std::cout << "-------------------------------------------------" << std::endl;
+        
+    for(int imc=0;imc<30;imc++) {
+
+      if ( !statusMc[imc] == 3 ) continue; // I am only interested in hard-scattering products
+      
+      //std::cout << " " << imc << " | " << statusMc[imc] << " | " << idMc[imc] << " | " << idMc[mothMc[imc]] 
+      //		<< " | " << idMc[mothMc[mothMc[imc]]]   << std::endl;
+      
+      if( idMc[imc] == 23 ) nZ++;
+      if( fabs(idMc[imc]) == 24) nW++;
+
+    
+    }
+
+    return ( nZ > 0 && nW > 0 );
+
+  }
+
+  // tH gen level
+  if(strcmp(processType,"tH")==0) {
+
+    bool tHevent = false;
+
+    int index_Top              = 999; // top  quark
+    int index_Higgs            = 999; // Higgs boson
+
+    int index_WfromTop         = 999;
+    int index_WplusfromH       = 999;
+    int index_WminusfromH      = 999;
+
+    int index_lminusfromWfromH = 999; // lepton(-) coming from W(-) from H
+    int index_lplusfromWfromH  = 999; // lepton(+) coming from W(+) from H
+    int index_lfromWfromT      = 999; // lepton(+) coming from W from T
+
+    int index_nminusfromWfromH = 999; // neutrino(-) coming from W(-) from H
+    int index_nplusfromWfromH  = 999; // neutrino(+) coming from W(+) from H
+    int index_nfromWfromT      = 999; // neutrino(+) coming from W from T
+
+    //std::cout << " imc | st | id | mother id | motherid (motherid) " << std::endl;
+    //std::cout << "-------------------------------------------------" << std::endl;
+
+    int nLeptonsfromWfromH = 0;
+    int nLeptonsfromWfromT = 0;
+
+    int nPlusLepton  = 0;
+    int nMinusLepton = 0;
+
+    int nWfromH            = 0;
+
+    for(int imc=0;imc<30;imc++) {
+
+      if ( !(statusMc[imc] == 3) ) continue; // I am only interested in hard-scattering products
+      
+      //std::cout << " " << imc << " | " << statusMc[imc] << " | " << idMc[imc] << " | " << idMc[mothMc[imc]] 
+      //	<< " | " << idMc[mothMc[mothMc[imc]]]   << std::endl;
+
+      float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
+
+      if (imc == 7){
+	_genForwardQuark_Pt  = pMc[imc]*fabs(sin(thetaMc[imc]));
+	_genForwardQuark_Eta = etaMc[imc];
+      }
+
+      if (imc == 10){
+	_genbQuark_Pt  = pMc[imc]*fabs(sin(thetaMc[imc]));
+	_genbQuark_Eta = etaMc[imc];
+      }
+      
+      if( fabs(idMc[imc]) == 6  ) index_Top   = imc;
+      if( fabs(idMc[imc]) == 25 ) index_Higgs = imc;
+
+      if( fabs(idMc[imc]) == 24 && fabs(idMc[mothMc[imc]]) == 6  ) index_WfromTop = imc;
+      
+      if( idMc[imc] == -24 && fabs(idMc[mothMc[imc]]) == 25 ){
+	index_WminusfromH = imc;
+	nWfromH++;
+      }
+      if( idMc[imc] == +24 && fabs(idMc[mothMc[imc]]) == 25 ){
+	index_WplusfromH  = imc;
+	nWfromH++;
+      }
+
+      // Lepton(-) from W(-) decay
+      if     ( (idMc[imc] == +11 || idMc[imc] == +13 || idMc[imc] == +15)  && idMc[mothMc[imc]] == -24 ){ 
+	
+	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){  // W from Top decay
+	  index_lfromWfromT = imc;
+	  nLeptonsfromWfromT++;
+	  nMinusLepton++;
+	}
+	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
+	  index_lminusfromWfromH = imc; 
+	  nLeptonsfromWfromH++;
+	  nMinusLepton++;
+	}
+
+      }      
+
+      // Neutrino(+) from W(-) decay
+      else if( (idMc[imc] == -12 || idMc[imc] == -14 || idMc[imc] == -16)  && idMc[mothMc[imc]] == -24 ){ 
+
+	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){ // W from Top decay
+	  index_nfromWfromT = imc;
+	  nLeptonsfromWfromT++;
+	}
+	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
+	  index_nplusfromWfromH = imc; 
+	  nLeptonsfromWfromH++;
+	}
+	
+      }
+
+      // Lepton(+) from W(+) decay
+      else if( (idMc[imc] == -11 || idMc[imc] == -13 || idMc[imc] == -15)  && idMc[mothMc[imc]] == +24 ){ 
+	
+	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){ // W from Top decay
+	  index_lfromWfromT = imc;
+	  nLeptonsfromWfromT++;
+	  nPlusLepton++;
+	}
+	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
+	  index_lplusfromWfromH = imc; 
+	  nLeptonsfromWfromH++;
+	  nPlusLepton++;
+	}
+
+      }      
+
+      // Neutrino(-) from W(+) decay
+      else if( (idMc[imc] == 12 || idMc[imc] == +14 || idMc[imc] == +16)  && idMc[mothMc[imc]] == +24 ){ 
+
+	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){ // W from Top decay
+	  index_nfromWfromT = imc;
+	  nLeptonsfromWfromT++;
+	}
+	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
+	  index_nminusfromWfromH = imc; 
+	  nLeptonsfromWfromH++;
+	}
+
+      }
+
+    }
+
+    if ( nLeptonsfromWfromH == 4){
+      nWWtoLLdecays++;
+    }
+    if ( nLeptonsfromWfromT == 2){ // (lepton + neutrino)
+      nWfromTtoLdecay++;
+    }
+
+    if ( (nPlusLepton == 2 && nMinusLepton == 0) || ( nMinusLepton == 2 && nPlusLepton == 0 ) ){
+      nSSevent++;
+    }
+
+    _genHiggsPt  = pMc[index_Higgs]*fabs(sin(thetaMc[index_Higgs]));
+    _genHiggsEta = etaMc[index_Higgs]; 
+
+    _genTopPt  = pMc[index_Top]*fabs(sin(thetaMc[index_Top]));
+    _genTopEta = etaMc[index_Top]; 
+
+    _genWpfromH_Pt  = pMc[index_WplusfromH]*fabs(sin(thetaMc[index_WplusfromH]));
+    _genWpfromH_Eta = etaMc[index_WplusfromH];
+    
+    _genWmfromH_Pt  = pMc[index_WminusfromH]*fabs(sin(thetaMc[index_WminusfromH])) ;
+    _genWmfromH_Eta = etaMc[index_WminusfromH];
+    
+    _genWfromT_Pt  = pMc[index_WfromTop]*fabs(sin(thetaMc[index_WfromTop]));
+    _genWfromT_Eta = etaMc[index_WfromTop];
+
+    if ( nLeptonsfromWfromH > 1 ){
+
+      _genNeutrinoPlusfromWfromH_Pt  = pMc[index_nplusfromWfromH]*fabs(sin(thetaMc[index_nplusfromWfromH]));
+      _genNeutrinoPlusfromWfromH_Eta = etaMc[index_nplusfromWfromH];
+      
+      _genNeutrinoMinusfromWfromH_Pt  = pMc[index_nminusfromWfromH]*fabs(sin(thetaMc[index_nminusfromWfromH]));
+      _genNeutrinoMinusfromWfromH_Eta = etaMc[index_nminusfromWfromH];
+      
+      _genLeptonPlusfromWfromH_Pt  = pMc[index_lplusfromWfromH]*fabs(sin(thetaMc[index_lplusfromWfromH]));
+      _genLeptonPlusfromWfromH_Eta = etaMc[index_lplusfromWfromH];
+      
+      _genLeptonMinusfromWfromH_Pt  = pMc[index_lminusfromWfromH]*fabs(sin(thetaMc[index_lminusfromWfromH]));
+      _genLeptonMinusfromWfromH_Eta = etaMc[index_lminusfromWfromH];
+
+    } 
+     
+    if(nLeptonsfromWfromT > 0){
+
+      _genLeptonfromWfromT_Pt  = pMc[index_lfromWfromT]*fabs(sin(thetaMc[index_lfromWfromT]));
+      _genLeptonfromWfromT_Eta = etaMc[index_lfromWfromT];
+
+      _genNeutrinofromWfromT_Pt  = pMc[index_nfromWfromT]*fabs(sin(thetaMc[index_nfromWfromT]));
+      _genNeutrinofromWfromT_Eta = etaMc[index_nfromWfromT]; 
+
+    }
+    
+    if (index_Top < 30 && index_Higgs < 30 ) tHevent = true;
+
+    return ( tHevent );
+
+  }
+  
+  else {
+    std::cout << "This processType: " << processType << " is not expected, you should put MTtruth switch off" <<std::endl;
+    return false;
+  }
+}

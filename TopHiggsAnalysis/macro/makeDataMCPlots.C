@@ -13,7 +13,7 @@
 #include <iostream>
 
 #define NSPECIES 13
-#define NVARIABLES 7
+#define NVARIABLES 12
 #define NCUTS 0
 #define JETBINS 1
 
@@ -33,7 +33,7 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
   gStyle->SetMarkerSize(1.0);
   gStyle->SetMarkerColor(1);
   
-  TString suffix="";
+  TString suffix="noStack";
   
   TString species[NSPECIES];
   species[0]="Data";
@@ -111,22 +111,24 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
   legendOrder[12]=12;
   
   TString files[NSPECIES];
-  files[0]="/cmsrm/pc24_2/jorda/data/finalresults_V04//Data/DataAll.root";  
-  files[1]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/tH125q_blvu_Yt1_H126toWW-datasetAll.root";  
-  files[2]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-datasetAll.root";
-  files[3]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-datasetAll.root";
-  files[4]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-datasetAll.root";
-  files[5]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola-datasetAll.root";
-  files[6]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/TTWJets-datasetAll.root";
-  files[7]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/TTZJets-datasetAll.root";
-  files[8]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/WWWJets_8TeV-madgraph-datasetAll.root";
-  files[9]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/WWZNoGstarJets_8TeV-madgraph-datasetAll.root";
-  files[10]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/WZZNoGstarJets_8TeV-madgraph-datasetAll.root";
-  files[11]="/cmsrm/pc24_2/jorda/data/finalresults_V04//MC/DYJetsToLL_M-10To50filter_8TeV-madgraph-datasetAll.root";
-  files[12]="/cmsrm/pc24_2/jorda/data/finalresults_V04/MC/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-datasetAll.root";
+  //files[0]="/cmsrm/pc24_2/jorda/data/finalresults_V04//Data/DataAll.root";  
+  //files[0]="/cmsrm/pc21/crovelli/data/topH/testV1/testV1/Data/weighted/allDataClean.root";
+  files[0]="/tmp/jorda/allDatatemp.root";  
+  files[1]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/tH125q_blvu_Yt1_H126toWW-datasetAll.root";  
+  files[2]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola-datasetAll.root";
+  files[3]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-datasetAll.root";
+  files[4]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola-datasetAll.root";
+  files[5]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola-datasetAll.root";
+  files[6]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/TTWJets-datasetAll.root";
+  files[7]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/TTZJets-datasetAll.root";
+  files[8]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/WWWJets_8TeV-madgraph-datasetAll.root";
+  files[9]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/WWZNoGstarJets_8TeV-madgraph-datasetAll.root";
+  files[10]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/WZZNoGstarJets_8TeV-madgraph-datasetAll.root";
+  files[11]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/DYJetsToLL_M-10To50filter_8TeV-madgraph-datasetAll.root";
+  files[12]="/cmsrm/pc24_2/jorda/data/finalresults_V05/MC/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball-datasetAll.root";
   
   // directory for the plots
-  TString plotsDir="./tHplots_V04/";
+  TString plotsDir="./tHplots_V05/";
 
   // create the folder
   TString createFolder    = "mkdir " + plotsDir + " > /dev/null";
@@ -143,15 +145,38 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
   TH1F* histos[NSPECIES][NVARIABLES];    // 5 species, 2 cut levels, 8 variables
   
   TString variables[NVARIABLES];
+  /*
   variables[0]="pfmet";
   variables[1]="mll";
   variables[2]="pt1";
   variables[3]="pt2";
   variables[4]="pt3";
-  variables[5]="njet";
-  variables[6]="nvtx";
-  
+  variables[5]="numbtagCSVLcbIDaccepjets";
+  variables[6]="numbtagCSVMcbIDaccepjets";
+  variables[7]="numcbIDcentralLjets";
+  variables[8]="numcbIDcentralMjets";
+  variables[9]="numcbIDforwardLjets";
+  variables[10]="numcbIDforwardMjets";
+  */
+
+  variables[0] = "ptCVStaggedM1";
+  variables[1] = "ptCVStaggedM2";
+  variables[2] = "ptCVStaggedM3";
+
+  variables[3] = "etaCVStaggedM1";
+  variables[4] = "etaCVStaggedM2";
+  variables[5] = "etaCVStaggedM3";
+
+  variables[6] = "ptForwardM1";
+  variables[7] = "ptForwardM2";
+  variables[8] = "ptForwardM3";
+
+  variables[9] = "etaForwardM1";
+  variables[10] = "etaForwardM2";
+  variables[11] = "etaForwardM3";
+
   TString units[NVARIABLES];
+  /*
   units[0]="GeV";
   units[1]="GeV";
   units[2]="GeV/c^{2}";
@@ -159,17 +184,54 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
   units[4]="GeV/c";
   units[5]="";
   units[6]="";
-  
+  units[7]="";
+  units[8]="";
+  units[9]="";
+  units[10]="";
+  */
+  units[0]="GeV";
+  units[1]="GeV";
+  units[2]="GeV";
+  units[3]="";
+  units[4]="";
+  units[5]="";
+  units[6]="GeV";
+  units[7]="GeV";
+  units[8]="GeV";
+  units[9]="";
+  units[10]="";
+  units[11]="";
+
   int nbins[NVARIABLES];
+  /*
   nbins[0]=25;
   nbins[1]=30;
   nbins[2]=20;  
   nbins[3]=20;  
   nbins[4]=20;  
-  nbins[5]=10;  
-  nbins[6]=30;  
+  nbins[5]=8;  
+  nbins[6]=8;  
+  nbins[7]=8;  
+  nbins[8]=8;  
+  nbins[9]=8;  
+  nbins[10]=8;  
+  */
+
+  nbins[0]=18;
+  nbins[1]=18;
+  nbins[2]=18;  
+  nbins[3]=25;  
+  nbins[4]=25;  
+  nbins[5]=25;  
+  nbins[6]=18;  
+  nbins[7]=18;  
+  nbins[8]=18;  
+  nbins[9]=25;  
+  nbins[10]=25; 
+  nbins[11]=25; 
 
   float range[NVARIABLES][2]; // 8 variables, min, max
+  /*
   // met
   range[0][0]=0.;
   range[0][1]=150.;
@@ -187,31 +249,90 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
   range[4][1]=200.;   
   // njets
   range[5][0]=0.;
-  range[5][1]=10.;
-  // nvtx
-  range[6][0]=1.;
-  range[6][1]=60.;
-  
-  //                         0,1 2 3 4 5 6 
-  int doplot[NVARIABLES] = { 1,1,1,1,1,1,1 };
+  range[5][1]=8.;
+  // njets
+  range[6][0]=0.;
+  range[6][1]=8.;
+  // njets
+  range[7][0]=0.;
+  range[7][1]=8.;
+  // njets
+  range[8][0]=0.;
+  range[8][1]=8.;
+  // njets
+  range[9][0]=0.;
+  range[9][1]=8.;
+  // njets
+  range[10][0]=0.;
+  range[10][1]=8.;
+  */
+  range[0][0]=20.;
+  range[0][1]=200.;
+  // mll
+  range[1][0]=20.;
+  range[1][1]=200.;
+  // pt 1
+  range[2][0]=20.;
+  range[2][1]=200.;   
+  // pt 2
+  range[3][0]=-5.0;
+  range[3][1]= 5.0;   
+  // pt 3
+  range[4][0]=-5.0.;
+  range[4][1]= 5.0;   
+  // njets
+  range[5][0]=-5.0;
+  range[5][1]= 5.0;
+  // njets
+  range[6][0]=20.;
+  range[6][1]=200.;
+  // njets
+  range[7][0]=20.;
+  range[7][1]=200.;
+  // njets
+  range[8][0]=20.;
+  range[8][1]=200.;
+  // njets
+  range[9][0]=-5.0;
+  range[9][1]= 5.0;
+  // njets
+  range[10][0]=-5.0;
+  range[10][1]= 5.0;
+
+  range[11][0]=-5.0;
+  range[11][1]= 5.0;
+  //                         0,1 2 3 4 5 6 7 8 9 10
+  //int doplot[NVARIABLES] = { 1,1,1,1,1,1,1,1,1,1,1 };
+  int doplot[NVARIABLES] = { 1,1,1,1,1,1,1,1,1,1,1,1 };
   
   TString xaxisLabel[NVARIABLES];
+  /*
   xaxisLabel[0]="PF E_{T}^{miss}";
   xaxisLabel[1]="m_{ll}";
   xaxisLabel[2]="p_{T}^{l,1}";
   xaxisLabel[3]="p_{T}^{l,2}";
   xaxisLabel[4]="p_{T}^{l,3}";
-  xaxisLabel[5]="n jets";
-  xaxisLabel[6]="n vtx";
-  
-  // back-up :P
-  //xaxisLabel[1]="min(pr. PF E_{T}^{miss}, tk E_{T}^{miss})";
-  //xaxisLabel[2]="m_{T}^{ll E_{T}^{miss}}";
-  //xaxisLabel[6]="#Delta #phi_{ll}";
-  //xaxisLabel[9]="M_{R}";
-  //xaxisLabel[10]="DY MVA";
-  
-  
+  xaxisLabel[5]="#jets b-tagged CVS-L";
+  xaxisLabel[6]="#jets b-tagged CVS-M";
+  xaxisLabel[7]="central jets (CVS-L basis)";
+  xaxisLabel[8]="central jets (CVS-M basis)";
+  xaxisLabel[9]="forward jets (CVS-L basis)";
+  xaxisLabel[10]="forward jets (CVS-M basis)";
+  */
+
+  xaxisLabel[0]="p_{T}^{b-tagged 1}";
+  xaxisLabel[1]="p_{T}^{b-tagged 2}";
+  xaxisLabel[2]="p_{T}^{b-tagged 3}";
+  xaxisLabel[3]="\\eta^{b-tagged 1}";
+  xaxisLabel[4]="\\eta^{b-tagged 2}";
+  xaxisLabel[5]="\\eta^{b-tagged 3}";
+  xaxisLabel[6]="p_{T}^{forward 1}";
+  xaxisLabel[7]="p_{T}^{forward 2}";
+  xaxisLabel[8]="p_{T}^{forward 3}";
+  xaxisLabel[9]="\\eta^{forward 1}";
+  xaxisLabel[10]="\\eta^{forward 2}";
+  xaxisLabel[11]="\\eta^{forward 3}";
+
   TString binSize[NVARIABLES];
   
   //for (int z=0;z<2;++z){
@@ -227,8 +348,11 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
   }
 
   TString cut; // requirements
-  //cut="( mll>12. && pt1>20.0 && mlll > 100. && pfmet > 30. && njet > 0 && njet < 3 && nextra == 0 && zveto == 1)*";
-  cut="( mll>12. && pt1>20.0 && pt2>20.0 && nextra == 0 )*";
+  cut="( mll>12. && pt1>20.0 && nextra == 0 && (mll<75. || mll>105.) && numbtagCSVMcbIDaccepjets == 1 && numcbIDforwardMjets > 0 && ptCVStaggedM1 > 30. )*";
+  //cut="( mll>12. && pt1>20.0 && nextra == 0 && (mll<75. || mll>105.) && numbtagCSVMcbIDaccepjets == 1 && numcbIDforwardMjets > 0 )*";
+  //cut="( mll>12. && pt1>20.0 && nextra == 0 && (mll<75. || mll>105.) && numbtagCSVMcbIDaccepjets == 1 && numcbIDforwardMjets > 0 )*";
+
+  //cut="( mll>12. && pt1>20.0 && nextra == 0 && numbtagCSVMcbIDaccepjets == 1 && numcbIDforwardMjets > 0 && ch1*ch2 < 0 && zveto)*";
 
   TString channelcut("1*");
   if(TString(finalstate).Contains("all")) 
@@ -238,6 +362,8 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
   if(TString(finalstate).Contains("mmm")) channelcut=TString("(channel==1)*");
   if(TString(finalstate).Contains("eem")) channelcut=TString("(channel==2)*");
   if(TString(finalstate).Contains("mme")) channelcut=TString("(channel==3)*");
+
+  if(TString(finalstate).Contains("SFDF")) channelcut=TString("(channel==2 || channel==3)*");
 
   if(TString(finalstate).Contains("Zee"))  channelcut=TString("(channel==4)*");
   if(TString(finalstate).Contains("Zmm"))  channelcut=TString("(channel==5)*");
@@ -254,12 +380,13 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
 
   if(!blindData) {
     _file[0]=TFile::Open(files[0]);
-    T1[0] = (TTree*)_file[0]->Get("latino");
+    T1[0] = (TTree*)_file[0]->Get("tCleaned");
   } else T1[0] = 0;
   
   for (int i=1;i<NSPECIES;++i) {
     _file[i]=TFile::Open(files[i]);
     T1[i] = (TTree*)_file[i]->Get("latino");
+    std::cout<<"specie = "<<i<<", entries = "<< T1[i]->GetEntries();
   }
   
   int nspeciesToRun=NSPECIES;
@@ -282,9 +409,17 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
       }
       
       if(i>0) {
-	
-	T1[i]->Project(histoName,variables[z],channelcut+cut+TString(lumiwgt)+TString("baseW*puW*effW*")+scalefactor_datadriven[i][0]);
+
+	if(i==1) // Ct == -1
+	  T1[i]->Project(histoName,variables[z],channelcut+cut+TString(lumiwgt)+TString("baseW*puW*effW*100")+scalefactor_datadriven[i][0]);
+	else
+	  T1[i]->Project(histoName,variables[z],channelcut+cut+TString(lumiwgt)+TString("baseW*puW*effW*")+scalefactor_datadriven[i][0]);
 	std::cout << "Done " << histoName << std::endl;
+
+	std::cout<<"specie = "<<i<<std::endl;
+	std::cout<<" expected events = " << histos[i][z]->Integral() << std::endl;
+	//std::cout<<" entries = " << histos[i][z]->Integral() << std::endl;
+	
 
       }else{
 
@@ -304,6 +439,19 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
     myPlot->setUnits((units[z]).Data());
     myPlot->setMass(mH);
 
+    histos[1][z]->SetNormFactor(1.0);
+    histos[2][z]->SetNormFactor(1.0);
+    histos[3][z]->SetNormFactor(1.0);
+    histos[4][z]->SetNormFactor(1.0);
+    histos[5][z]->SetNormFactor(1.0);
+    histos[6][z]->SetNormFactor(1.0);
+    histos[7][z]->SetNormFactor(1.0);
+    histos[8][z]->SetNormFactor(1.0);
+    histos[9][z]->SetNormFactor(1.0); 
+    histos[10][z]->SetNormFactor(1.0);
+    histos[11][z]->SetNormFactor(1.0);
+    histos[12][z]->SetNormFactor(1.0);
+
     myPlot->setMCHist(itH,      histos[1][z]);
     myPlot->setMCHist(iWZ,      histos[2][z]);
     myPlot->setMCHist(iZZ,      histos[3][z]);
@@ -317,6 +465,10 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
     myPlot->setMCHist(idyl,     histos[11][z]);
     myPlot->setMCHist(idy,      histos[12][z]);
 
+    
+
+
+
     if(!blindData) 
       myPlot->setDataHist(histos[0][z]);
 
@@ -326,7 +478,7 @@ void makeDataMCPlots(int mH, const char *finalstate, float lumi, bool blindData=
 
     c1->SetLogy(0);
 
-    //myPlot.setNoStack();
+    myPlot.setNoStack();
     myPlot->Draw(1);
     c1->GetFrame()->DrawClone();
     c1->SaveAs(plotsDir+"/"+TString(finalstate)+"/"+variables[z]+suffix+".lin.png");

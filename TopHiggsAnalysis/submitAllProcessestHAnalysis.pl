@@ -12,46 +12,48 @@ else { die "usage: ./submitAllProcessestHAnalysis.pl -p <prefix> ";}
 
 print  "submitting disobons ...\n";
 
-system("python cmst3_submit_manyfilesperjob.py MC WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola 10 TopHiggsApp 8nh V04 1");
+system("python cmst3_submit_manyfilesperjob.py MC WWJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC WZJetsTo3LNu_TuneZ2_8TeV-madgraph-tauola 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC ZZJetsTo2L2Nu_TuneZ2star_8TeV-madgraph-tauola 10 TopHiggsApp 8nh V05 1");
 
 sleep 100;
 
 print  "submitting TT+boson ...\n";
 
-system("python cmst3_submit_manyfilesperjob.py MC TTWJets 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC TTZJets 10 TopHiggsApp 8nh V04 1");
+system("python cmst3_submit_manyfilesperjob.py MC TTWJets 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC TTZJets 10 TopHiggsApp 8nh V05 1");
 
 sleep 100;
 
 print  "submitting tribosons ...\n";
 
-system("python cmst3_submit_manyfilesperjob.py MC WWWJets_8TeV-madgraph 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC WWZNoGstarJets_8TeV-madgraph 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC WZZNoGstarJets_8TeV-madgraph 10 TopHiggsApp 8nh V04 1");
+system("python cmst3_submit_manyfilesperjob.py MC WWWJets_8TeV-madgraph 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC WWZNoGstarJets_8TeV-madgraph 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC WZZNoGstarJets_8TeV-madgraph 10 TopHiggsApp 8nh V05 1");
 
 sleep 100;
 
 print  "submitting top ...\n";
 
-system("python cmst3_submit_manyfilesperjob.py MC TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC T_t-channel_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC T_s-channel_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V04 1");
+system("python cmst3_submit_manyfilesperjob.py MC TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC TTJetsFullyLeptMGDecaysTauola 10 TopHiggsApp 8nh V05 1");
+
+system("python cmst3_submit_manyfilesperjob.py MC T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC T_t-channel_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC T_s-channel_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V05 1");
 
 sleep 600;
 
-system("python cmst3_submit_manyfilesperjob.py MC Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V04 1");
+system("python cmst3_submit_manyfilesperjob.py MC Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola 10 TopHiggsApp 8nh V05 1");
 
 print  "submitting w+jets ...\n";
-system("python cmst3_submit_manyfilesperjob.py MC WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball 10 TopHiggsApp 8nh V04 1");
+system("python cmst3_submit_manyfilesperjob.py MC WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball 10 TopHiggsApp 8nh V05 1");
 
 print  "submitting dy+jets ...\n";
-system("python cmst3_submit_manyfilesperjob.py MC DYJetsToLL_M-10To50filter_8TeV-madgraph 10 TopHiggsApp 8nh V04 1");
-system("python cmst3_submit_manyfilesperjob.py MC DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball 10 TopHiggsApp 8nh V04 1");
+system("python cmst3_submit_manyfilesperjob.py MC DYJetsToLL_M-10To50filter_8TeV-madgraph 10 TopHiggsApp 8nh V05 1");
+system("python cmst3_submit_manyfilesperjob.py MC DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball 10 TopHiggsApp 8nh V05 1");
 
 print "\nDONE \n";
 

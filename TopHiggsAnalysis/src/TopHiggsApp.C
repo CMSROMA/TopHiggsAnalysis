@@ -603,6 +603,8 @@ int main(int argc, char* argv[]) {
   
   if(isMC) {
 
+
+    std::cout<<"no trigger for mc"<<std::endl;
     /*
     maskEEE.push_back("1-1:HLT_Ele17_SW_TighterEleIdIsol_L1R_v3");
 
@@ -689,8 +691,8 @@ int main(int argc, char* argv[]) {
     tH.setRequiredTriggers(maskEEM,2);
     tH.setRequiredTriggers(maskMME,3);
     
-    tH.setNotRequiredTriggers(maskNotEEE,0);
-    tH.setNotRequiredTriggers(maskNotMMM,1);
+    //tH.setNotRequiredTriggers(maskNotEEE,0);
+    //tH.setNotRequiredTriggers(maskNotMMM,1);
     tH.setNotRequiredTriggers(maskNotEEM,2);
     tH.setNotRequiredTriggers(maskNotMME,3);
 

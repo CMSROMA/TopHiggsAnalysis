@@ -2,7 +2,7 @@ isData                  0
 goodRunLS               1
 asymmetricID		1
 applyBDTEleID           1
-MCtruth			0   
+MCtruth			1   
 apply_kFactor		0  
 trigger			1    
 preselection		1   

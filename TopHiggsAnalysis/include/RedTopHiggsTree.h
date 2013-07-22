@@ -19,6 +19,8 @@ public:
   void addMLVars();
   //! add infos for jetId studies
   void addJetsVars();
+  //! add more infos for jetId studies
+  void addMoreJetsVars();
   //! add the electron ID+iso variables for the selected best electrons
   void addLeptonInfos();
   //! add the CSA07 processID and weight block
@@ -49,7 +51,8 @@ public:
   void addPDFs();
   //! add MCTruth for tH MC sampe
   void addtHMcTruthInfos();
-  
+  //! add lepton mva variables
+  void addLeptonMVAidVariables();
 
   //! event by event final dataset fill
   void fillAll(float met, float pfmet, float cmet, float projmet, 
@@ -82,6 +85,7 @@ public:
 		float wfp35, float wsfp35, float wff35, float wsff35, float wpp35, float wspp35,
 		float wfp50, float wsfp50, float wff50, float wsff50, float wpp50, float wspp50,
 		float wfpQCD, float wsfpQCD, float wffQCD, float wsffQCD, float wppQCD, float wsppQCD);
+
   //! fill more informations for analysis not cut based
   void fillMLVars(int njets, int nuncorrjets, int   ncbIDjets, float dxyEVT, float dszEVT,
                   float softbdisc, float hardbdisc, float bTagSecVertex, int nSoftMu, 
@@ -93,15 +97,11 @@ public:
 		  int numbtagCSVMcbIDaccepjets,  
 		  int numbtagCSVTcbIDaccepjets,
 
-		  int numbtagCSVLcbIDcentraljets,  
-		  int numbtagCSVMcbIDcentraljets,  
-		  int numbtagCSVTcbIDcentraljets,
+		  int numcbIDcentralLjets,  
+		  int numcbIDforwardLjets,  
 
-		  int numcbIDcentraljets,  
-		  int numcbIDforwardjets,  
-
-		  int numcbIDaccepINjets ,  
-		  int numcbIDaccepOUTjets,  
+		  int numcbIDcentralMjets,  
+		  int numcbIDforwardMjets,  
 
 		  // mva
 		  int numbtagCSVLmvaIDaccepjets,  
@@ -121,6 +121,15 @@ public:
   //! fill infos for jetId studies
   void fillJetsVars(float ljpt, float ljeta, int ljpfid, int ljmatch, float ljmva, int ljl, float sljpt, float sljeta, int sljpfid, int sljmatch, float sljmva, int sljl);
 
+  //! fill more infos for jetId studies
+  void fillMoreJetsVars(float ptCVStaggedM[5], float etaCVStaggedM[5], float phiCVStaggedM[5], float eneCVStaggedM[5], float cvsCVStaggedM[5],
+			float   ptForwardM[5], float   etaForwardM[5], float   phiForwardM[5], float   eneForwardM[5], float cvsForwardM[5],
+			float   ptCentralM[5], float   etaCentralM[5], float   phiCentralM[5], float   eneCentralM[5], float cvsCentralM[5],
+
+			float ptCVStaggedL[5], float etaCVStaggedL[5], float phiCVStaggedL[5], float eneCVStaggedL[5], float cvsCVStaggedL[5],
+			float   ptForwardL[5], float   etaForwardL[5], float   phiForwardL[5], float   eneForwardL[5], float   cvsForwardL[5],
+			float   ptCentralL[5], float   etaCentralL[5], float   phiCentralL[5], float   eneCentralL[5], float   cvsCentralL[5]);
+			
   //! fill lepton ID variables
   void fillLeptons(float pt[3], float eta[3], float phi[3], int flavour[3],
                    float lepid[3], float lepiso[3], float lepconv[3]);
@@ -182,7 +191,20 @@ public:
 			  float genbQuark_Pt,
 			  float genbQuark_Eta);
   
-
+  //! add lepton mva variables
+  void fillLeptonMVAidVariables(float leptPt[3],
+				float leptEta[3],
+				float neuRelIs[3],
+				float chRelIso[3],
+				float jetDR_in[3],
+				float jetPtRatio_in[3],
+				float jetBTagCSV_in[3],
+				float sip3d[3],
+				float mvaId[3],
+				int   innerHits[3],
+				float logdxy[3],
+				float logdz[3]);
+  
   //! effectively store the events in the tree
   void store();
   //! save in the ROOT file
@@ -231,15 +253,11 @@ private:
   int myNumbtagCSVMcbIDaccepjets; 
   int myNumbtagCSVTcbIDaccepjets;
 
-  int myNumbtagCSVLcbIDcentraljets;
-  int myNumbtagCSVMcbIDcentraljets; 
-  int myNumbtagCSVTcbIDcentraljets;
+  int myNumcbIDcentralLjets;
+  int myNumcbIDforwardLjets;
 
-  int myNumcbIDcentraljets;
-  int myNumcbIDforwardjets;
-
-  int myNumcbIDaccepINjets;
-  int myNumcbIDaccepOUTjets;
+  int myNumcbIDcentralMjets;
+  int myNumcbIDforwardMjets;
 
   int myNumbtagCSVLmvaIDaccepjets; 
   int myNumbtagCSVMmvaIDaccepjets; 
@@ -254,6 +272,42 @@ private:
 
   int myNummvaIDaccepINjets;
   int myNummvaIDaccepOUTjets;
+
+  float myptCVStaggedM [5];
+  float myetaCVStaggedM[5];
+  float myphiCVStaggedM[5];
+  float myeneCVStaggedM[5];
+  float mycvsCVStaggedM[5];
+
+  float myptForwardM [5];
+  float myetaForwardM[5];
+  float myphiForwardM[5];
+  float myeneForwardM[5];
+  float mycvsForwardM[5];
+
+  float myptCentralM [5];
+  float myetaCentralM[5];
+  float myphiCentralM[5];
+  float myeneCentralM[5];
+  float mycvsCentralM[5];
+
+  float myptCVStaggedL [5];
+  float myetaCVStaggedL[5];
+  float myphiCVStaggedL[5];
+  float myeneCVStaggedL[5];
+  float mycvsCVStaggedL[5];
+
+  float myptForwardL [5];
+  float myetaForwardL[5];
+  float myphiForwardL[5];
+  float myeneForwardL[5];
+  float mycvsForwardL[5];
+
+  float myptCentralL [5];
+  float myetaCentralL[5];
+  float myphiCentralL[5];
+  float myeneCentralL[5];
+  float mycvsCentralL[5];
 
   bool myFinalLeptons;
   bool myJetVeto;
@@ -363,6 +417,21 @@ private:
   // lepton variables
   int myLepCharge[3];
   float myScEnergy[3], myR9[3];
+
+  // lepton mva variables
+    //! Lepton MVA input variables
+  float myleptPt[3];
+  float myleptEta[3];
+  float myneuRelIs[3];
+  float mychRelIso[3];
+  float myjetDR_in[3];
+  float myjetPtRatio_in[3];
+  float myjetBTagCSV_in[3];
+  float mysip3d[3];
+  float mymvaId[3];
+  int   myinnerHits[3];
+  float mylogdxy[3];
+  float mylogdz[3];
 
   TFile* myFile;
   TTree* myTree;
