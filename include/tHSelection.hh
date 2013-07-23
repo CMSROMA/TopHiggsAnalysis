@@ -51,7 +51,7 @@ public:
 
 private:
 
-  bool findMcTree(const char* processType);
+  bool findMcTree(const char* processType, int channel);
 
   //! ID for leptons
   bool isSelectedMuon2012(int muonIndex);
@@ -96,6 +96,9 @@ private:
   int numJets       ( std::vector<int> eleToRemove, std::vector<int> muonToRemove, int theChannel );
   int numcbIDJets   ( std::vector<int> eleToRemove, std::vector<int> muonToRemove, int theChannel );
   int numUncorrJets ( std::vector<int> eleToRemove, std::vector<int> muonToRemove, int theChannel );
+
+  //! for PU id studies
+  void puIdStudies2013( std::vector<int> eleToRemove, std::vector<int> muonToRemove, int theChannel );
 
   //! calculate the Up/Down smeared met applying JES uncertainties
   void JESPfMet( std::vector<int> eleToRemove, std::vector<int> muonToRemove);
@@ -255,6 +258,19 @@ private:
   int   leadJetLoosePFId   [6], leadJetMatchGen   [6], leadJetLooseId    [6];
   float subleadJetPt       [6], subleadJetEta     [6], subleadJetMvaJetId[6];
   int   subleadJetLoosePFId[6], subleadJetMatchGen[6], subleadJetLooseId [6];
+
+  // for additional jetId studies (2013)                                                                                                                                                
+  bool  wantJetIdStuff2013;
+  float jetPuId_eta[6][20];
+  float jetPuId_phi[6][20];
+  float jetPuId_energy[6][20];
+  float jetPuId_pt[6][20];
+  float jetPuId_csv[6][20];
+  float jetPuId_betastar[6][20];
+  float jetPuId_rms[6][20];
+  int   jetPuId_cutBased[6][20];
+  float jetPuId_mvaBased[6][20];
+  int   jetPuId_associated[6][20];
 
   // 4 channels, 3 leptons
   int   m_ch   [6][3];
@@ -428,6 +444,26 @@ private:
 
   //! Rochester correction for muons
   RochCor2012 *rmcor;
+
+  //! gen variables for mctruth matching at reco level, [4] channels (ee and mm excluded)
+
+  // muon, electron
+  float genLepPt  [4][3]; // pt
+  float genLepEta [4][3]; // eta
+  float genLepPhi [4][3]; // phi
+  float genLepFlav[4][3]; // flavour
+  float genLepChar[4][3]; // charge
+  float genLepGMum[4][3]; // grandma id (top or Higgs)
+  
+  // neutrinos
+  float genNeuPt [4][3]; // pt
+  float genNeuEta[4][3]; // eta
+  float genNeuPhi[4][3]; // phi
+
+  // b-quarks
+  float genbPt [4]; // pt
+  float genbEta[4]; // eta
+  float genbPhi[4]; // phi
 
   //! Lepton MVA input variables
   float leptPt[6][3];
