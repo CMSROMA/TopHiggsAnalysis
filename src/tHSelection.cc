@@ -151,7 +151,8 @@ tHSelection::tHSelection(TTree *tree)
   H_deltaRcorr   = new TH1F("H_deltaRcorr",  "corrected jets",  100, 0.,2*TMath::Pi());
 
   // as defaults switch off jet ID studies 
-  wantJetIdStuff = true;
+  wantJetIdStuff     = true;
+  wantJetIdStuff2013 = true;
 
   // counter
   nWWtoLLdecays   = 0;
@@ -247,6 +248,8 @@ void tHSelection::Loop() {
     
     if (wantJetIdStuff) myOutTree[theChannel]->addJetsVars();
 
+    if (wantJetIdStuff2013) myOutTree[theChannel]->add2013IDJetsVars();
+
     myOutTree[theChannel]->addMoreJetsVars();
 
     myOutTree[theChannel]->addLatinos();
@@ -300,7 +303,7 @@ void tHSelection::Loop() {
     bool tHgenerated = false;
 
     if( !_selectionEEE->getSwitch("isData") ) {
-      tHgenerated = findMcTree("tH");  
+      tHgenerated = findMcTree("tH",-999); //negative value for channel, don't care about that now  
       //std::cout<<"th generated!"<<std::endl;
       //WZgenerated = findMcTree("WZ");  
     }
@@ -626,6 +629,25 @@ void tHSelection::Loop() {
 
       }
 
+      if ( wantJetIdStuff2013 ) {                                                                      
+
+	for(int k=0; k<20; k++){
+
+	  jetPuId_eta[ichan][k]        = -999.9;
+	  jetPuId_phi[ichan][k]        = -999.9;
+	  jetPuId_energy[ichan][k]     = -999.9;
+	  jetPuId_pt[ichan][k]         = -999.9;
+	  jetPuId_csv[ichan][k]        = -999.9;
+	  jetPuId_betastar[ichan][k]   = -999.9;
+	  jetPuId_rms[ichan][k]        = -999.9;
+	  jetPuId_cutBased[ichan][k]   = -999.9;
+	  jetPuId_mvaBased[ichan][k]   = -999.9;
+	  jetPuId_associated[ichan][k] = -999.9;
+
+	}
+	
+      }
+
       // Initialize variables for jetId studies
       if (wantJetIdStuff) {
 	
@@ -650,6 +672,9 @@ void tHSelection::Loop() {
       ncbIDjets   [ichan] = numcbIDJets(eleCands[ichan],muCands[ichan],ichan);  // Cut Based Id jets
       nuncorrjets [ichan] = numUncorrJets(eleCands[ichan],muCands[ichan],ichan);// MVA Id jets 
       
+      // For 2013 jetId studies
+      if(wantJetIdStuff2013) puIdStudies2013(eleCands[ichan],muCands[ichan],ichan);
+
       // if 1-jet bin, use deltaphi(ll-jet)
       // old HWW 
       dphiLLJ[ichan] = deltaPhiLLJet(ichan);   
@@ -926,6 +951,19 @@ void tHSelection::Loop() {
 						 eneCentralL[theChannel],
 						 cvsCentralL[theChannel]);
 
+      if (wantJetIdStuff2013) {
+	myOutTree[theChannel] ->fill2013ExtraJetsVars( jetPuId_eta[theChannel],
+						       jetPuId_phi[theChannel],
+						       jetPuId_energy[theChannel],
+						       jetPuId_pt[theChannel],
+						       jetPuId_csv[theChannel],
+						       jetPuId_betastar[theChannel],
+						       jetPuId_rms[theChannel],
+						       jetPuId_cutBased[theChannel],
+						       jetPuId_mvaBased[theChannel],
+						       jetPuId_associated[theChannel]);
+      }
+
       if (tHgenerated)
 	myOutTree[theChannel] -> filltHMcTruthInfos(_genHiggsPt,
 						    _genHiggsEta,
@@ -1033,8 +1071,8 @@ void tHSelection::Loop() {
 					       jesMtUp          [theChannel], 
 					       jesMtDown        [theChannel]);
       
-      if(theChannel!=4 || theChannel!=5){
-
+      if(theChannel<4){
+	
 	int lep1,lep2,lep3;
 	
 	if(theChannel==eee){
@@ -1042,17 +1080,19 @@ void tHSelection::Loop() {
 	  lep2 = theBestEEE.at(1);
 	  lep3 = theBestEEE.at(2);
 	}
-
+	
 	if(theChannel==mmm){
 	  lep1 = theBestMMM.at(0);
 	  lep2 = theBestMMM.at(1);
 	  lep3 = theBestMMM.at(2);
 	}
-
+	
 	if(theChannel==eem){
+
 	  lep1 = theBestEEM.at(0);
 	  lep2 = theBestEEM.at(1);
 	  lep3 = theBestEEM.at(2);
+
 	}
 
 	if(theChannel==mme){
@@ -1060,9 +1100,9 @@ void tHSelection::Loop() {
 	  lep2 = theBestMME.at(1);
 	  lep3 = theBestMME.at(2);
 	}
-
+	
 	estimateLeptonMVAvariables(theChannel, lep1, lep2, lep3);
-
+	
 	myOutTree[theChannel] -> fillLeptonMVAidVariables( leptPt[theChannel],
 							   leptEta[theChannel],
 							   neuRelIs[theChannel],
@@ -1075,7 +1115,6 @@ void tHSelection::Loop() {
 							   innerHits[theChannel],
 							   logdxy[theChannel],
 							   logdz[theChannel]);
-
       }
       
 
@@ -1237,8 +1276,6 @@ bool tHSelection::isSelectedMuon2013(int i){
   // Lepton MVA ID
   float bdtValue = leptBDTForBs(fMVAMuon, i, false);
 
-  if(eventNumber==500850) std::cout<< "bdtValue == "<<bdtValue<<std::endl;
-
   if ( bdtValue < 0.7 ) return false;
   if (print) std::cout<< " [FinalBDT]= 1" << std::endl;  
 
@@ -1362,9 +1399,8 @@ bool tHSelection::isSelectedElectron2013(int i){
   // Lepton MVA ID
   float bdtValue = leptBDTForBs(fMVAElectron, i, true);
 
-  if(eventNumber==500850) std::cout<< "[electron] bdtValue == "<<bdtValue<<std::endl;
-
   if ( bdtValue < 0.7 ) return false;
+  
   if (print) std::cout<< " [FinalBDT]= 1" << std::endl;  
   
   return true;
@@ -1377,9 +1413,13 @@ void tHSelection::estimateLeptonMVAvariables(int channel, int lepton1, int lepto
     
     float _pt[3];
     float _eta[3];
+    float _phi[3];
     float _neureliso[3];
     float _chreliso[3];
     float _sip3d[3];
+    float _jetDR_in[3];
+    float _jetPtRatio_in[3];
+    float _jetBTagCSV_in[3];
     float _mvaId[3];
     int   _inhits[3];
     float _ldxy[3];
@@ -1405,6 +1445,10 @@ void tHSelection::estimateLeptonMVAvariables(int channel, int lepton1, int lepto
       _eta[0] = etaEle[lepton1]; 
       _eta[1] = etaEle[lepton2]; 
       _eta[2] = etaEle[lepton3];
+
+      _phi[0] = phiEle[lepton1]; 
+      _phi[1] = phiEle[lepton2]; 
+      _phi[2] = phiEle[lepton3];
     
       absNeutral1  = pfCandNeutralIso04Ele[lepton1] + pfCandPhotonIso04Ele[lepton1]; 
       absNeutral2  = pfCandNeutralIso04Ele[lepton2] + pfCandPhotonIso04Ele[lepton2]; 
@@ -1470,6 +1514,10 @@ void tHSelection::estimateLeptonMVAvariables(int channel, int lepton1, int lepto
       _eta[0] = etaMuon[lepton1]; 
       _eta[1] = etaMuon[lepton2]; 
       _eta[2] = etaMuon[lepton3];
+
+      _phi[0] = phiMuon[lepton1]; 
+      _phi[1] = phiMuon[lepton2]; 
+      _phi[2] = phiMuon[lepton3];
     
       absNeutral1  = pfCandNeutralIso04Muon[lepton1] + pfCandPhotonIso04Muon[lepton1]; 
       absNeutral2  = pfCandNeutralIso04Muon[lepton2] + pfCandPhotonIso04Muon[lepton2]; 
@@ -1532,6 +1580,12 @@ void tHSelection::estimateLeptonMVAvariables(int channel, int lepton1, int lepto
       _ldz[1] = log(fabs(dzMu2));
       _ldz[2] = log(fabs(dzMu3));
 
+      //if (eventNumber==470302 || eventNumber==489627 || eventNumber==500850 || eventNumber==542806){
+
+
+	  
+	//}
+
     }
     
     if(channel==eem){ //eem channel
@@ -1543,6 +1597,10 @@ void tHSelection::estimateLeptonMVAvariables(int channel, int lepton1, int lepto
       _eta[0] = etaEle[lepton1]; 
       _eta[1] = etaEle[lepton2]; 
       _eta[2] = etaMuon[lepton3];
+
+      _phi[0] = phiEle[lepton1]; 
+      _phi[1] = phiEle[lepton2]; 
+      _phi[2] = phiMuon[lepton3];
 
       absNeutral1  = pfCandNeutralIso04Ele[lepton1] + pfCandPhotonIso04Ele[lepton1]; 
       absNeutral2  = pfCandNeutralIso04Ele[lepton2] + pfCandPhotonIso04Ele[lepton2]; 
@@ -1618,6 +1676,10 @@ void tHSelection::estimateLeptonMVAvariables(int channel, int lepton1, int lepto
       _eta[1] = etaMuon[lepton2]; 
       _eta[2] = etaEle[lepton3];
     
+      _phi[0] = phiMuon[lepton1]; 
+      _phi[1] = phiMuon[lepton2]; 
+      _phi[2] = phiEle[lepton3];
+
       absNeutral1  = pfCandNeutralIso04Muon[lepton1] + pfCandPhotonIso04Muon[lepton1]; 
       absNeutral2  = pfCandNeutralIso04Muon[lepton2] + pfCandPhotonIso04Muon[lepton2]; 
       absNeutral3  = pfCandNeutralIso04Ele [lepton3] + pfCandPhotonIso04Ele [lepton3];
@@ -1682,41 +1744,76 @@ void tHSelection::estimateLeptonMVAvariables(int channel, int lepton1, int lepto
       _ldz[1] = log(fabs(dzMu2));
       _ldz[2] = -999.;
 
+	std::cout<<"[event "<<eventNumber<<"]"<<std::endl;
+	std::cout<<"muon[1] dz = " << dzMu1 << ",abs(dzMu1) = " << fabs(dzMu1)<<", log(abs(dzMu1)) = "<<log(fabs(dzMu1))<<",_ldz[0] = "<<_ldz[0]<<std::endl;
+	std::cout<<"muon[2] dz = " << dzMu2 <<std::endl;
+
     }
 
-    if (channel==4 || channel==5){
+    for(int k = 0; k<3; k++){
       
-      for(int k = 0; k<3; k++){
+      // lepton momentum                                                                                                                                                                                                
+      TVector3 pLept;
+      pLept.SetPtEtaPhi(_pt[k], _eta[k], _phi[k]);
+
+      //std::cout<<"[channel] = "<<channel<<"[lepton] pt,eta,phi="<<_pt[k]<<","<<_eta[k]<<","<<_phi[k]<<std::endl;
       
-	_pt[k] = -999.;
-	_eta[k] = -999.;
-	_neureliso[k] = -999.;
-	_chreliso[k] = -999.;
-	_sip3d[k] = -999.;
-	_mvaId[k] = -999.;
-	_inhits[k] = -999.;
-	_ldxy[k] = -999.;
-	_ldz[k] = -999.;
+      float tmp_jetDR_in, tmp_jetPtRatio_in, tmp_jetBTagCSV_in;
+
+      // wrt jets                                                                                                                                                                                                      
+      float minDr = 999.;
+      int closestJet = -999;
+      for (int ii=0; ii<nAK5PFPUcorrJet; ii++) {
+	
+	float ptJet = sqrt(pxAK5PFPUcorrJet[ii]*pxAK5PFPUcorrJet[ii] + pyAK5PFPUcorrJet[ii]*pyAK5PFPUcorrJet[ii]);
+	if (ptJet<10) continue;
+	
+	float etaJet = etaAK5PFPUcorrJet[ii];
+	if (fabs(etaJet)>3.) continue;
+	
+	TVector3 pJet(pxAK5PFPUcorrJet[ii],pyAK5PFPUcorrJet[ii],pzAK5PFPUcorrJet[ii]);
+	//std::cout<<"[channel] = "<<channel<<"[lepton] px,py,pz ="<<pxAK5PFPUcorrJet[ii]<<","<<pyAK5PFPUcorrJet[ii]<<","<<pzAK5PFPUcorrJet[ii]<<std::endl;
+	float theDr = pJet.DeltaR(pLept);
+	if (theDr<minDr) {
+	  minDr = theDr;
+	  closestJet = ii;
+	}
+	pJet.Clear();
 	
       }
-      //std::cout<<"WARNING: Do not use this channel for synchronization"<<std::endl;
-    } 
+      
+      if (closestJet<0) {
+	cout << "problem with leptonID!! Jet not found" << endl;
+	return;
+      }
+      
 
-    for(int k = 0; k<3; k++){
+      pLept.Clear();
+      float closestJetPt = sqrt(pxAK5PFPUcorrJet[closestJet]*pxAK5PFPUcorrJet[closestJet] + pyAK5PFPUcorrJet[closestJet]*pyAK5PFPUcorrJet[closestJet]);
+      
+      tmp_jetDR_in = minDr;
+      if (tmp_jetDR_in>0.5) tmp_jetDR_in = 0.5;
+      
+      tmp_jetPtRatio_in = _pt[k]/closestJetPt;
+      if (tmp_jetPtRatio_in>1.5) tmp_jetPtRatio_in = 1.5;
+
+      tmp_jetBTagCSV_in = combinedSecondaryVertexBJetTagsAK5PFNoPUJet[closestJet];
+      if (tmp_jetBTagCSV_in<0) tmp_jetBTagCSV_in=0;
       
       leptPt[channel][k] = _pt[k];
       leptEta[channel][k] = _eta[k];
       neuRelIs[channel][k] = _neureliso[k];
       chRelIso[channel][k] = _chreliso[k];
-      jetDR_in[channel][k] = -999.;
-      jetPtRatio_in[channel][k] = -999.;
-      jetBTagCSV_in[channel][k] = -999.;
       sip3d[channel][k] = _sip3d[k];
       mvaId[channel][k] = _mvaId[k];
       innerHits[channel][k] = _inhits[k];
       logdxy[channel][k] = _ldxy[k];
       logdz[channel][k] = _ldz[k];
     
+      jetDR_in[channel][k] = tmp_jetDR_in;
+      jetPtRatio_in[channel][k] = tmp_jetPtRatio_in;
+      jetBTagCSV_in[channel][k] = tmp_jetBTagCSV_in;
+
     }
     
   }
@@ -2108,8 +2205,8 @@ std::vector<int> tHSelection::getBestMME(){
     float ElectronCharge = chargeEle[i];
     
     // Select the lepton ID
-    bool tightElectronSelection     = true;
-    bool LeptonMVAElectronSelection = false;
+    bool tightElectronSelection     = false;
+    bool LeptonMVAElectronSelection = true;
     
     if (tightElectronSelection){
       
@@ -2396,8 +2493,8 @@ std::vector<int> tHSelection::getBestEEM(){
     float ElectronCharge = chargeEle[i];
     
     // Select the lepton ID
-    bool tightElectronSelection     = true;
-    bool LeptonMVAElectronSelection = false;
+    bool tightElectronSelection     = false;
+    bool LeptonMVAElectronSelection = true;
     
     if (tightElectronSelection){
       
@@ -3682,6 +3779,28 @@ void tHSelection::resetKinematics() {
 
   _genbQuark_Pt = -999.9;
   _genbQuark_Eta = -999.9;
+
+  for(int theChannel=0; theChannel<4; theChannel++) {
+    
+    for(int k=0;k<3;k++){
+      
+      genLepPt  [theChannel][k] = -999.;
+      genLepEta [theChannel][k] = -999.;
+      genLepPhi [theChannel][k] = -999.;
+      genLepFlav[theChannel][k] = -999.;
+      genLepChar[theChannel][k] = -999.;
+
+      genNeuPt  [theChannel][k] = -999.;
+      genNeuEta [theChannel][k] = -999.;
+      genNeuPhi [theChannel][k] = -999.;
+
+    }
+
+    genbPt [theChannel] = -999.;
+    genbEta[theChannel] = -999.;
+    genbPhi[theChannel] = -999.;
+
+  }
   
   for(int theChannel=0; theChannel<6; theChannel++) {
 
@@ -4276,6 +4395,112 @@ int tHSelection::numcbIDJets( std::vector<int> eleToRemove, std::vector<int> muo
   return num;
 
 }
+
+void tHSelection::puIdStudies2013( std::vector<int> eleToRemove, std::vector<int> muonToRemove, int theChannel) {
+
+  int selected = 0;
+
+  for(int j=0;j<nAK5PFPUcorrJet;j++) {
+
+    float pt = GetPt(pxAK5PFPUcorrJet[j],pyAK5PFPUcorrJet[j]);
+    TVector3 t3RecoJet(pxAK5PFPUcorrJet[j],pyAK5PFPUcorrJet[j],pzAK5PFPUcorrJet[j]);
+
+    // --------------------------------------------------------                                                                                                                                                     
+    // preselection: eta, eT and check wrt leptons                                                                                                                                                                  
+    if( _selectionEEE->getSwitch("etaJetAcc") && !_selectionEEE->passCut("etaJetAcc",fabs(etaAK5PFPUcorrJet[j]))) continue;
+    if( _selectionEEE->getSwitch("etJetAcc") && !_selectionEEE->passCut("etJetAcc", pt)) continue;
+    if( fabs(etaAK5PFPUcorrJet[j]==5) ) continue;
+
+    // check if the selected electrons and muons fall into the jet                                                                                                                                                  
+    bool foundMatch = false;
+    for(int i=0; i<(int)eleToRemove.size(); i++) {
+      int ele = eleToRemove[i];
+      if ( ele > -1 ) {
+	TVector3 p3Ele(pxEle[ele],pyEle[ele],pzEle[ele]);
+        float deltaR =  fabs( t3RecoJet.DeltaR( p3Ele ) );
+        H_deltaRcorr -> Fill(deltaR);
+        if(_selectionEEE->getSwitch("jetConeWidth") && _selectionEEE->passCut("jetConeWidth",deltaR)) foundMatch=true;
+        p3Ele.Clear();
+      }
+    }
+    if(foundMatch) continue;
+
+    for(int i=0; i<(int)muonToRemove.size(); i++) {
+      int mu = muonToRemove[i];
+      if ( mu > -1 ) {
+        TVector3 p3Muon(pxMuon[mu],pyMuon[mu],pzMuon[mu]);
+        float deltaR =  fabs( t3RecoJet.DeltaR( p3Muon ) );
+        H_deltaRcorr -> Fill(deltaR);
+        if(_selectionEEE->getSwitch("jetConeWidth") && _selectionEEE->passCut("jetConeWidth",deltaR)) foundMatch=true;
+        p3Muon.Clear();
+      }
+    }
+    if(foundMatch) continue;
+
+
+    // --------------------------------------------------------                                                                                                                                                     
+    // kinematic of the selected jets                                                                                                                                                                               
+    float eta      = etaAK5PFPUcorrJet[j];
+    float phi      = phiAK5PFPUcorrJet[j];
+    float energy   = energyAK5PFPUcorrJet[j];
+    float CSV      = combinedSecondaryVertexBJetTagsAK5PFPUcorrJet[j];
+    float jetIdMva = jetIdMvaFullAK5PFPUcorrJet[j];
+    float betastar = betastarclassicIdMvaAK5PFPUcorrJet[j];
+    float betaTh   = 0.64;
+    float rms      = dR2MeanIdMvaAK5PFPUcorrJet[j];
+    bool passCutBasedId = true;
+    if( abs(eta) < 2.5 ){
+      if ( betastar > 0.2*TMath::Log( m_goodvertices - betaTh ) ) passCutBasedId = false;
+      if ( rms > 0.06 ) passCutBasedId = false;
+    } else if ( abs(eta) < 3.0 ){
+      if ( rms > 0.05 ) passCutBasedId = false;
+    }else{
+      if ( rms > 0.055 ) passCutBasedId = false;
+    }
+
+    // --------------------------------------------------------                                                                                                                                                     
+    // match with gen jets                                                                                                                                                                                          
+    int associated = -1;
+    float dRmin = 999.;
+
+    for (int iGen=0; iGen<nAK5GenJet; iGen++) {
+      TVector3 t3GenJet(pxAK5GenJet[iGen],pyAK5GenJet[iGen],pzAK5GenJet[iGen]);
+      float genPt = t3GenJet.Perp();
+      float dR    = t3RecoJet.DeltaR(t3GenJet);
+      double firstExpres = ErrEt(pt,eta);
+      if ( (dR<dRmin) && ((fabs(pt-genPt))/genPt)<0.5 ) {
+        associated = iGen;
+        dRmin = dR;
+      }
+      t3GenJet.Clear();
+    }
+    if (associated>-999) {
+      float genAssPt = sqrt(pxAK5GenJet[associated]*pxAK5GenJet[associated] + pyAK5GenJet[associated]*pyAK5GenJet[associated]);
+      if (dRmin > 0.1 + 0.3 * exp(-0.05*(genAssPt-10))) associated = -999;
+    }
+
+    // --------------------------------------------------------                                                                                                                                                     
+    // variables to be saved, for 20 jets maximum                                                                                                                                                                   
+    if (selected<20){
+      jetPuId_eta[theChannel][selected]      = eta;
+      jetPuId_phi[theChannel][selected]      = phi;
+      jetPuId_energy[theChannel][selected]   = energy;
+      jetPuId_pt[theChannel][selected]       = pt;
+      jetPuId_csv[theChannel][selected]      = CSV;
+      jetPuId_betastar[theChannel][selected] = betastar;
+      jetPuId_rms[theChannel][selected]      = rms;
+      jetPuId_cutBased[theChannel][selected] = passCutBasedId;
+      jetPuId_mvaBased[theChannel][selected] = jetIdMva;
+      if(associated>=0) jetPuId_associated[theChannel][selected] = 1;
+      else jetPuId_associated[theChannel][selected] = 0;
+    }
+
+    selected++;
+
+    t3RecoJet.Clear();
+  }
+}
+
 
 
 int tHSelection::numUncorrJets( std::vector<int> eleToRemove, std::vector<int> muonToRemove, int theChannel ) {
@@ -5250,7 +5475,7 @@ bool tHSelection::isLooseJetMva(float pt, float eta, float id) {
   return isOk;
 }
 
-bool tHSelection::findMcTree(const char* processType) {
+bool tHSelection::findMcTree(const char* processType, int channel) {
 
   _process = "UNDEFINED";
   _theGenEle = -1;
@@ -5319,6 +5544,12 @@ bool tHSelection::findMcTree(const char* processType) {
 
     int nWfromH            = 0;
 
+    int nLeptons   = 0;
+    int nNeutrinos = 0;
+
+    int indexLepton   [3];
+    int indexNeutrino [3];
+
     for(int imc=0;imc<30;imc++) {
 
       if ( !(statusMc[imc] == 3) ) continue; // I am only interested in hard-scattering products
@@ -5328,21 +5559,31 @@ bool tHSelection::findMcTree(const char* processType) {
 
       float ptMc = pMc[imc]*fabs(sin(thetaMc[imc]));
 
+      
+      // Forward jet
       if (imc == 7){
 	_genForwardQuark_Pt  = pMc[imc]*fabs(sin(thetaMc[imc]));
 	_genForwardQuark_Eta = etaMc[imc];
       }
 
+      // b-quark jet
       if (imc == 10){
 	_genbQuark_Pt  = pMc[imc]*fabs(sin(thetaMc[imc]));
 	_genbQuark_Eta = etaMc[imc];
+
+	genbPt [channel] = _genbQuark_Pt;  // pt                                                                                                                                                                                           
+	genbEta[channel] = _genbQuark_Eta; // eta                                                                                                                                                                                          
+	genbPhi[channel] = phiMc[imc];     // phi      
       }
       
+      // top quark
       if( fabs(idMc[imc]) == 6  ) index_Top   = imc;
+
+      // Higgs boson
       if( fabs(idMc[imc]) == 25 ) index_Higgs = imc;
 
+      // W bosons
       if( fabs(idMc[imc]) == 24 && fabs(idMc[mothMc[imc]]) == 6  ) index_WfromTop = imc;
-      
       if( idMc[imc] == -24 && fabs(idMc[mothMc[imc]]) == 25 ){
 	index_WminusfromH = imc;
 	nWfromH++;
@@ -5356,14 +5597,25 @@ bool tHSelection::findMcTree(const char* processType) {
       if     ( (idMc[imc] == +11 || idMc[imc] == +13 || idMc[imc] == +15)  && idMc[mothMc[imc]] == -24 ){ 
 	
 	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){  // W from Top decay
+
 	  index_lfromWfromT = imc;
 	  nLeptonsfromWfromT++;
 	  nMinusLepton++;
+	  
+	  indexLepton [nLeptons] = imc;
+	  nLeptons++;
+
 	}
+
 	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
+
 	  index_lminusfromWfromH = imc; 
 	  nLeptonsfromWfromH++;
 	  nMinusLepton++;
+
+	  indexLepton [nLeptons] = imc;
+	  nLeptons++;
+
 	}
 
       }      
@@ -5372,12 +5624,21 @@ bool tHSelection::findMcTree(const char* processType) {
       else if( (idMc[imc] == -12 || idMc[imc] == -14 || idMc[imc] == -16)  && idMc[mothMc[imc]] == -24 ){ 
 
 	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){ // W from Top decay
+
 	  index_nfromWfromT = imc;
 	  nLeptonsfromWfromT++;
+
+	  indexNeutrino [nNeutrinos] = imc;
+	  nNeutrinos++;
+
 	}
 	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
 	  index_nplusfromWfromH = imc; 
 	  nLeptonsfromWfromH++;
+
+	  indexNeutrino [nNeutrinos] = imc;
+	  nNeutrinos++;
+
 	}
 	
       }
@@ -5386,14 +5647,24 @@ bool tHSelection::findMcTree(const char* processType) {
       else if( (idMc[imc] == -11 || idMc[imc] == -13 || idMc[imc] == -15)  && idMc[mothMc[imc]] == +24 ){ 
 	
 	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){ // W from Top decay
+
 	  index_lfromWfromT = imc;
 	  nLeptonsfromWfromT++;
 	  nPlusLepton++;
+
+	  indexLepton [nLeptons] = imc;
+	  nLeptons++;
+
 	}
 	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
+	  
 	  index_lplusfromWfromH = imc; 
 	  nLeptonsfromWfromH++;
 	  nPlusLepton++;
+
+	  indexLepton [nLeptons] = imc;
+	  nLeptons++;
+
 	}
 
       }      
@@ -5402,18 +5673,60 @@ bool tHSelection::findMcTree(const char* processType) {
       else if( (idMc[imc] == 12 || idMc[imc] == +14 || idMc[imc] == +16)  && idMc[mothMc[imc]] == +24 ){ 
 
 	if      ( fabs(idMc[mothMc[mothMc[imc]]]) == 6  ){ // W from Top decay
+
 	  index_nfromWfromT = imc;
 	  nLeptonsfromWfromT++;
+
+	  indexNeutrino [nNeutrinos] = imc;
+	  nNeutrinos++;
+
 	}
 	else if ( fabs(idMc[mothMc[mothMc[imc]]]) == 25 ){ // W from Higgs decay
+
 	  index_nminusfromWfromH = imc; 
 	  nLeptonsfromWfromH++;
+
+	  indexNeutrino [nNeutrinos] = imc;
+	  nNeutrinos++;
+
 	}
 
       }
 
     }
 
+
+    if( channel > 0 ){
+
+      int indexL = -999;
+      for (int i=0; i<nLeptons; i++){
+	
+	indexL = indexLepton[i];
+	genLepPt  [channel][i] = pMc[indexL]*fabs(sin(thetaMc[indexL])); // pt 
+	genLepEta [channel][i] = etaMc[indexL]; // eta                                                                                                                                                                                 
+	genLepPhi [channel][i] = phiMc[indexL]; // phi                                                                                                                                                                                    
+	genLepFlav[channel][i] = idMc[indexL];  // flavour                                                                                                                                                                                
+	if(idMc[indexL] > 0)
+	  genLepChar[channel][i] = +1; // charge                                                                                                                                                                                 
+	else
+	  genLepChar[channel][i] = -1; // charge                                                                                                                                                                                 
+	genLepGMum[channel][i] = fabs(idMc[mothMc[mothMc[indexL]]]); // grandma id (top or Higgs)                  
+      }
+
+      int indexN = -999;
+      for (int k=0; k<nNeutrinos;k++){
+	
+	indexN = indexNeutrino[k];
+	genNeuPt [channel][k] = pMc[indexN]*fabs(sin(thetaMc[indexN])); // pt                                                                                                                                                     
+ 	genNeuEta[channel][k] = etaMc[indexN]; // eta                                                                                                                                                                                     
+	genNeuPhi[channel][k] = phiMc[indexN]; // phi 
+	
+      }
+
+    }
+
+
+    // other tree
     if ( nLeptonsfromWfromH == 4){
       nWWtoLLdecays++;
     }
