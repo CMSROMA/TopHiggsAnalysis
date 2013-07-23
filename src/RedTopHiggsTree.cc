@@ -112,6 +112,21 @@ void RedTopHiggsTree::addJetsVars() {
   myTree->Branch("jetid2",             &mySubleadJetPassLooseId,  "jetid2/I");
 }
 
+void RedTopHiggsTree::add2013IDJetsVars() {
+
+  myTree->Branch("jetPuId_eta",          &myJetPuId_eta,         "jetPuId_eta[20]/F");
+  myTree->Branch("jetPuId_phi",          &myJetPuId_phi,         "jetPuId_phi[20]/F");
+  myTree->Branch("jetPuId_energy",       &myJetPuId_energy,      "jetPuId_energy[20]/F");
+  myTree->Branch("jetPuId_pt",           &myJetPuId_pt,          "jetPuId_pt[20]/F");
+  myTree->Branch("jetPuId_csv",          &myJetPuId_csv,         "jetPuId_csv[20]/F");
+  myTree->Branch("jetPuId_betastar",     &myJetPuId_betastar,    "jetPuId_betastar[20]/F");
+  myTree->Branch("jetPuId_rms",          &myJetPuId_rms,         "jetPuId_rms[20]/F");
+  myTree->Branch("jetPuId_cutBased",     &myJetPuId_cutBased,    "jetPuId_cutBased[20]/I");
+  myTree->Branch("jetPuId_mvaBased",     &myJetPuId_mvaBased,    "jetPuId_mvaBased[20]/F");
+  myTree->Branch("jetPuId_associated",   &myJetPuId_associated,  "jetPuId_associated[20]/I");
+}
+
+
 void RedTopHiggsTree::addMoreJetsVars() {
   
   myTree->Branch("ptCVStaggedL" , &myptCVStaggedL , "ptCVStaggedL[5]/F");
@@ -556,6 +571,26 @@ void RedTopHiggsTree::fillJetsVars(float ljpt, float ljeta, int ljpfid, int ljma
   mySubleadJetGenMatch    = sljmatch;
   mySubleadJetIdMva       = sljmva;
   mySubleadJetPassLooseId = sljl;
+}
+
+void RedTopHiggsTree::fill2013ExtraJetsVars(float jetPuId_eta[20], float jetPuId_phi[20], float jetPuId_energy[20], float jetPuId_pt[20],
+                                            float jetPuId_csv[20], float jetPuId_betastar[20], float jetPuId_rms[20],
+                                            int jetPuId_cutBased[20],
+                                            float jetPuId_mvaBased[20],
+                                            int jetPuId_associated[20]) {
+
+  for(int k=0;k<20;k++){
+    myJetPuId_eta[k] = jetPuId_eta[k];
+    myJetPuId_phi[k] = jetPuId_phi[k];
+    myJetPuId_energy[k] = jetPuId_energy[k];
+    myJetPuId_pt[k] = jetPuId_pt[k];
+    myJetPuId_csv[k] = jetPuId_csv[k];
+    myJetPuId_betastar[k] = jetPuId_betastar[k];
+    myJetPuId_rms[k] = jetPuId_rms[k];
+    myJetPuId_cutBased[k] = jetPuId_cutBased[k];
+    myJetPuId_mvaBased[k] = jetPuId_mvaBased[k];
+    myJetPuId_associated[k] = jetPuId_associated[k];
+  }
 }
 
 void RedTopHiggsTree::fillMoreJetsVars(float ptCVStaggedM[5], float etaCVStaggedM[5], float phiCVStaggedM[5], float eneCVStaggedM[5], float cvsCVStaggedM[5],
