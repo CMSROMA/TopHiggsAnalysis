@@ -19,6 +19,8 @@ public:
   void addMLVars();
   //! add infos for jetId studies
   void addJetsVars();
+  //! add infos for more general jetId studies (2013)                                                                                                                                                         
+  void add2013IDJetsVars();
   //! add more infos for jetId studies
   void addMoreJetsVars();
   //! add the electron ID+iso variables for the selected best electrons
@@ -120,6 +122,11 @@ public:
 
   //! fill infos for jetId studies
   void fillJetsVars(float ljpt, float ljeta, int ljpfid, int ljmatch, float ljmva, int ljl, float sljpt, float sljeta, int sljpfid, int sljmatch, float sljmva, int sljl);
+
+  //! fill more infos for a more general jetId study (2013)                                                                                                                                                   
+  void fill2013ExtraJetsVars(float jetPuId_eta[20], float jetPuId_phi[20], float jetPuId_energy[20], float jetPuId_pt[20], float jetPuId_csv[20], float jetPuId_betastar[20], float jetPuId_rms[20], 
+			     int jetPuId_cutBased[20], float jetPuId_mvaBased[20], int jetPuId_associated[20]);
+
 
   //! fill more infos for jetId studies
   void fillMoreJetsVars(float ptCVStaggedM[5], float etaCVStaggedM[5], float phiCVStaggedM[5], float eneCVStaggedM[5], float cvsCVStaggedM[5],
@@ -308,6 +315,17 @@ private:
   float myphiCentralL[5];
   float myeneCentralL[5];
   float mycvsCentralL[5];
+
+  float myJetPuId_eta[20];
+  float myJetPuId_phi[20];
+  float myJetPuId_energy[20];
+  float myJetPuId_pt[20];
+  float myJetPuId_csv[20];
+  float myJetPuId_betastar[20];
+  float myJetPuId_rms[20];
+  int myJetPuId_cutBased[20];
+  float myJetPuId_mvaBased[20];
+  int myJetPuId_associated[20];
 
   bool myFinalLeptons;
   bool myJetVeto;
